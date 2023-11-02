@@ -1,0 +1,242 @@
+.calcul_de_tonnage {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1250px;
+    width: 100%;
+    margin: auto;
+    background: #FFFFFF;
+    box-shadow: 0 4px 50px #BCBCBC;
+    border-radius: 10px;
+    max-height: 575px;
+}
+
+.densities {
+    max-width: 1250px;
+    width: 100%;
+    font-family: 'Lato', sans-serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #262626;
+    text-align: center;
+    margin: 24px auto auto;
+}
+
+.form_calcul_de_tonnage, .img_calcul_de_tonnage_form, .result_calcul_de_tonnage, .img_calcul_de_tonnage_result {
+    width: 50%;
+}
+
+.form_calcul_de_tonnage, .result_calcul_de_tonnage {
+    padding: 30px 160px 32px 105px;
+}
+
+.calcul_de_tonnage h3:after {
+    content: '';
+    width: 100%;
+    display: block;
+    position: absolute;
+    height: 12px;
+    background: #D9D9D9;
+    transform: rotate(-0.21deg);
+    bottom: -1px;
+    z-index: -1;
+}
+
+
+.calcul_de_tonnage h3 {
+    width: fit-content;
+    position: relative;
+    z-index: 0;
+    font-family: 'Arca Majora 3', sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    color: #262626;
+    margin: 0;
+}
+
+.form_calcul_de_tonnage label {
+    font-family: 'Lato', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    color: #262626;
+    width: 100%;
+    margin-top: 24px;
+}
+
+.form_calcul_de_tonnage input,.form_calcul_de_tonnage select{
+    margin-top: 8px;
+    border: 1px solid #262626;
+    box-shadow: 0 1px 3px rgba(230, 235, 241, 0.25);
+    border-radius: 4px;
+}
+
+.recommandation, .density_body {
+    font-family: 'Lato', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    color: #262626;
+    margin-top: 8px;
+}
+
+img#img_info_bull_density {
+    position: relative;
+    top : 8px;
+}
+
+.density {
+    display: flex;
+    align-items: center;
+    margin-top: 25px;
+    position: relative;
+}
+
+.density > img {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.form_calcul_de_tonnage span.btn {
+    font-family: 'Arca Majora 3', sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    color: #FFFFFF;
+    background: linear-gradient(180deg, #BE9E67 0%, #A98951 100%);
+    border-radius: 5px;
+    padding: 8px 24px;
+    cursor: pointer;
+    margin-top: 24px;
+    display: block;
+    width: fit-content;
+    float: right;
+}
+
+.img_calcul_de_tonnage_form img , .img_calcul_de_tonnage_result img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    max-height: 575px;
+    border-radius: 10px;
+}
+
+.img_calcul_de_tonnage_result {
+    display: none;
+}
+
+label.densite {
+    position: relative;
+}
+
+#info_bull_density {
+    background: #E5D8C2;
+    border-radius: 10px;
+    position: absolute;
+    max-width: 205px;
+    padding: 0 10px 30px 15px;
+    font-family: 'Lato', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    color: #000000;
+    left: 100px;
+    bottom: 50px;
+    display: none;
+}
+
+#close_info_bull_density {
+    text-align: end;
+    line-height: 0;
+    padding-top: 16px;
+    padding-bottom: 2px;
+    padding-right: 10px;
+    width: fit-content;
+    margin-left: auto;
+}
+
+#close_info_bull_density>img {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+#info_bull_density:before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    display: block;
+    background: #E5D8C2;
+    position: absolute;
+    bottom: 10px;
+    left: -5px;
+    transform: rotate(45deg);
+}
+
+.result_calcul_de_tonnage {
+    display: none;
+}
+
+.result_weight, .result_longueur {
+    margin-top: 24px;
+    font-family: 'Lato', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    color: #262626;
+}
+
+.result_bag, .result_largeur, .result_epaiseur {
+    margin-top: 8px;
+    font-family: 'Lato', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    color: #262626;
+}
+
+h3.false_h3:after {
+display: none;
+}
+
+h3.false_h3 {
+    margin-top: 28px;
+}
+
+.result_calcul_de_tonnage > h3:nth-child(1){
+    margin-top: 14px;
+}
+
+span#reset_calcul_de_tonnage {
+    margin-top: 24px;
+    font-family: 'Lato', sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    text-decoration-line: underline;
+    color: #BE9E67;
+    display: block;
+    cursor: pointer;
+}
+
+.density_body_result {
+    margin-top: 8px;
+}
+
+.false_h3 img {
+    margin-left: 8px;
+}
+
+.result_longueur img , .result_largeur img {
+    margin: 0 13px 0 14px;
+}

@@ -1,0 +1,100 @@
+/**
+ * Theme Name:     Hello Elementor Child
+ * Author:         Elementor Team
+ * Template:       hello-elementor
+ * Text Domain:	   hello-elementor-child
+ * Description:    A plain-vanilla &amp; lightweight theme for Elementor page builder
+ */
+
+.yellow {
+    color: #BE9E67;
+}
+
+.affiche-produit a.woocommerce-LoopProduct-link.woocommerce-loop-product__link:after {
+    content: '';
+    width: 100%;
+    display: block;
+    position: absolute;
+    height: 50%;
+    background: linear-gradient(360deg, #474747 0%, rgba(71, 71, 71, 0) 100%);
+    border-radius: 0 0 5px 5px;
+    bottom: 0;
+}
+
+.affiche-produit .uael-woocommerce .woocommerce-LoopProduct-link{
+    line-height: 0;
+}
+
+.affiche-produit .uael-woocommerce .woocommerce-loop-product__link {
+    overflow: visible!important;
+}
+
+.affiche-produit h2.woocommerce-loop-product__title {
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.affiche-produit .uael-woocommerce li.product .price {
+    margin-top: 16px;
+}
+
+.affiche-produit .uael-woocommerce .uael-woo-products-summary-wrap {
+    margin-top: -50px;
+    transition: all .35s;
+    padding: 0 1em;
+    background: #F5F5F5;
+}
+
+.affiche-produit span.price {
+    color: #262626!important;
+    font-family: "Lato", Sans-serif!important;
+    font-weight: 900!important;
+    font-size: 16px!important;
+    line-height: 24px!important;
+    text-align: center;
+}
+
+.affiche-produit span.woocommerce-Price-amount.amount {
+    font-family: "Arca Majora 3", Sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    color: #BE9E67;
+}
+
+.h2_grey_back h2:after {
+    content: '';
+    width: 100%;
+    display: block;
+    position: absolute;
+    height: 25px;
+    background: #D9D9D9;
+    transform: rotate(-0.21deg);
+    bottom: -7px;
+    z-index: -1;
+}
+
+.h2_grey_back h2 {
+    width: fit-content;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+    color: #262626!important;
+    font-family: "Arca Majora 3", Sans-serif!important;
+    font-size: 32px!important;
+    font-weight: 900!important;
+    line-height: 40px!important;
+}
+
+.affiche-produit .uael-woo-skin-grid-franko .uael-product-actions {
+    right: 45%;
+    top: auto;
+    bottom: 46px;
+    transform: translate3d(0,0,0)!important;
+    -webkit-transform: translate3d(0,0,0)!important;
+    transition: all .35s;
+    -webkit-transition: all .35s;
+}

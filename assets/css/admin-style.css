@@ -1,0 +1,98 @@
+/* ---- Ajout AGCI ---- */
+
+/* Transporter labels */
+
+.transp-label {
+  display: inline-flex;
+  line-height: 2.5em;
+  border-radius: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  margin: -0.25em 0;
+  cursor: inherit !important;
+  white-space: nowrap;
+  max-width: 100%;
+  text-decoration: none;
+  padding-left: 1.25em;
+  padding-right: 1.25em;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+
+.transp-label.undefined {
+  color: #776261;
+  background-color: #e5e5e5;
+}
+
+.transp-label.fragner {
+  text-transform: uppercase;
+  color: #420c0a;
+  background-color: #dc5f51;
+}
+
+.transp-label.king {
+  text-transform: uppercase;
+  color: #282525;
+  background-color: #a98851;
+}
+
+.transp-label.kuehne {
+  text-transform: uppercase;
+  color: #b7beec;
+  background-color: #1a2461;
+}
+
+.transp-label.geotextile {
+  text-transform: uppercase;
+  color: #f9f9ed;
+  background-color: #8a6e2c;
+}
+
+.transp-label.tred {
+  text-transform: uppercase;
+  color: #e1e2e3;
+  background-color: #4b4a4d;
+}
+
+/* Order statuses */
+
+.order-status.status-completed:first-child {
+  border-top-right-radius:0!important;
+  border-bottom-right-radius:0!important;
+}
+
+.order-status.status-completed:last-child {
+  border-top-left-radius:0!important;
+  border-bottom-left-radius:0!important;
+}
+
+.order-status.status-completed:first-child > span{
+  margin-right:2px;
+}
+
+.order-status.status-completed:last-child > span{
+  margin-left:2px;
+}
+
+.order-status.status-completed:only-child{
+  border-radius:4px!important;
+}
+
+.order-status.status-completed {
+  color: #3c6c2b !important;
+  background-color: #cfdfca !important;
+}
+
+.order-status.status-on-hold {
+  color: #776261 !important;
+  background-color: #e5e5e5 !important;
+}
+
+.order-status.status-sav {
+  color: #420c0a !important;
+  background-color: #dc5f51 !important;
+}
+.order-status.status-scheduled {
+  color: #89591e !important;
+  background-color: #f0deb3 !important;
+}

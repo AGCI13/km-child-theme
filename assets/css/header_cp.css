@@ -1,0 +1,116 @@
+#background_modal_cp, #background_modal_cp_m {
+    z-index: 1000000;
+    display: none;
+    padding-top: 250px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+#modal_cp, #modal_cp_m {
+    margin: auto;
+    background-color: #fff;
+    position: relative;
+    outline: 0;
+    border-radius: 5px;
+    width: 560px;
+    padding: 32px 96px;
+}
+
+#modal_cp > p , #modal_cp_m > p {
+    font-family: 'Arca Majora 3';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.header_cp > p {
+    font-family: 'Lato';
+    font-style: italic;
+    color: #fff;
+    margin-bottom: 0;
+}
+
+.header_cp > p > span  {
+    font-style: normal;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 767px) {
+    #modal_cp, #modal_cp_m {
+        width: 296px;
+    }
+}
+
+.close_btn_modal_cp {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    border: none;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    height: 20px;
+    width: 20px;
+    text-decoration: none;
+    color: inherit;
+    background-color: inherit;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.close_btn_modal_cp > img {
+    height: 16px;
+    width: 16px;
+}
+
+#submit_btn_modal_cp , #submit_btn_modal_cp_m {
+    background: linear-gradient(180deg, #BE9E67 0%, #A98951 100%);
+    border-radius: 5px;
+    padding: 8px 24px;
+    font-family: 'Arca Majora 3';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 24px;
+    color: #FFFFFF;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+#modal_cp > div, #modal_cp_m > div {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 176px;
+    margin: auto;
+    align-content: center;
+}
+
+#modal_cp > div > label , #modal_cp_m > div > label {
+    width: 100%;
+}
+
+#modal_cp > div > label > *, #modal_cp_m > div > label > * {
+    border-radius: 5px;
+}
+
+#zip_code_label,#zip_code_label_m {
+    width: 368px!important;
+    text-align: center;
+    color: red;
+    display: block;
+    transform: translateX(-96px);
+    margin-bottom: -16px;
+}
