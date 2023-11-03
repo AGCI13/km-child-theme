@@ -11,7 +11,6 @@ if (isset($_COOKIE['zip_code'])) {
 
 </div>
 
-
 <div id="background_modal_cp">
     <form id="form_cp" method="post">
     <div id="modal_cp">

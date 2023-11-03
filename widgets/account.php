@@ -14,23 +14,28 @@ class Account_Widget extends \Elementor\Widget_Base {
     }
 
     public function get_categories() {
-        return [ 'basic' ];
+        return array( 'basic' );
     }
 
     public function get_keywords() {
-        return [ 'account'];
+        return array( 'account' );
     }
 
     protected function render() {
+        if ( is_user_logged_in() ) {
+            $permalink = get_permalink( get_option( 'woocommerce_myaccount_page_id' ) );
+        } else {
+            $permalink = '/connexion';
+        }
         ?>
 
         <div class="king-account">
-            <a href="<?php if (is_user_logged_in()) { echo get_permalink(get_option('woocommerce_myaccount_page_id')); } else { echo '/connexion'; } ?>">
+            <a href="<?php echo $permalink; ?>         ">
             <img src="/wp-content/themes/hello-elementor-child/assets/img/account.svg" alt="My Account">
-            <?php if (is_user_logged_in()) : ?>
-                <span class="king-account-content">Mon compte</span>
-            <?php else: ?>
-                <span class="king-account-content">Se connecter</span>
+            <?php if ( is_user_logged_in() ) : ?>
+                <span class="king-account-content"><?php echo __( 'Mon compte', 'kingmateriaux' ); ?></span>
+            <?php else : ?>
+                <span class="king-account-content"><?php echo __( 'Se connecter', 'kingmateriaux' ); ?></span>
             <?php endif; ?>
             </a>
         </div>

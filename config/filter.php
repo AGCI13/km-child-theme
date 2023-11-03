@@ -1,24 +1,4 @@
 <?php
-/**
- * Ajoute le statut de commande 'En cours de SAV'
- *
- * @param $order_statuses
- * @return array
- */
-function add_sav_to_order_statuses($order_statuses): array
-{
-    $new_order_statuses = array();
-    foreach ($order_statuses as $key => $status) {
-        $new_order_statuses[$key] = $status;
-        if ('wc-on-hold' === $key) {
-            $new_order_statuses['wc-sav'] = 'En cours de SAV';
-        }
-    }
-    return $new_order_statuses;
-}
-
-add_filter('wc_order_statuses', 'add_sav_to_order_statuses');
-
 
 /**
  * Rends le code postal non-modifiable dans le tunnel de commande
@@ -52,8 +32,6 @@ function custom_override_default_address_fields($address_fields): array
 
 add_filter('woocommerce_default_address_fields', 'custom_override_default_address_fields');
 
-
-
 /**
  * Remplit automatiquement le champ code postal avec le cookie
  *
@@ -66,7 +44,6 @@ function custom_override_checkout_init(): void
         $_POST['billing_postcode'] = $zip_code;
     }
 }
-
 add_action('woocommerce_checkout_init', 'custom_override_checkout_init');
 
 

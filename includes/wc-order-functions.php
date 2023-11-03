@@ -5,16 +5,32 @@ function km_register_scheduled_order_status() {
     register_post_status(
         'wc-scheduled',
         array(
-            'label'                     => 'Prévue',
+            'label'                     => __( 'Prévue', 'kingmateriaux' ),
             'public'                    => true,
             'exclude_from_search'       => false,
             'show_in_admin_all_list'    => true,
             'show_in_admin_status_list' => true,
-            'label_count'               => _n_noop( 'Prévue <span class="count">(%s)</span>', 'Prévue <span class="count">(%s)</span>' ),
+            'label_count'               => _n_noop( 'Prévue <span class="count">(%s)</span>', 'Prévue <span class="count">(%s)</span>', 'kingmateriaux' ),
         )
     );
 }
 add_action( 'init', 'km_register_scheduled_order_status' );
+
+// Enregistrer le statut de commande : "En cours de SAV"
+function km_register_sav_order_status() {
+    register_post_status(
+        'wc-sav',
+        array(
+            'label'                     => __( 'En cours de SAV', 'kingmateriaux' ),
+            'public'                    => true,
+            'show_in_admin_status_list' => true,
+            'show_in_admin_all_list'    => true,
+            'exclude_from_search'       => false,
+            'label_count'               => _n_noop( 'En cours de SAV (%s)', 'En cours de SAV (%s)', 'kingmateriaux' ),
+        )
+    );
+}
+add_action( 'init', 'km_register_sav_order_status' );
 
 // Ajouter le statut de commande : "Prévue"
 function km_add_scheduled_order_status( $order_statuses ) {
@@ -32,6 +48,25 @@ function km_add_scheduled_order_status( $order_statuses ) {
     return $new_order_statuses;
 }
 add_filter( 'wc_order_statuses', 'km_add_scheduled_order_status' );
+
+/**
+ * Ajoute le statut de commande 'En cours de SAV'
+ *
+ * @param $order_statuses
+ * @return array
+ */
+function km_add_sav_to_order_statuses( $order_statuses ): array {
+    $new_order_statuses = array();
+    foreach ( $order_statuses as $key => $status ) {
+        $new_order_statuses[ $key ] = $status;
+        if ( 'wc-on-hold' === $key ) {
+            $new_order_statuses['wc-sav'] = 'En cours de SAV';
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter( 'wc_order_statuses', 'km_add_sav_to_order_statuses' );
 
 // Ajouter la colonne 'Transporteur' à la liste des commandes
 function km_add_transporter_column( $columns ) {

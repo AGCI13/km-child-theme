@@ -4,28 +4,15 @@ if ( !defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
 
-require_once 'config/import.php';
+require_once 'config/enqueue.php';
 require_once 'config/filter.php';
-require_once 'config/action.php';
 require_once 'config/ajax.php';
-require_once 'config/shortcode.php';
+require_once 'config/shortcodes.php';
 require_once 'config/price.php';
 require_once 'config/atoosync.php';
 
-/* ---- Début Ajout AGCI ---- */
-
 require_once 'includes/wc-order-functions.php';
-
-function km_enqueue_custom_admin_style() {
-    $admin_stylesheet_path = get_stylesheet_directory() . '/assets/css/admin-style.css';
-
-    if ( file_exists( $admin_stylesheet_path ) ) {
-        wp_enqueue_style( 'custom-admin-style', get_stylesheet_directory_uri() . '/assets/css/admin-style.css' );
-    }
-}
-add_action( 'admin_enqueue_scripts', 'km_enqueue_custom_admin_style' );
-
-/* ---- Fin ajout AGCI ---- */
+require_once 'includes/wc-order-functions.php';
 
 add_action( 'wp_ajax_wc_woocommerce_clear_cart_url', 'td_woocommerce_clear_cart_url' );
 add_action( 'wp_ajax_nopriv_wc_woocommerce_clear_cart_url', 'td_woocommerce_clear_cart_url' );
@@ -40,7 +27,7 @@ function td_woocommerce_clear_cart_url() {
         $returned = array( 'status' => 'success' );
     }
 
-    die( json_encode( $returned ) );
+    die( wp_json_encode( $returned ) );
 }
 
 add_action( 'wp_ajax_wc_before_popup', 'td_before_popup' );
@@ -50,7 +37,7 @@ function td_before_popup() {
      global $woocommerce;
 
     if ( !isset( $_POST['product_id'] ) || !isset( $_POST['qty'] ) ) {
-        die( json_encode( array( 'status' => 'error' ) ) );
+        die( wp_json_encode( array( 'status' => 'error' ) ) );
     }
 
     // Vérifier si un "produit en vrac" est déjà dans le panier
@@ -70,7 +57,7 @@ function td_before_popup() {
     if ( $isBulkProductInCart === true ) {
         // Afficher la popup pour indiquer que le produit en vrac est déjà dans le panier
         die(
-            json_encode(
+            wp_json_encode(
                 array(
                     'status'  => 'vrac_popup',
                     'content' => "<style>
@@ -437,13 +424,29 @@ function oauthMicrosoft(Request $request)
     return redirect()->away($authUrl);
 }*/
 
-function register_hello_world_widget( $widgets_manager ) {
-
+function km_register_account_widget( $widgets_manager ) {
     require_once __DIR__ . '/widgets/account.php';
 
     $widgets_manager->register( new \Account_Widget() );
-
 }
-add_action( 'elementor/widgets/register', 'register_hello_world_widget' );
+add_action( 'elementor/widgets/register', 'km_register_account_widget' );
 
-/* Test git workflow */
+
+add_filter( 'woocommerce_persistent_cart_enabled', 'disable_persistent_cart_for_logged_in_users' );
+function disable_persistent_cart_for_logged_in_users( $enabled ) {
+    return false;
+}
+
+
+function custom_elementor_archive_posts_query( $query ) {
+    if ( is_admin() || !$query->is_main_query() ) {
+        return;
+    }
+
+    if ( is_search() ) {
+        $query->set( 'post_type', 'product' );
+    }
+}
+add_action( 'pre_get_posts', 'custom_elementor_archive_posts_query' );
+
+

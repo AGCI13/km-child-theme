@@ -1,7 +1,7 @@
-<div class="calcul_de_tonnage">
-    <div class="form_calcul_de_tonnage">
+<div class="tonnage_calculator">
+    <div class="form_tonnage_calculator">
         <h3>Le calculateur</h3>
-        <form id="calcul_de_tonnage" method="post">
+        <form id="tonnage_calculator" method="post">
             <label>
                 Longueur
                 <input type="number" name="lon" min="0" placeholder="Longueur de votre dalle en cm" required>
@@ -21,7 +21,7 @@
                 <img id="img_info_bull_density" src="<?php echo get_stylesheet_directory_uri() . '/assets/img/icone-information.svg'; ?>" alt="icon information">
                 <div id="info_bull_density">
                     <div id="close_info_bull_density">
-                        <img id="img_close_info_bull_density" src="<?php echo get_stylesheet_directory_uri() . '/assets/img/close_info_bull.svg'; ?>" alt="close info bull densite">
+                        <img id="img_close_info_bull_density" src="<?php echo get_stylesheet_directory_uri() . '/assets/img/close-info-tooltip.svg'; ?>" alt="close info bull densite">
                     </div>
                     Définition, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris, cursus morbi ac auctor.
                 </div>
@@ -35,10 +35,10 @@
                 </select>
             </label>
 
-            <span class="btn" id="submit_calcul_de_tonnage">Calculer</span>
+            <span class="btn" id="submit_tonnage_calculator">Calculer</span>
         </form>
     </div>
-    <div class="result_calcul_de_tonnage">
+    <div class="result_tonnage_calculator">
         <h3>TOTAL - Tonnage </h3>
         <div class="result_weight"><b>Poids : </b><span id="poids"></span></div>
         <div class="result_bag"><b>Sac correspondant : </b><span id="bag"></span></div>
@@ -56,14 +56,14 @@
         <div class="result_epaiseur"><b>Épaisseur : </b><span id="epaiseur_cm"></span> cm</div>
         <div class="recommandation">Nous recommandons une épaisseur minimale de 5 cm</div>
         <div class="density_body_result"><b>Densité : </b><span id="densite_value"></span></div>
-        <span id="reset_calcul_de_tonnage">Calculer un nouveau tonnage</span>
+        <span id="reset_tonnage_calculator">Calculer un nouveau tonnage</span>
     </div>
-    <div class="img_calcul_de_tonnage_form">
-        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/calcul_de_tonnage_right.png'; ?>"
+    <div class="img_tonnage_calculator_form">
+        <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/tonnage_calculator_right.png'; ?>"
              alt="image de calcul de tonnage">
     </div>
-    <div class="img_calcul_de_tonnage_result">
-        <img src="<?php echo get_the_post_thumbnail_url(get_the_ID(), 'full'); ?>"
+    <div class="img_tonnage_calculator_result">
+        <img src="<?php echo get_the_post_thumbnail_url( get_the_ID(), 'full' ); ?>"
              alt="image de calcul de tonnage">
     </div>
 </div>

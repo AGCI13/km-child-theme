@@ -1,5 +1,3 @@
-/* ---- Ajout AGCI ---- */
-
 /* Transporter labels */
 
 .transp-label {
@@ -95,4 +93,26 @@
 .order-status.status-scheduled {
   color: #89591e !important;
   background-color: #f0deb3 !important;
+}
+
+/* Product list */
+
+.wp-admin td.product_tag.column-product_tag, .wp-admin th#product_tag {
+  width: 5%!important;
+}
+
+.wp-admin td.product_cat.column-product_cat,.wp-admin th#product_cat {
+  width: 7%!important;
+}
+
+.fixed td.stats.column-stats,th#stats {
+  width: 3%!important;
+}
+
+td.date.column-date, th#date{
+  width: 7%!important;
+}
+
+.woocommerce-admin-page td.name.column-name.has-row-actions.column-primary , .woocommerce-admin-page table.wp-list-table .column-name {
+  width: 17%!important;
 }

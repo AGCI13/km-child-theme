@@ -1,13 +1,9 @@
 jQuery(document).ready(function () {
-
     document.getElementById('img_info_bull_density').addEventListener('click', info_bull)
     document.getElementById('img_close_info_bull_density').addEventListener('click', info_bull)
-    document.getElementById('submit_calcul_de_tonnage').addEventListener('click', send_form_tonnage)
-    document.getElementById('reset_calcul_de_tonnage').addEventListener('click', reset_form_calcul_de_tonnage)
-
-
+    document.getElementById('submit_tonnage_calculator').addEventListener('click', send_form_tonnage)
+    document.getElementById('reset_tonnage_calculator').addEventListener('click', reset_form_tonnage_calculator)
 });
-
 
 function info_bull() {
     let info_bull_density = document.getElementById('info_bull_density');
@@ -19,14 +15,13 @@ function info_bull() {
     info_bull_density.classList.toggle('open');
 }
 
-
 function send_form_tonnage(){
-    let form = document.getElementById('calcul_de_tonnage');
+    let form = document.getElementById('tonnage_calculator');
     let dataForm = new FormData(form);
-    let pageForm = document.querySelector('.calcul_de_tonnage > .form_calcul_de_tonnage ');
-    let pageResult = document.querySelector('.calcul_de_tonnage > .result_calcul_de_tonnage ');
-    let imgForm = document.querySelector('.calcul_de_tonnage > .img_calcul_de_tonnage_form ');
-    let imgResult = document.querySelector('.calcul_de_tonnage > .img_calcul_de_tonnage_result ');
+    let pageForm = document.querySelector('.tonnage_calculator > .form_tonnage_calculator ');
+    let pageResult = document.querySelector('.tonnage_calculator > .result_tonnage_calculator ');
+    let imgForm = document.querySelector('.tonnage_calculator > .img_tonnage_calculator_form ');
+    let imgResult = document.querySelector('.tonnage_calculator > .img_tonnage_calculator_result ');
 
 
     const formDataObj = Object.fromEntries(dataForm.entries());
@@ -70,11 +65,11 @@ function send_form_tonnage(){
     });
 }
 
-function reset_form_calcul_de_tonnage(){
-    let pageForm = document.querySelector('.calcul_de_tonnage > .form_calcul_de_tonnage ');
-    let pageResult = document.querySelector('.calcul_de_tonnage > .result_calcul_de_tonnage ');
-    let imgForm = document.querySelector('.calcul_de_tonnage > .img_calcul_de_tonnage_form ');
-    let imgResult = document.querySelector('.calcul_de_tonnage > .img_calcul_de_tonnage_result ');
+function reset_form_tonnage_calculator(){
+    let pageForm = document.querySelector('.tonnage_calculator > .form_tonnage_calculator ');
+    let pageResult = document.querySelector('.tonnage_calculator > .result_tonnage_calculator ');
+    let imgForm = document.querySelector('.tonnage_calculator > .img_tonnage_calculator_form ');
+    let imgResult = document.querySelector('.tonnage_calculator > .img_tonnage_calculator_result ');
     pageForm.style.display = 'block'
     pageResult.style.display = 'none'
     imgForm.style.display = 'block'

@@ -1,8 +1,8 @@
 <?php
 
-add_action('wp_ajax_calcul_tonnage', 'calcul_tonnage');
-add_action('wp_ajax_nopriv_calcul_tonnage', 'calcul_tonnage');
-function calcul_tonnage()
+add_action('wp_ajax_calcul_tonnage', 'km_calcul_tonnage');
+add_action('wp_ajax_nopriv_calcul_tonnage', 'km_calcul_tonnage');
+function km_calcul_tonnage()
 {
     if (!isset($_GET['lon']) && !isset($_GET['lar']) && !isset($_GET['epa']) && !isset($_GET['den'])) {
         wp_send_json_error();
@@ -57,10 +57,9 @@ function calcul_tonnage()
     die();
 }
 
-
-add_action('wp_ajax_get_shipping_zone', 'get_shipping_zone_callback');
-add_action('wp_ajax_nopriv_get_shipping_zone', 'get_shipping_zone_callback'); // Pour les utilisateurs non connectés
-function get_shipping_zone_callback() {
+add_action('wp_ajax_get_shipping_zone', 'km_get_shipping_zone_callback');
+add_action('wp_ajax_nopriv_get_shipping_zone', 'km_get_shipping_zone_callback');
+function km_get_shipping_zone_callback() {
     delete_cookie('shipping_zone');
     $zip = (int)sanitize_text_field($_POST['zip']);
     $shipping_zones = WC_Shipping_Zones::get_zones();
