@@ -4,10 +4,10 @@ function km_header_cp_func( $atts = array() ) {
     wp_enqueue_style( 'km-header-postcode-style' );
     if ( isset( $atts['view'] ) && $atts['view'] === 'mobile' ) {
         wp_enqueue_script( 'header-cp-mobile-script' );
-        get_template_part( '/templates/header_cp_mobile', 'header_cp_mobile' );
+        get_template_part( '/templates/header-postcode-mobile', 'header-postcode-mobile' );
     } else {
         wp_enqueue_script( 'km-header-postcode-script' );
-        get_template_part( '/templates/header-cp', 'header-cp' );
+        get_template_part( '/templates/header-postcode', 'header-postcode' );
     }
 }
 add_shortcode( 'header_cp', 'km_header_cp_func' );

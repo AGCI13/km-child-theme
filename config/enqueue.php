@@ -12,14 +12,14 @@ function km_front_scripts_enqueue() {
     wp_enqueue_script( 'km-footer-scripts', $js_dir . 'footer.js', 'jquery', '1.0', true, array() );
     wp_localize_script( 'km-footer', 'frontend_ajax_object', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
-    wp_register_style( 'km-header-postcode-style', $css_dir . 'header-cp.css', array(), '1.0', 'all' );
+    wp_register_style( 'km-header-postcode-style', $css_dir . 'header-postcode.css', array(), '1.0', 'all' );
     wp_register_script( 'km-header-postcode-script', $js_dir . 'header-postcode.js', array( 'jquery' ), '1.0', false );
     wp_register_script( 'km-header-postcode-mobile-script', $js_dir . 'header-postcode-mobile.js', array( 'jquery' ), '1.0', false );
 
     wp_register_style( 'km-tonnage-calculator-style', $css_dir . 'tonnage-calculator.css', array(), '1.0', 'all' );
     wp_register_script( 'km-tonnage-calculator-script', $js_dir . 'tonnage-calculator.js', array( 'jquery' ), '1.0', false );
 
-    if ( is_product_category() || is_archive() ) {
+    if ( is_archive() ) {
         wp_enqueue_style( 'km-product-archive-style', $css_dir . 'product-archive.css', array(), '1.0', 'all' );
         wp_enqueue_script( 'km-product-archive-script', $js_dir . 'product-archive.js', array( 'jquery' ), '1.0', false );
     }

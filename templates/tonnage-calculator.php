@@ -68,6 +68,10 @@
     </div>
 </div>
 <div class="densities">
-    La densité des galets est de 1 - La densité du sable est de 1,8 - La densité du mélange est de 1,6 - La densité de
-    la terre est de 1,2 - la densité de la pouzzolane est de 0,8
+    <?php
+    echo __(
+        'La densité des galets est de 1 - La densité du sable est de 1,8 - La densité du mélange est de 1,6 - La densité de
+    la terre est de 1,2 - la densité de la pouzzolane est de 0,8',
+        'kingmateriaux'
+    ); ?>
 </div>
