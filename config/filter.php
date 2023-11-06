@@ -43,18 +43,18 @@ function custom_override_checkout_init(): void {
 add_action( 'woocommerce_checkout_init', 'custom_override_checkout_init' );
 
 
-function price_format( $price ) {
-    $tmp_price = htmlentities( $price );
-    $tmp       = explode( 'ndash', $tmp_price );
-    if ( count( $tmp ) > 1 ) {
-        $tmp[0] = substr( $tmp[0], 0, -6 );
-        $tmp[1] = substr( $tmp[1], 1 );
-        return html_entity_decode( 'de ' . $tmp[0] . ' à ' . $tmp[1] );
-    } else {
-        return $price;
-    }
-}
-add_filter( 'woocommerce_get_price_html', 'price_format' );
+// function price_format( $price ) {
+//     $tmp_price = htmlentities( $price );
+//     $tmp       = explode( 'ndash', $tmp_price );
+//     if ( count( $tmp ) > 1 ) {
+//         $tmp[0] = substr( $tmp[0], 0, -6 );
+//         $tmp[1] = substr( $tmp[1], 1 );
+//         return html_entity_decode( 'de ' . $tmp[0] . ' à ' . $tmp[1] );
+//     } else {
+//         return $price;
+//     }
+// }
+// add_filter( 'woocommerce_get_price_html', 'price_format' );
 
 function supprimer_option_livraison( $available_shipping_methods, $package ) {
     // Remplacez 'nom_option_a_supprimer' par le nom de l'option que vous souhaitez supprimer.

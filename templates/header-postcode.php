@@ -4,8 +4,8 @@
 if ( isset( $_COOKIE['zip_code'] ) ) :
     !$zip_code = explode( '-', $_COOKIE['zip_code'] )[0];
     ?>
-    <p><?php echo __( 'Code postal', 'kingmateriaux' ); ?> : <span class="yellow" id="cp_btn_modal"><?php echo $zip_code; ?></span></p>
-<?php  else : ?>
+    <p><?php echo __( 'Code postal', 'kingmateriaux' ); ?> : <span class="yellow" id="cp_btn_modal"><?php echo esc_html( $zip_code ); ?></span></p>
+<?php else : ?>
     <p><?php echo __( 'Pour voir nos tarifs', 'kingmateriaux' ); ?> : <span class="yellow" id="cp_btn_modal"><?php echo __( 'Rentrez votre code postal', 'kingmateriaux' ); ?></span></p>
 <?php endif; ?>
 
@@ -37,8 +37,8 @@ if ( isset( $_COOKIE['zip_code'] ) ) :
                 <input id="zip_code" name="zip_code" type="text" maxlength="5" placeholder=" | Code postal" required>
                 <span id="zip_code_label"></span>
             </label>
-            <span data-ajaxurl="<?php echo admin_url( 'admin-ajax.php' ); ?>" id="submit_btn_modal_cp">Appliquer</span>
-        </div>
+            <?php wp_nonce_field( 'get_shipping_zone_id_from_zip', 'nonce_header_postcode' ); ?>
+            <input type="submit" id="submit_btn_modal_cp" value="<?php echo __( 'Valider', 'kingmateriaux' ); ?>">        </div>
     </div>
     </form>
 </div>

@@ -31,7 +31,7 @@ class Account_Widget extends \Elementor\Widget_Base {
 
         <div class="king-account">
             <a href="<?php echo $permalink; ?>         ">
-            <img src="/wp-content/themes/hello-elementor-child/assets/img/account.svg" alt="My Account">
+            <img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/account.svg'; ?>" alt="My Account">
             <?php if ( is_user_logged_in() ) : ?>
                 <span class="king-account-content"><?php echo __( 'Mon compte', 'kingmateriaux' ); ?></span>
             <?php else : ?>
