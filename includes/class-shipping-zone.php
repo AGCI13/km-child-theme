@@ -33,21 +33,91 @@ class KM_Shipping_Zone {
     public $shipping_zone_name = '';
 
     /**
+     * The zip_code string.
+     *
+     * @var string|null
+     */
+    public $zip_code = '';
+
+    /**
+     * The country code string.
+     *
+     * @var string|null
+     */
+    public $country_code = '';
+
+    /**
      * Constructor.
      *
      * The constructor is protected to prevent creating a new instance from outside
      * and to prevent creating multiple instances through the `new` keyword.
      */
     private function __construct() {
+        $this->get_zip_and_country_from_cookie();
         $this->shipping_zone_id   = $this->get_shipping_zone_id_from_cookie();
         $this->shipping_zone_name = $this->get_shipping_zone_name();
 
         $this->register();
     }
 
+    /*
+    * Register hooks
+    *
+    * @return void
+    */
     public function register() {
+        add_shortcode( 'header_cp', array( $this, 'postcode_form_shortcode_render' ) );
         add_action( 'wp_ajax_get_shipping_zone_id_from_zip', array( $this, 'get_shipping_zone_id_from_zip' ) );
         add_action( 'wp_ajax_nopriv_get_shipping_zone_id_from_zip', array( $this, 'get_shipping_zone_id_from_zip' ) );
+    }
+
+    /**
+     * Renders the postcode form shortcode
+     *
+     * @return void
+     */
+    public function postcode_form_shortcode_render() {
+
+        // Conditionne l'affichage du formulaire de demande de code postal aux pages autres que le blog
+        if ( is_single() && 'post' === get_post_type() || is_archive() && 'post' === get_post_type() ) {
+            return;
+        }
+
+        wp_enqueue_style( 'km-postcode-form-style' );
+        wp_enqueue_script( 'km-postcode-form-script' );
+
+        $zip_code         = $this->zip_code ?: '';
+        $shipping_zone_id = $this->shipping_zone_id ?: '';
+        $country_code     = $this->country_code ?: '';
+
+        ob_start(); // Démarre la mise en mémoire tampon
+
+        // Assurez-vous que le chemin d'accès au fichier est correct et que le fichier existe.
+        include get_stylesheet_directory() . '/templates/postcode-form.php';
+
+        $content = ob_get_clean(); // Récupère le contenu du tampon et arrête la mise en mémoire tampon
+
+        return $content; // Retourne le contenu pour le shortcode
+    }
+
+    /**
+     *  Checks if the current shipping zone is in the thirtheen.
+     *
+     * @return string
+     */
+    public function get_zip_and_country_from_cookie() {
+        // Retrieve the 'shipping_zone' cookie value using the KM_Cookie_Handler
+        $zip_cookie = isset( $_COOKIE['zip_code'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['zip_code'] ) ) : null;
+        $zip_cookie = explode( '-', $zip_cookie );
+
+        if ( !isset( $zip_cookie[0] ) || empty( $zip_cookie[0] ) || !isset( $zip_cookie[1] ) || empty( $zip_cookie[1] ) ) {
+            return false;
+        }
+
+        $this->zip_code     = $zip_cookie[0];
+        $this->country_code = $zip_cookie[1];
+
+        return true;
     }
 
     /**
@@ -131,11 +201,13 @@ class KM_Shipping_Zone {
      * @return bool True if the shipping zone is in the thirtheen, false otherwise.
      */
 
-    public function is_in_thirtheen() {
+    public function is_in_thirteen() {
 
         $shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
 
         if ( in_array( $shipping_zone_id, array( 12, 13, 14, 15, 16, 17 ) ) ) {
+            global $km_is_in_thirteen;
+            $km_is_in_thirteen = true;
             return true;
         }
 
@@ -143,9 +215,9 @@ class KM_Shipping_Zone {
     }
 
 
-    /** 
+    /**
      * Ajax callback to get the shipping zone ID from a zip code.
-     * 
+     *
      * @return void | json
      */
     public function get_shipping_zone_id_from_zip() {
@@ -159,6 +231,10 @@ class KM_Shipping_Zone {
 
         $zip_code = isset( $_POST['zip'] ) && !empty( $_POST['zip'] ) ? wp_unslash( $_POST['zip'] ) : '';
         $zip_code = sanitize_text_field( $zip_code );
+
+        if ( empty( $zip_code ) ) {
+            wp_send_json_error( array( 'message' => 'Le code postal est vide.' ) );
+        }
 
         setcookie( 'shipping_zone', '', time() - 3600, '/' );
 
@@ -189,7 +265,5 @@ class KM_Shipping_Zone {
         } catch ( Exception $e ) {
             wp_send_json_error( array( 'message' => 'Une erreur est survenue : ' . $e->getMessage() ) );
         }
-        wp_die();
     }
-
 }

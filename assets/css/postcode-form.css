@@ -1,7 +1,6 @@
-#background_modal_cp, #background_modal_cp_m {
+#modal_pc_wrapper {
     z-index: 1000000;
     display: none;
-    padding-top: 250px;
     position: fixed;
     left: 0;
     top: 0;
@@ -9,9 +8,15 @@
     height: 100%;
     overflow: auto;
     background-color: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
 }
 
-#modal_cp, #modal_cp_m {
+#modal_pc_wrapper.active{
+    display: flex;
+}
+
+#modal_postcode{
     margin: auto;
     background-color: #fff;
     position: relative;
@@ -21,7 +26,7 @@
     padding: 32px 96px;
 }
 
-#modal_cp > p , #modal_cp_m > p {
+#modal_postcode > p {
     font-family: 'Arca Majora 3';
     font-style: normal;
     font-weight: 700;
@@ -31,26 +36,26 @@
     margin-bottom: 24px;
 }
 
-.header_cp > p {
+.header_postcode > p {
     font-family: 'Lato';
     font-style: italic;
     color: #fff;
     margin-bottom: 0;
 }
 
-.header_cp > p > span  {
+.header_postcode > p > span  {
     font-style: normal;
     text-decoration: underline;
     cursor: pointer;
 }
 
 @media only screen and (max-width: 767px) {
-    #modal_cp, #modal_cp_m {
+    #modal_postcode {
         width: 296px;
     }
 }
 
-.close_btn_modal_cp {
+#modal_pc_close_btn {
     position: absolute;
     right: 15px;
     top: 15px;
@@ -68,12 +73,12 @@
     white-space: nowrap;
 }
 
-.close_btn_modal_cp > img {
+#modal_pc_close_btn > img {
     height: 16px;
     width: 16px;
 }
 
-#submit_btn_modal_cp , #submit_btn_modal_cp_m {
+#submit_btn_modal_postcode{
     background: linear-gradient(180deg, #BE9E67 0%, #A98951 100%);
     border-radius: 5px;
     padding: 8px 24px;
@@ -87,7 +92,7 @@
     margin-top: 16px;
 }
 
-#modal_cp > div, #modal_cp_m > div {
+#modal_postcode > div {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
@@ -98,15 +103,15 @@
     align-content: center;
 }
 
-#modal_cp > div > label , #modal_cp_m > div > label {
+#modal_postcode > div > label , #modal_postcode_m > div > label {
     width: 100%;
 }
 
-#modal_cp > div > label > *, #modal_cp_m > div > label > * {
+#modal_postcode > div > label > *, #modal_postcode_m > div > label > * {
     border-radius: 5px;
 }
 
-#zip_code_label,#zip_code_label_m {
+#zip_code_label {
     width: 368px!important;
     text-align: center;
     color: red;

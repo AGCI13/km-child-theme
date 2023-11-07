@@ -15,11 +15,12 @@ require_once 'widgets/register-widgets.php';
 require_once 'includes/wc-order-functions.php';
 
 require_once 'includes/class-singleton-trait.php';
+require_once 'includes/class-dynamic-pricing.php';
 require_once 'includes/class-shipping-zone.php';
 require_once 'includes/class-delivery-options.php';
-require_once 'includes/class-dynamic-pricing.php';
 
 $km_dynamic_pricing  = KM_Dynamic_Pricing::get_instance();
+$km_shipping_zone    = KM_Shipping_Zone::get_instance();
 $km_delivery_options = KM_Delivery_Options::get_instance();
 
 /**
@@ -196,15 +197,3 @@ function oauthMicrosoft(Request $request)
     session(['oauthState' => $client->getState()]);
     return redirect()->away($authUrl);
 }*/
-
-
-function km_elementor_archive_posts_query( $query ) {
-    if ( is_admin() || !$query->is_main_query() ) {
-        return;
-    }
-
-    if ( is_search() ) {
-        $query->set( 'post_type', 'product' );
-    }
-}
-add_action( 'pre_get_posts', 'km_elementor_archive_posts_query' );

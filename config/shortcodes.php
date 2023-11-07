@@ -1,17 +1,5 @@
 <?php
 
-function km_header_cp_func( $atts = array() ) {
-    wp_enqueue_style( 'km-header-postcode-style' );
-    if ( isset( $atts['view'] ) && $atts['view'] === 'mobile' ) {
-        wp_enqueue_script( 'header-cp-mobile-script' );
-        get_template_part( '/templates/header-postcode-mobile', 'header-postcode-mobile' );
-    } else {
-        wp_enqueue_script( 'km-header-postcode-script' );
-        get_template_part( '/templates/header-postcode', 'header-postcode' );
-    }
-}
-add_shortcode( 'header_cp', 'km_header_cp_func' );
-
 function km_archive_product_assets(): void {
     $cate   = get_queried_object();
     $vowels = array( 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U' );
@@ -44,8 +32,6 @@ function km_tonnage_calculator( $atts = array() ): void {
     get_template_part( '/templates/tonnage-calculator', 'tonnage-calculator', );
 }
 add_shortcode( 'tonnage_calculator', 'km_tonnage_calculator' );
-
-
 function km_avis_verifie_product_page( $atts = array() ): void {
     $product = wc_get_product( get_the_ID() );
     if ( !$product ) {

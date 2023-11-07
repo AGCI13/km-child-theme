@@ -1,24 +1,19 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    let cp_btn_modal = document.getElementById('cp_btn_modal');
-    let background_modal_cp = document.getElementById('background_modal_cp');
-    let cross_modal = document.querySelector("#modal_cp > span");
-    let form_modal = document.getElementById('form_cp');
+    let modal_pc_open_btn = document.getElementById('modal_pc_open_btn');
+    let modal_pc_wrapper = document.getElementById('modal_pc_wrapper');
+    let modal_pc_close_btn = document.getElementById("modal_pc_close_btn");
+    let form_modal = document.getElementById('form_postcode');
 
-    if (!getCookie('zip_code')) {
-        background_modal_cp.style.display = 'block';
-        cross_modal.style.cursor = 'not-allowed';
+    modal_pc_open_btn.addEventListener('click', function () {
+        modal_pc_wrapper.classList.add('active');
+    });
+
+    if (modal_pc_close_btn !== null) {
+        modal_pc_close_btn.addEventListener('click', function () {
+            modal_pc_wrapper.classList.remove('active');
+        });
     }
-
-    cp_btn_modal.addEventListener('click', function () {
-        background_modal_cp.style.display = 'block';
-    });
-
-    cross_modal.addEventListener('click', function () {
-        if (getCookie('zip_code')) {
-            background_modal_cp.style.display = 'none';
-        }
-    });
 
     form_modal.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -29,11 +24,11 @@ document.addEventListener('DOMContentLoaded', function () {
 function km_submit_cp(e) {
     let country_modal = document.getElementById('country').value;
     let zip_modal = document.getElementById('zip_code').value;
-    let background_modal_cp = document.getElementById('background_modal_cp');
-    let label_modal_cp = document.getElementById('zip_code_label');
+    let modal_pc_wrapper = document.getElementById('modal_pc_wrapper');
+    let label_modal_postcode = document.getElementById('zip_code_label');
 
     if (zip_modal.length < 5 && country_modal === 'FR' || zip_modal.length < 4 && country_modal === 'BE') {
-        label_modal_cp.textContent = 'Veuillez rentrez un code postal valide';
+        label_modal_postcode.textContent = 'Veuillez rentrez un code postal valide';
         return;
     }
 
@@ -46,16 +41,16 @@ function km_submit_cp(e) {
     ajaxCall('get_shipping_zone_id_from_zip', data)
         .then(response => {
             if (response.data) {
-                background_modal_cp.style.display = 'none';
+                modal_pc_wrapper.style.display = 'none';
                 setCookie('zip_code', zip_modal + '-' + country_modal, 1);
                 setCookie('shipping_zone', response.data, 1);
-                document.location.reload();
+                window.location.href = window.location.href.split('?')[0];
             } else {
-                label_modal_cp.textContent = response.error;
+                label_modal_postcode.textContent = response.error;
             }
         })
         .catch(error => {
-            label_modal_cp.textContent = 'Network error in "km_submit_cp" method : ' + error.message;
+            label_modal_postcode.textContent = 'Erreur : ' + error.message;
         });
 }
 

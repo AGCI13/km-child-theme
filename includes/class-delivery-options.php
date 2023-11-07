@@ -7,7 +7,6 @@ if ( !defined( 'ABSPATH' ) ) {
 /**
  * Handles dynamic pricing based on shipping zones and classes in WooCommerce.
  */
-
 class KM_Delivery_Options {
 
     use SingletonTrait;

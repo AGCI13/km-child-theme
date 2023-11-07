@@ -39,12 +39,32 @@ class KM_Dynamic_Pricing {
     }
 
     private function register() {
-        // Hook pour le produit simple
-        add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 1, 2 );
-        // Hook pour les variations de produit
-        add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 1, 2 );
-        // Hook pour les prices des variations de produit (notamment min et max)
-        add_filter( 'woocommerce_variation_prices', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 10, 3 );
+
+        add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
+
+        // Si la zone de livraison est la 13, on modifie les prix des produits
+        if ( !$this->km_shipping_zone->is_in_thirteen() ) {
+            // Hook pour le produit simple
+            add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+            // Hook pour les variations de produit
+            add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+            // Hook pour les prices des variations de produit (notamment min et max)
+            add_filter( 'woocommerce_variation_prices', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 10, 3 );
+
+            add_filter( 'woocommerce_get_price_html', array( $this, 'no_shipping_class_price_html' ), 10, 2 );
+
+            add_filter( 'woocommerce_is_purchasable', array( $this, 'no_shipping_class_is_purchasable' ), 10, 2 );
+
+            // add_action( 'pre_get_posts', array( $this, 'hide_products_out_thirteen' ), 10, 1 );
+        }
+    }
+
+    public function set_prices_on_zip_or_zone_missing() {
+        if ( $this->km_shipping_zone->zip_code && $this->km_shipping_zone->shipping_zone_id ) {
+            return;
+        }
+        add_filter( 'woocommerce_is_purchasable', '__return_false' );
+        add_filter( 'woocommerce_get_price_html', array( $this, 'display_message_instead_on_price' ), 10, 2 );
     }
 
     /**
@@ -76,10 +96,6 @@ class KM_Dynamic_Pricing {
     }
 
     public function change_product_price_based_on_shipping_zone( $price, $product ) {
-
-        if ( $this->km_shipping_zone->is_in_thirtheen() ) {
-            return $price;
-        }
 
         // Obtenir la classe de livraison du produit
         $shipping_class_id = $product->get_shipping_class_id();
@@ -116,4 +132,86 @@ class KM_Dynamic_Pricing {
         return $prices;
     }
 
+    public function no_shipping_class_price_html( $price, $product ) {
+        if ( $product->is_type( 'variable' ) ) {
+            $variations = $product->get_available_variations();
+            foreach ( $variations as $variation ) {
+                $variation_obj = wc_get_product( $variation['variation_id'] );
+                if ( $variation_obj->get_shipping_class_id() ) {
+                    return $price; // Si au moins une variation a une classe de livraison, retourner le prix.
+                }
+            }
+            // Si aucune variation n'a de classe de livraison, afficher le message.
+            return __( "Ce produit n'est pas disponible dans votre zone", 'kingmateriaux' );
+        } else {
+            // Pour les produits non variables, continuez avec la logique existante.
+            if ( !$product->get_shipping_class_id() ) {
+                return __( "Ce produit n'est pas disponible dans votre zone", 'kingmateriaux' );
+            }
+            return $price;
+        }
+    }
+
+    public function no_shipping_class_is_purchasable( $is_purchasable, $product ) {
+        if ( !$this->has_shipping_class( $product ) ) {
+            return false;
+        }
+        return $is_purchasable;
+    }
+
+    private function has_shipping_class( $product ) {
+        $shipping_class = $product->get_shipping_class();
+        return !empty( $shipping_class );
+    }
+
+    public function hide_products_out_thirteen( $query ) {
+
+        // Ne pas modifier les requêtes dans l'administration ou qui ne sont pas la requête principale.
+        if ( is_admin() || $query->get( 'post_type' ) !== 'product' ) {
+            return;
+        }
+
+        // Obtenir tous les termes de la classe d'expédition.
+        $shipping_class_ids = get_terms(
+            array(
+                'taxonomy'   => 'product_shipping_class',
+                'fields'     => 'ids',
+                'hide_empty' => false,
+            )
+        );
+
+        // S'il n'y a pas de classes d'expédition, ne rien faire.
+        if ( empty( $shipping_class_ids ) ) {
+            return;
+        }
+
+        // Modifier la requête pour exclure les produits sans classe d'expédition.
+        $tax_query = (array) $query->get( 'tax_query' );
+
+        $tax_query[] = array(
+            'taxonomy' => 'product_shipping_class',
+            'field'    => 'term_id',
+            'terms'    => $shipping_class_ids,
+            'operator' => 'IN',
+        );
+
+        $query->set( 'tax_query', $tax_query );
+
+    }
+
+    /**
+     * Affiche un message au lieu du prix du produit.
+     *
+     * @param string $price Le prix du produit.
+     */
+    public function display_message_instead_on_price( $price, $product ) {
+
+        // Vous pouvez ajouter une condition pour vérifier si un code postal a été entré ou non.
+        // Si aucun code postal n'est entré, affichez le message.
+        if ( !isset( $_COOKIE['zip_code'] ) || empty( $_COOKIE['zip_code'] ) ) {
+            return __( 'Entrer votre code postal', 'kingmateriaux' );
+        }
+        // Sinon, retournez le prix habituel.
+        return $price;
+    }
 }
