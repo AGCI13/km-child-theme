@@ -41,6 +41,7 @@ function km_submit_cp(e) {
     ajaxCall('get_shipping_zone_id_from_zip', data)
         .then(response => {
             if (response.data) {
+                //Traiement de la réponse
                 modal_pc_wrapper.style.display = 'none';
                 setCookie('zip_code', zip_modal + '-' + country_modal, 1);
                 setCookie('shipping_zone', response.data, 1);

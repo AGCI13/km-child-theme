@@ -4,8 +4,6 @@ if ( !defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
 
-use KM_Shipping_zone;
-
 /**
  * Handles dynamic pricing based on shipping zones and classes in WooCommerce.
  */
@@ -28,13 +26,21 @@ class KM_Dynamic_Pricing {
     public $km_shipping_zone;
 
     /**
+     * The message to display when the product is not available in the shipping zone.
+     *
+     * @var string
+     */
+    public $unavailable_message;
+
+    /**
      * Constructor.
      *
      * The constructor is protected to prevent creating a new instance from outside
      * and to prevent creating multiple instances through the `new` keyword.
      */
     private function __construct() {
-        $this->km_shipping_zone = KM_Shipping_zone::get_instance();
+        $this->km_shipping_zone    = KM_Shipping_zone::get_instance();
+        $this->unavailable_message = __( 'Ce produit n\'est pas disponible dans votre zone de livraison', 'kingmateriaux' );
         $this->register();
     }
 
@@ -45,16 +51,17 @@ class KM_Dynamic_Pricing {
         // Si la zone de livraison est la 13, on modifie les prix des produits
         if ( !$this->km_shipping_zone->is_in_thirteen() ) {
             // Hook pour le produit simple
-            add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+            add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 1, 2 );
             // Hook pour les variations de produit
-            add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+            add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 1, 2 );
             // Hook pour les prices des variations de produit (notamment min et max)
-            add_filter( 'woocommerce_variation_prices', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 10, 3 );
+            add_filter( 'woocommerce_variation_prices', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 1, 3 );
 
-            add_filter( 'woocommerce_get_price_html', array( $this, 'no_shipping_class_price_html' ), 10, 2 );
+            add_filter( 'woocommerce_get_price_html', array( $this, 'no_shipping_class_price_html' ), 99, 2 );
 
             add_filter( 'woocommerce_is_purchasable', array( $this, 'no_shipping_class_is_purchasable' ), 10, 2 );
 
+            //Décommenter la ligne ci dessous afin de masquer les produits lorsqu'ils n'ont pas de classe de livraison
             // add_action( 'pre_get_posts', array( $this, 'hide_products_out_thirteen' ), 10, 1 );
         }
     }
@@ -97,31 +104,25 @@ class KM_Dynamic_Pricing {
 
     public function change_product_price_based_on_shipping_zone( $price, $product ) {
 
-        // Obtenir la classe de livraison du produit
-        $shipping_class_id = $product->get_shipping_class_id();
+        $shipping_product_title = $this->km_shipping_zone->get_related_shipping_product_title( $product );
+        $shipping_product       = $this->km_shipping_zone->get_related_shipping_product_by_title( $shipping_product_title );
 
-        if ( $shipping_class_id ) {
-            // Récupérer l'objet de la classe de livraison
-            $shipping_class_term = get_term( $shipping_class_id, 'product_shipping_class' );
+        $shipping_price = $shipping_product->get_price();
 
-            if ( $shipping_class_term && !is_wp_error( $shipping_class_term ) ) {
-                // Récupérer le nom de la classe de livraison
-                $shipping_class_name = $shipping_class_term->name;
-
-                $shipping_price_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_class_name;
-                // echo '<h3>$shipping_price_name</h3><pre>' . var_export( $shipping_price_name, true ) . '</pre>';
-
-                $shipping_price = $this->get_price_by_product_title( $shipping_price_name );
-
-                if ( $shipping_price > 0 ) {
-                    $price += $shipping_price;
-                }
-            }
+        if ( $shipping_price > 0 ) {
+            $price += $shipping_price;
         }
 
         return $price;
     }
 
+
+    /**
+     * Change les prix des variations de produit en fonction de la zone de livraison.
+     * 
+     * @param array $prices Les prix des variations de produit.
+     *  
+     */
     public function change_variation_prices_based_on_shipping_zone( $prices, $variation, $product ) {
         foreach ( $prices as $price_type => $variation_prices ) {
             foreach ( $variation_prices as $variation_id => $price ) {
@@ -133,6 +134,7 @@ class KM_Dynamic_Pricing {
     }
 
     public function no_shipping_class_price_html( $price, $product ) {
+
         if ( $product->is_type( 'variable' ) ) {
             $variations = $product->get_available_variations();
             foreach ( $variations as $variation ) {
@@ -142,11 +144,11 @@ class KM_Dynamic_Pricing {
                 }
             }
             // Si aucune variation n'a de classe de livraison, afficher le message.
-            return __( "Ce produit n'est pas disponible dans votre zone", 'kingmateriaux' );
+            return $this->unavailable_message;
         } else {
             // Pour les produits non variables, continuez avec la logique existante.
             if ( !$product->get_shipping_class_id() ) {
-                return __( "Ce produit n'est pas disponible dans votre zone", 'kingmateriaux' );
+                return $this->unavailable_message;
             }
             return $price;
         }

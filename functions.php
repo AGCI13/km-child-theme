@@ -18,10 +18,12 @@ require_once 'includes/class-singleton-trait.php';
 require_once 'includes/class-dynamic-pricing.php';
 require_once 'includes/class-shipping-zone.php';
 require_once 'includes/class-delivery-options.php';
+require_once 'includes/class-order-processing.php';
 
-$km_dynamic_pricing  = KM_Dynamic_Pricing::get_instance();
-$km_shipping_zone    = KM_Shipping_Zone::get_instance();
-$km_delivery_options = KM_Delivery_Options::get_instance();
+KM_Shipping_Zone::get_instance();
+KM_Dynamic_Pricing::get_instance();
+KM_Delivery_Options::get_instance();
+KM_Order_Processing::get_instance();
 
 /**
  * Todo: TD | Fonctions après OAUTH, déclenchées sur la thank you page pour ajout d'un event au calendrier

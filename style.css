@@ -63,7 +63,6 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .page-id-563 .uael-form.uael-login-form input[type="password"]:focus{border: 1px solid black;}
 
 
-
 /* Contact */
 .page-id-455 .form-contact select{border-color: black !important;}
 .page-id-455 .form-contact input[type="text"]:focus,
@@ -91,7 +90,8 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 
 
 
-
+/* Produit single */
+.single-product #pa_variation-conditionnement{width:inherit;}
 
 
  /* ancien css Agence-88 */

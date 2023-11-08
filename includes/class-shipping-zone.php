@@ -95,9 +95,7 @@ class KM_Shipping_Zone {
         // Assurez-vous que le chemin d'accès au fichier est correct et que le fichier existe.
         include get_stylesheet_directory() . '/templates/postcode-form.php';
 
-        $content = ob_get_clean(); // Récupère le contenu du tampon et arrête la mise en mémoire tampon
-
-        return $content; // Retourne le contenu pour le shortcode
+        return ob_get_clean();
     }
 
     /**
@@ -212,6 +210,56 @@ class KM_Shipping_Zone {
         }
 
         return false;
+    }
+
+    /**
+     * Obtient le nom du produit de livraison associé.
+     *
+     * @param WC_Product $product Le produit.
+     */
+    public function get_related_shipping_product_title( $product ) {
+        // Obtenir la classe de livraison du produit
+        $shipping_class_id = $product->get_shipping_class_id();
+
+        if ( !$shipping_class_id ) {
+            return;
+        }
+        // Récupérer l'objet de la classe de livraison
+        $shipping_class_term = get_term( $shipping_class_id, 'product_shipping_class' );
+
+        if ( !$shipping_class_term || is_wp_error( $shipping_class_term ) ) {
+            return;
+        }
+
+        // Récupérer le nom de la classe de livraison
+        $shipping_class_name = $shipping_class_term->name;
+
+        return $this->shipping_zone_name . ' ' . $shipping_class_name;
+    }
+
+    /**
+     * Obtient le prix d'un produit par son titre.
+     *
+     * @param string $product_title Le titre du produit.
+     *
+     * @return object Le prix du produit ou null si le produit n'est pas trouvé.
+     */
+    public function get_related_shipping_product_by_title( $shipping_product_title ) {
+        $args = array(
+            'post_type'      => 'product',
+            'posts_per_page' => 1,
+            'post_status'    => array( 'private' ),
+            'name'           => sanitize_title( $shipping_product_title ),
+        );
+
+        $shipping_products = get_posts( $args );
+
+        if ( empty( $products ) ) {
+            return;
+        }
+
+        $shipping_product = $shipping_products[0];
+        return $shipping_product;
     }
 
 

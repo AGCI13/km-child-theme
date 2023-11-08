@@ -13,7 +13,7 @@ function km_front_scripts_enqueue() {
     wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
     wp_enqueue_script( 'km-ajax-script' );
 
-    wp_register_script( 'km-front-scripts', $js_path . 'front.js', 'jquery', filemtime( $js_path . 'front.js' ), false, array() );
+    wp_enqueue_script( 'km-front-scripts', $js_path . 'front.js', 'jquery', filemtime( $js_path . 'front.js' ), false, array() );
     wp_register_script( 'km-footer-scripts', $js_path . 'footer.js', 'jquery', filemtime( $js_path . 'footer.js' ), true, array() );
 
     wp_register_style( 'km-postcode-form-style', $css_path . 'postcode-form.css', array(), filemtime( $css_path . 'postcode-form.css' ), 'all' );
