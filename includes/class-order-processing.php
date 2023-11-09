@@ -37,7 +37,7 @@ class KM_Order_Processing {
     }
 
     private function register() {
-        // add_action( 'woocommerce_new_order', array( $this, 'add_custom_order_meta' ), 10, 1 );
+        add_action( 'woocommerce_checkout_order_processed', array( $this, 'add_custom_order_meta' ), 50, 3 );
     }
 
     /**
@@ -46,10 +46,7 @@ class KM_Order_Processing {
      * @param int $order_id
      * @return void
      */
-    public function add_custom_order_meta( $order_id ) {
-
-        $order = wc_get_order( $order_id );
-
+    public function add_custom_order_meta( $order_id, $posted_data, $order ) {
         if ( !$order ) {
             return;
         }
@@ -59,6 +56,7 @@ class KM_Order_Processing {
             $item_data = $item->get_data();
 
             wc_update_order_item_meta( $item_id, '_actual_product_price_excl', $item_data['total'] );
+
             wc_update_order_item_meta( $item_id, '_actual_product_tax_price', $item_data['total_tax'] );
 
             // Check if the product name contains 'VRAC' and update item meta
@@ -75,14 +73,13 @@ class KM_Order_Processing {
             if ( !$product ) {
                 continue;
             }
-
-            $shipping_product = $this->km_shipping_zone->get_related_shipping_product_by_title( $product );
+            $shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
 
             if ( $shipping_product ) {
                 // Obtenir le prix TTC
-                $price_incl_tax = $shipping_product->get_price_including_tax();
+                $price_incl_tax = wc_get_price_including_tax( $shipping_product );
                 // Obtenir le prix HT
-                $price_excl_tax = $shipping_product->get_price_excluding_tax();
+                $price_excl_tax = wc_get_price_excluding_tax( $shipping_product );
                 // Calculer le montant de la taxe
                 $tax_amount = $price_incl_tax - $price_excl_tax;
 

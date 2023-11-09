@@ -217,7 +217,11 @@ class KM_Shipping_Zone {
      *
      * @param WC_Product $product Le produit.
      */
-    public function get_related_shipping_product_title( $product ) {
+    public function get_related_shipping_product( $product ) {
+
+        if ( !$product ) {
+            return;
+        }
         // Obtenir la classe de livraison du produit
         $shipping_class_id = $product->get_shipping_class_id();
 
@@ -234,34 +238,22 @@ class KM_Shipping_Zone {
         // Récupérer le nom de la classe de livraison
         $shipping_class_name = $shipping_class_term->name;
 
-        return $this->shipping_zone_name . ' ' . $shipping_class_name;
-    }
-
-    /**
-     * Obtient le prix d'un produit par son titre.
-     *
-     * @param string $product_title Le titre du produit.
-     *
-     * @return object Le prix du produit ou null si le produit n'est pas trouvé.
-     */
-    public function get_related_shipping_product_by_title( $shipping_product_title ) {
         $args = array(
+            'fields'         => 'ids',
             'post_type'      => 'product',
             'posts_per_page' => 1,
             'post_status'    => array( 'private' ),
-            'name'           => sanitize_title( $shipping_product_title ),
+            'name'           => sanitize_title( $this->shipping_zone_name . ' ' . $shipping_class_name ),
         );
 
-        $shipping_products = get_posts( $args );
+        $shipping_products_posts = get_posts( $args );
 
-        if ( empty( $products ) ) {
+        if ( !$shipping_products_posts ) {
             return;
         }
 
-        $shipping_product = $shipping_products[0];
-        return $shipping_product;
+        return wc_get_product( $shipping_products_posts[0] );
     }
-
 
     /**
      * Ajax callback to get the shipping zone ID from a zip code.

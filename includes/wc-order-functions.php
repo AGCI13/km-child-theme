@@ -1,5 +1,9 @@
 <?php
 
+if ( !defined( 'ABSPATH' ) ) {
+    exit; // Exit if accessed directly.
+}
+
 // Enregistrer le statut de commande : "Prévue"
 function km_register_scheduled_order_status() {
     register_post_status(

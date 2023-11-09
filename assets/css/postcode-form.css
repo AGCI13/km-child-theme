@@ -1,32 +1,4 @@
-#modal_pc_wrapper {
-    z-index: 1000000;
-    display: none;
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-    justify-content: center;
-    align-items: center;
-}
-
-#modal_pc_wrapper.active{
-    display: flex;
-}
-
-#modal_postcode{
-    margin: auto;
-    background-color: #fff;
-    position: relative;
-    outline: 0;
-    border-radius: 5px;
-    width: 560px;
-    padding: 32px 96px;
-}
-
-#modal_postcode > p {
+#modal-postcode p {
     font-family: 'Arca Majora 3';
     font-style: normal;
     font-weight: 700;
@@ -36,29 +8,42 @@
     margin-bottom: 24px;
 }
 
-.header_postcode > p {
+.header_postcode>p {
     font-family: 'Lato';
     font-style: italic;
     color: #fff;
     margin-bottom: 0;
 }
 
-.header_postcode > p > span  {
+.header_postcode>p>span {
     font-style: normal;
     text-decoration: underline;
     cursor: pointer;
 }
 
+#modal-postcode .km-form-fields{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; 
+}
+
+#modal-postcode input,
+#modal-postcode select {
+    max-width: 150px;
+    margin-bottom:9px;
+}
+
 @media only screen and (max-width: 767px) {
-    #modal_postcode {
+    #modal-postcode {
         width: 296px;
     }
 }
 
 #modal_pc_close_btn {
     position: absolute;
-    right: 15px;
-    top: 15px;
+    right: 20px;
+    top: 20px;
     border: none;
     display: inline-block;
     vertical-align: middle;
@@ -73,46 +58,24 @@
     white-space: nowrap;
 }
 
-#modal_pc_close_btn > img {
-    height: 16px;
-    width: 16px;
-}
-
-#submit_btn_modal_postcode{
+#modal-postcode-submit {
+    width: 100%;
     background: linear-gradient(180deg, #BE9E67 0%, #A98951 100%);
     border-radius: 5px;
-    padding: 8px 24px;
+    padding: 9px 24px;
     font-family: 'Arca Majora 3';
     font-style: normal;
     font-weight: 700;
     font-size: 16px;
     line-height: 24px;
-    color: #FFFFFF;
+    color: #fff;
     cursor: pointer;
-    margin-top: 16px;
-}
-
-#modal_postcode > div {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    width: 176px;
-    margin: auto;
-    align-content: center;
-}
-
-#modal_postcode > div > label , #modal_postcode_m > div > label {
-    width: 100%;
-}
-
-#modal_postcode > div > label > *, #modal_postcode_m > div > label > * {
-    border-radius: 5px;
+    margin-top:6px;
+    border: none;
 }
 
 #zip_code_label {
-    width: 368px!important;
+    width: 368px !important;
     text-align: center;
     color: red;
     display: block;

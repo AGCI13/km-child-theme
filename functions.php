@@ -8,11 +8,12 @@ require_once 'config/ajax.php';
 require_once 'config/enqueue.php';
 require_once 'config/filter.php';
 require_once 'config/shortcodes.php';
-require_once 'config/atoosync.php';
 
 require_once 'widgets/register-widgets.php';
 
+require_once 'includes/wc-cart-functions.php';
 require_once 'includes/wc-order-functions.php';
+require_once 'includes/wc-product-functions.php';
 
 require_once 'includes/class-singleton-trait.php';
 require_once 'includes/class-dynamic-pricing.php';
@@ -24,7 +25,6 @@ KM_Shipping_Zone::get_instance();
 KM_Dynamic_Pricing::get_instance();
 KM_Delivery_Options::get_instance();
 KM_Order_Processing::get_instance();
-
 /**
  * Todo: TD | Fonctions après OAUTH, déclenchées sur la thank you page pour ajout d'un event au calendrier
  */

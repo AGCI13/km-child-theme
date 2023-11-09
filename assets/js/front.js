@@ -45,6 +45,29 @@ span.innerHTML += 'Voir le produit >';
 				//Changement de place du lien Mot de passe oublié
 				$('.uael-login-form-wrapper .elementor-col-100.uael-login-form-footer').insertAfter($('.uael-login-form-wrapper .elementor-col-100.elementor-field-required').eq(1));
 			}
+			//Page single
+			if ($('body').hasClass('single')) {
+				/* Scroll du sommaire */
+				var sommaire = document.querySelector('.sommaire');
+				var contenu = document.querySelector('.contenu');
+				var contenuOffsetTop = contenu.offsetTop;
+				var contenuHeight = contenu.offsetHeight;
+				var setSommairePosition = function () {
+				  var scrollPosition = window.scrollY;
+				  var sommaireHeight = sommaire.offsetHeight;
+				  var contenuBottomPosition = contenuOffsetTop + contenuHeight;
+				  var sommaireBottomPosition = scrollPosition + sommaireHeight;
+				  sommaire.classList.remove("fixed", "fixedbottom");
+				  if (scrollPosition > contenuOffsetTop && sommaireBottomPosition < contenuBottomPosition) {
+					sommaire.classList.add("fixed");
+				  } 
+				  else if (sommaireBottomPosition >= contenuBottomPosition) {
+					sommaire.classList.add("fixedbottom");
+				  }
+				};
+				window.onscroll = setSommairePosition;
+				window.onload = setSommairePosition;
+			  }
 			/* footer mobile */
 			$(".footer .retractable").on("click", function() {
 				if ($(window).width() < 768) {

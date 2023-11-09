@@ -26,6 +26,13 @@ class KM_Dynamic_Pricing {
     public $km_shipping_zone;
 
     /**
+     * The ecotaxe rate.
+     *
+     * @var float
+     */
+    public $ecotaxe_rate = 0.50;
+
+    /**
      * The message to display when the product is not available in the shipping zone.
      *
      * @var string
@@ -50,14 +57,15 @@ class KM_Dynamic_Pricing {
 
         // Si la zone de livraison est la 13, on modifie les prix des produits
         if ( !$this->km_shipping_zone->is_in_thirteen() ) {
-            // Hook pour le produit simple
-            add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 1, 2 );
-            // Hook pour les variations de produit
-            add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 1, 2 );
-            // Hook pour les prices des variations de produit (notamment min et max)
-            add_filter( 'woocommerce_variation_prices', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 1, 3 );
 
-            add_filter( 'woocommerce_get_price_html', array( $this, 'no_shipping_class_price_html' ), 99, 2 );
+            // Hook pour le produit simple
+            add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+            // Hook pour les variations de produit
+            add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+
+            add_filter( 'woocommerce_variation_prices', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 80, 3 );
+
+            add_filter( 'woocommerce_get_price_html', array( $this, 'change_price_html' ), 99, 2 );
 
             add_filter( 'woocommerce_is_purchasable', array( $this, 'no_shipping_class_is_purchasable' ), 10, 2 );
 
@@ -75,41 +83,22 @@ class KM_Dynamic_Pricing {
     }
 
     /**
-     * Obtient le prix d'un produit par son titre.
+     * Change le prix du produit en fonction de la zone de livraison.
      *
-     * @param string $product_title Le titre du produit.
-     * @return float|null Le prix du produit ou null si le produit n'est pas trouvé.
+     * @param float $price Le prix du produit.
      */
-    public function get_price_by_product_title( $product_title ) {
-
-        // Arguments pour la requête
-        $args = array(
-            'post_type'      => 'product',
-            'posts_per_page' => 1,
-            'post_status'    => array( 'private' ),
-            'name'           => sanitize_title( $product_title ),
-        );
-
-        // Effectuer la requête
-        $products = get_posts( $args );
-
-        // Si un produit est trouvé, retourner son prix
-        if ( !empty( $products ) ) {
-            $product = wc_get_product( $products[0]->ID );
-            return $product->get_price();
-        }
-
-        return null;
-    }
-
     public function change_product_price_based_on_shipping_zone( $price, $product ) {
 
-        $shipping_product_title = $this->km_shipping_zone->get_related_shipping_product_title( $product );
-        $shipping_product       = $this->km_shipping_zone->get_related_shipping_product_by_title( $shipping_product_title );
+        $shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
 
-        $shipping_price = $shipping_product->get_price();
+        // Check if `$shipping_product` is a WooCommerce product object
+        if ( !$shipping_product instanceof WC_Product ) {
+            return $price;
+        }
 
-        if ( $shipping_price > 0 ) {
+        $shipping_price = $shipping_product->get_price( 'edit' );
+
+        if ( $shipping_price && $shipping_price > 0 ) {
             $price += $shipping_price;
         }
 
@@ -119,11 +108,11 @@ class KM_Dynamic_Pricing {
 
     /**
      * Change les prix des variations de produit en fonction de la zone de livraison.
-     * 
+     *
      * @param array $prices Les prix des variations de produit.
-     *  
      */
-    public function change_variation_prices_based_on_shipping_zone( $prices, $variation, $product ) {
+    public function change_variation_prices_based_on_shipping_zone( $prices, $product, $for_display ) {
+        //TODO: Le prix min max affiché n'est pas le bon
         foreach ( $prices as $price_type => $variation_prices ) {
             foreach ( $variation_prices as $variation_id => $price ) {
                 $variation_prices[ $variation_id ] = $this->change_product_price_based_on_shipping_zone( $price, wc_get_product( $variation_id ) );
@@ -133,27 +122,26 @@ class KM_Dynamic_Pricing {
         return $prices;
     }
 
-    public function no_shipping_class_price_html( $price, $product ) {
-
-        if ( $product->is_type( 'variable' ) ) {
-            $variations = $product->get_available_variations();
-            foreach ( $variations as $variation ) {
-                $variation_obj = wc_get_product( $variation['variation_id'] );
-                if ( $variation_obj->get_shipping_class_id() ) {
-                    return $price; // Si au moins une variation a une classe de livraison, retourner le prix.
-                }
-            }
-            // Si aucune variation n'a de classe de livraison, afficher le message.
-            return $this->unavailable_message;
-        } else {
-            // Pour les produits non variables, continuez avec la logique existante.
+    /**
+     * Affiche un message au lieu du prix du produit.
+     *
+     * @param string $price Le prix du produit.
+     */
+    public function change_price_html( $price, $product ) {
+        if ( !$product->is_type( 'variable' ) ) {
+            // Pour les produits simple, continuez avec la logique existante.
             if ( !$product->get_shipping_class_id() ) {
                 return $this->unavailable_message;
             }
-            return $price;
         }
+        return $price;
     }
 
+    /**
+     * Rend le produit non achetable si il n'a pas de classe de livraison.
+     *
+     * @param bool $is_purchasable Si le produit est achetable ou non.
+     */
     public function no_shipping_class_is_purchasable( $is_purchasable, $product ) {
         if ( !$this->has_shipping_class( $product ) ) {
             return false;
@@ -161,11 +149,21 @@ class KM_Dynamic_Pricing {
         return $is_purchasable;
     }
 
+    /**
+     * @param WC_Product $product Le produit.
+     *
+     * @return bool Si le produit a une classe de livraison ou non.
+     */
     private function has_shipping_class( $product ) {
         $shipping_class = $product->get_shipping_class();
         return !empty( $shipping_class );
     }
 
+    /**
+     * Masque les produits dont la classe de livraison n'est pas dans le département du 13
+     *
+     * @param WP_Query $query La requête principale.
+     */
     public function hide_products_out_thirteen( $query ) {
 
         // Ne pas modifier les requêtes dans l'administration ou qui ne sont pas la requête principale.
@@ -215,5 +213,15 @@ class KM_Dynamic_Pricing {
         }
         // Sinon, retournez le prix habituel.
         return $price;
+    }
+
+    public function product_is_bulk_or_bigbag( $item_name ) {
+
+        // Vérifier si le titre contient "BIG BAG" ou "VRAC A LA TONNE"
+        if ( false !== stripos( $item_name, 'big bag' ) || false !== stripos( $item_name, 'vrac a la tonne' ) ) {
+            return true;
+        }
+
+        return false;
     }
 }
