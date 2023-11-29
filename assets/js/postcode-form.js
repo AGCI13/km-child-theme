@@ -1,60 +1,33 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    let modal_pc_open_btn = document.getElementById('modal_pc_open_btn');
-    let modal_postcode = document.getElementById('modal-postcode');
-    let modal_pc_close_btn = document.getElementById("modal-postcode-close");
-    let form_modal = document.getElementById('form-postcode');
+    const modal_pc_open_btns = document.querySelectorAll('.modal_pc_open_btn');
+    const modal_postcode = document.querySelector('.modal-postcode');
+    const modal_pc_close_btns = document.querySelectorAll(".modal-postcode-close");
+    const form_modals = document.querySelectorAll('.form-postcode');
 
-    modal_pc_open_btn.addEventListener('click', function () {
-        modal_postcode.classList.add('active');
-    });
-
-    if (modal_pc_close_btn !== null) {
-        modal_pc_close_btn.addEventListener('click', function () {
-            modal_postcode.classList.remove('active');
+    modal_pc_open_btns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            modal_postcode.classList.add('active');
+            document.body.classList.add('modal-open');
         });
-    }
-
-    form_modal.addEventListener('submit', function (e) {
-        e.preventDefault();
-        km_submit_postcode(e);
     });
 
+    modal_pc_close_btns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            modal_postcode.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        });
+    });
 
-    const km_submit_postcode = (e) => {
-        let country_modal = document.getElementById('country').value;
-        let zip_modal = document.getElementById('zip_code').value;
-        let label_modal_postcode = document.getElementById('zip_code_label');
+    form_modals.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            submitPostcode(e);
+        });
+    });
 
-        if (zip_modal.length < 5 && country_modal === 'FR' || zip_modal.length < 4 && country_modal === 'BE') {
-            label_modal_postcode.textContent = 'Veuillez rentrez un code postal valide';
-            return;
-        }
-
-        const data = {
-            zip: zip_modal,
-            country: country_modal,
-            nonce_header_postcode: document.getElementById('nonce_header_postcode').value,
-        };
-
-        ajaxCall('get_shipping_zone_id_from_zip', data)
-            .then(response => {
-                if (response.data) {
-                    //Traiement de la réponse
-                    modal_postcode.style.display = 'none';
-                    setCookie('zip_code', zip_modal + '-' + country_modal, 1);
-                    setCookie('shipping_zone', response.data, 1);
-                    window.location.href = window.location.href.split('?')[0];
-                } else {
-                    label_modal_postcode.textContent = response.error;
-                }
-            })
-            .catch(error => {
-                label_modal_postcode.textContent = 'Erreur : ' + error.message;
-            });
-    }
-
-    function getCookie(cname) {
+    const getCookie = (cname) => {
         let name = cname + "=";
         let decodedCookie = decodeURIComponent(document.cookie);
         let ca = decodedCookie.split(';');
@@ -70,10 +43,56 @@ document.addEventListener('DOMContentLoaded', function () {
         return "";
     }
 
-    function setCookie(cname, cvalue, exdays) {
+    const setCookie = (cname, cvalue, exdays) => {
         const d = new Date();
         d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
         let expires = "expires=" + d.toUTCString();
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+
+    const submitPostcode = (event) => {
+        let country_modal = event.target.querySelector('.country').value;
+        let zip_modal = event.target.querySelector('.zip_code').value;
+        let label_modal_postcode = event.target.querySelector('.zip_code_label');
+        let nonce = event.target.querySelector('#nonce_postcode');
+        console.log( nonce );
+        console.log( nonce.value );
+        //Front simple validation
+        if (zip_modal.length < 5 && country_modal === 'FR' || zip_modal.length < 4 && country_modal === 'BE') {
+            label_modal_postcode.textContent = 'Veuillez rentrez un code postal valide';
+            return;
+        }
+
+        const data = {
+            zip: zip_modal,
+            country: country_modal,
+            nonce_postcode: nonce.value,
+        };
+
+        handleLoading(event, true);
+
+        kmAjaxCall('postcode_submission_handler', data)
+            .then(response => {
+                if (response.success) {
+                    //Traiement de la réponse
+                    setCookie('zip_code', zip_modal + '-' + country_modal, 1);
+                    setCookie('shipping_zone', response.data, 1);
+                    window.location.href = window.location.href.split('?')[0];
+                    modal_postcode.style.display = 'none';
+                } else {
+                    // Gestion des erreurs
+                    if (response.data && typeof response.data.message === 'string') {
+                        label_modal_postcode.textContent = response.data.message;
+                    } else {
+                        label_modal_postcode.textContent = 'Une erreur inattendue est survenue.';
+                    }
+                }
+                handleLoading(event, false);
+            })
+            .catch(error => {
+                label_modal_postcode.textContent = error.message;
+                handleLoading(event, false);
+            });
     }
 });

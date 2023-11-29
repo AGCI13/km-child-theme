@@ -1,0 +1,105 @@
+.cart-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cart-action-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: transparent !important;
+    color: #BE9E67 !important;
+    text-decoration: underline !important;
+}
+
+.cart-action-link img {
+    height: 20px !important;
+    width: auto !important;
+    margin-right: 8px;
+}
+
+.cart-action-link:disabled {
+    opacity: 0.5;
+}
+
+/* Masquer les flèches des inputs de type number */
+.woocommerce-cart-form input[type="number"]::-webkit-inner-spin-button,
+.woocommerce-cart-form input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.woocommerce-cart-form input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.woocommerce-cart-form .quantity button {
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.woocommerce-cart-form .product-quantity {
+    text-align: center !important;
+}
+
+.woocommerce-cart-form .product-quantity .quantity {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.woocommerce-cart-form .product-quantity .quantity .qty {
+    text-align: center !important;
+}
+
+.woocommerce-cart-form .product-quantity .quantity .qty-modifier {
+    width: 17px;
+    cursor: pointer;
+}
+
+.woocommerce-cart-form .product-quantity .quantity .qty-modifier img {
+    width: 100% !important;
+}
+
+.cart-collaterals .redeem-coupon {
+    display: none;
+    align-items: center;
+    width: 100%;
+    gap: .5rem;
+}
+
+.cart-collaterals #km-coupon-label{
+    cursor: pointer;
+}
+.cart-collaterals #km-coupon-label:before{
+color:#BE9E67 !important;
+}
+
+.cart-collaterals #km-coupon-label.active{
+    cursor: default;
+}
+
+.cart-collaterals #km-coupon-label.active .redeem-coupon{
+    display: flex;
+}
+
+.cart-collaterals #km-coupon-label.active:before{
+    color:#000 !important;
+}
+ 
+ .cart-collaterals .order-total strong .woocommerce-Price-amount {
+    font-size: 20px;
+}
+
+.cart-collaterals .order-total .includes_tax {
+    display: block;
+    font-size: 13px;
+}

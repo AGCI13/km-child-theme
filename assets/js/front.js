@@ -1,44 +1,31 @@
 let span = document.getElementsByClassName('uael-product-actions');
 span.innerHTML += 'Voir le produit >';
 
+document.addEventListener('DOMContentLoaded', () => {
+	setTimeout(() => {
+		const tidioIframe = document.getElementById('tidio-chat-iframe');
+		if(tidioIframe){
+			tidioIframe.style.zIndex = '98';
+		}
+	}, 1500);
+});
+
+
 (function ($, root, undefined) {
 	$(function () {
 		'use strict';
-		$(document).ready(function($) {
-			if($('.home').length){
-	
+		$(document).ready(function ($) {
+			if ($('.home').length) {
+
 			}
 			/* catégorie cliquable en entier */
-			$('.clickable-column').on('click', function() {
+			$('.clickable-column').on('click', function () {
 				var link = $(this).find('a').first().attr('href');
 				if (link) {
 					window.location = link;
 				}
 			});
-			/* grille produits bouton Voir le produit */
-			/*
-			function handleListItem($item) {
-				const productLink = $item.find('.woocommerce-LoopProduct-link').attr('href');
-				const newButton = $('<a>', {
-					'href': productLink,
-					'class': 'view-product-btn',
-					'text': 'Voir le produit'
-				});
-				$item.find('.uael-product-actions').remove();
-				$item.find('.uael-woo-products-thumbnail-wrap').append(newButton);
-			}
-			$('li').has('.uael-product-actions').each(function() {
-				handleListItem($(this));
-			});
-			$('li').hover(
-				function() {
-					$(this).find('.view-product-btn').show();
-				},
-				function() {
-					$(this).find('.view-product-btn').hide();
-				}
-			);
-			*/
+
 			//Page de connexion
 			if ($('body').hasClass('page-id-563')) {
 				$(".uael-google-text").text("Se connecter avec Google");
@@ -53,23 +40,27 @@ span.innerHTML += 'Voir le produit >';
 				var contenuOffsetTop = contenu.offsetTop;
 				var contenuHeight = contenu.offsetHeight;
 				var setSommairePosition = function () {
-				  var scrollPosition = window.scrollY;
-				  var sommaireHeight = sommaire.offsetHeight;
-				  var contenuBottomPosition = contenuOffsetTop + contenuHeight;
-				  var sommaireBottomPosition = scrollPosition + sommaireHeight;
-				  sommaire.classList.remove("fixed", "fixedbottom");
-				  if (scrollPosition > contenuOffsetTop && sommaireBottomPosition < contenuBottomPosition) {
-					sommaire.classList.add("fixed");
-				  } 
-				  else if (sommaireBottomPosition >= contenuBottomPosition) {
-					sommaire.classList.add("fixedbottom");
-				  }
+					var scrollPosition = window.scrollY;
+					var sommaireHeight = sommaire.offsetHeight;
+					var contenuBottomPosition = contenuOffsetTop + contenuHeight;
+					var sommaireBottomPosition = scrollPosition + sommaireHeight;
+					sommaire.classList.remove("fixed", "fixedbottom");
+					if (scrollPosition > contenuOffsetTop && sommaireBottomPosition < contenuBottomPosition) {
+						sommaire.classList.add("fixed");
+					}
+					else if (sommaireBottomPosition >= contenuBottomPosition) {
+						sommaire.classList.add("fixedbottom");
+					}
 				};
 				window.onscroll = setSommairePosition;
 				window.onload = setSommairePosition;
-			  }
+			}
+			//Page panier
+			if ($('body').hasClass('shopengine-cart')) {
+
+			}
 			/* footer mobile */
-			$(".footer .retractable").on("click", function() {
+			$(".footer .retractable").on("click", function () {
 				if ($(window).width() < 768) {
 					var nearestNav = $(this).closest('.elementor-widget-wrap').find('ul.elementor-nav-menu');
 					var nearestIconList = $(this).closest('.elementor-widget-wrap').find('ul.elementor-icon-list-items');
@@ -82,8 +73,34 @@ span.innerHTML += 'Voir le produit >';
 				}
 			});
 		});
-		$(window).load(function() {
+		$(window).load(function () {
 
 		});
 	});
 })(jQuery, this);
+
+const handleLoading = (event, show = false) => {
+	let container;
+	// Si le bouton lui-même a été cliqué, remontez dans l'arbre DOM jusqu'au parent commun.
+	if (event.target.closest('.modal-actions')) {
+		container = event.target.closest('.modal-actions');
+	} else {
+		container = event.target;
+	}
+
+	// Maintenant, sélectionnez les éléments à partir du conteneur.
+	const submit = container.querySelector('.btn-confirm');
+	const submit_label = container.querySelector('.btn-confirm-label');
+	const loader = container.querySelector('.btn-confirm-loader');
+
+	if (show) {
+		submit.disabled = true;
+		submit_label.style.visibility = 'hidden';
+		loader.style.display = 'block';
+	}
+	else {
+		submit.disabled = false;
+		loader.style.display = 'none';
+		submit_label.style.visibility = 'visible';
+	}
+}

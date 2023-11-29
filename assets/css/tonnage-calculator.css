@@ -1,13 +1,12 @@
 .tonnage_calculator {
     display: flex;
     flex-wrap: wrap;
-    max-width: 1250px;
+    max-width: 728px;
     width: 100%;
     margin: auto;
     background: #FFFFFF;
-    box-shadow: 0 4px 50px #BCBCBC;
-    border-radius: 10px;
-    max-height: 575px;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .densities {
@@ -19,16 +18,27 @@
     font-size: 16px;
     line-height: 24px;
     color: #262626;
-    text-align: center;
     margin: 24px auto auto;
 }
 
 .form_tonnage_calculator, .img_tonnage_calculator_form, .result_tonnage_calculator, .img_tonnage_calculator_result {
-    width: 50%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    align-items: center;
 }
 
 .form_tonnage_calculator, .result_tonnage_calculator {
-    padding: 30px 160px 32px 105px;
+    padding: 50px;
+}
+.tonnage_calculator h2{
+    align-self: flex-start;
+    margin-bottom: 20px;
+    font-weight: 600;
 }
 
 .tonnage_calculator h3:after {
@@ -57,15 +67,39 @@
     margin: 0;
 }
 
+.form_tonnage_calculator{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;  
+}
+
+.form_tonnage_calculator #tonnage_calculator{
+    width:100%;
+}
+
+.input-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.form_tonnage_calculator input {
+    width: 100% !important;
+}
+
 .form_tonnage_calculator label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     font-family: 'Lato', sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
     line-height: 24px;
     color: #262626;
-    width: 100%;
-    margin-top: 24px;
+    width: 49%;
+    margin-top: 15px;
 }
 
 .form_tonnage_calculator input,.form_tonnage_calculator select{
@@ -73,6 +107,12 @@
     border: 1px solid #262626;
     box-shadow: 0 1px 3px rgba(230, 235, 241, 0.25);
     border-radius: 4px;
+}
+
+.form_tonnage_calculator  .recommandation{
+    width: 100%;
+    display: block;
+    text-align: left;
 }
 
 .recommandation, .density_body {
@@ -87,7 +127,7 @@
 
 img#img_info_bull_density {
     position: relative;
-    top : 8px;
+    top : 0px;
 }
 
 .density {
@@ -97,34 +137,28 @@ img#img_info_bull_density {
     position: relative;
 }
 
+.densite{
+    flex-direction: row !important;
+    align-items: center !important;
+}
+
+.densite > span {
+    margin-right: 10px;
+}
+
+.densite select{
+    margin: 0px 0px 0px 4px;
+}
+
 .density > img {
     margin-left: 10px;
     cursor: pointer;
-}
-
-.form_tonnage_calculator span.btn {
-    font-family: 'Arca Majora 3', sans-serif;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 24px;
-    color: #FFFFFF;
-    background: linear-gradient(180deg, #BE9E67 0%, #A98951 100%);
-    border-radius: 5px;
-    padding: 8px 24px;
-    cursor: pointer;
-    margin-top: 24px;
-    display: block;
-    width: fit-content;
-    float: right;
 }
 
 .img_tonnage_calculator_form img , .img_tonnage_calculator_result img{
     width: 100%;
     height: 100%;
     object-fit: cover;
-    max-height: 575px;
-    border-radius: 10px;
 }
 
 .img_tonnage_calculator_result {
@@ -239,4 +273,8 @@ span#reset_tonnage_calculator {
 
 .result_longueur img , .result_largeur img {
     margin: 0 13px 0 14px;
+}
+
+#submit_tonnage_calculator{
+    margin-top:30px;
 }

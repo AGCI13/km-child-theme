@@ -2,17 +2,18 @@
 /**
  *  Template Name: SEO Page
  * Template Post Type: page, post
-
+ *
  * @package HelloElementor
  */
 
-if ( !defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
 
-while ( have_posts() ) :
-    the_post();
-    ?>
+get_header();
+
+while ( have_posts() ) : the_post();
+?>
 
 <main id="content" <?php post_class( 'site-main' ); ?> class="seo-page">
 
@@ -34,5 +35,8 @@ while ( have_posts() ) :
 
 </main>
 
-    <?php
+<?php
 endwhile;
+
+get_footer();
+?>
