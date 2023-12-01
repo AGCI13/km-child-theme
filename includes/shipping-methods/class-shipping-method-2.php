@@ -20,7 +20,6 @@ class Shipping_method_2 extends WC_Shipping_Method {
 		$this->method_title       = 'Option 2';
 		$this->method_description = 'Livraison option 2';
 		$this->tax_status         = 'taxable';
-		$this->supports           = array();
 		$this->init();
 	}
 

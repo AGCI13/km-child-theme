@@ -18,12 +18,10 @@ class Shipping_method_1 extends WC_Shipping_Method {
 	public function __construct() {
 		parent::__construct();
 		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
-
 		$this->id                 = 'option1';
 		$this->method_title       = 'Option 1';
 		$this->method_description = 'Livraison option 1';
 		$this->tax_status         = 'taxable';
-		$this->supports           = array();
 		$this->init();
 	}
 
@@ -97,9 +95,9 @@ class Shipping_method_1 extends WC_Shipping_Method {
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(
-			'id'      => $this->id,
-			'label'   => $this->title,
-			'cost'    => $shipping_cost,
+			'id'    => $this->id,
+			'label' => $this->title,
+			'cost'  => $shipping_cost,
 		);
 
 		$this->add_rate( $rate );

@@ -19,7 +19,6 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 		$this->id           = 'option1express';
 		$this->method_title = 'Option 1 Express';
 		$this->tax_status   = 'taxable';
-		$this->supports     = array();
 		$this->init();
 	}
 

@@ -25,22 +25,16 @@ require_once 'includes/class-order-processing.php';
 require_once 'includes/class-palletization-manager.php';
 require_once 'includes/class-big-bag-manager.php';
 
+require_once 'includes/class-shipping-methods.php';
+require_once 'includes/shipping-methods/class-shipping-method-1.php';
+require_once 'includes/shipping-methods/class-shipping-method-1-express.php';
+require_once 'includes/shipping-methods/class-shipping-method-2.php';
+require_once 'includes/shipping-methods/class-shipping-method-2-express.php';
+require_once 'includes/shipping-methods/class-shipping-method-drive.php';
+
 KM_Shipping_Zone::get_instance();
 KM_Dynamic_Pricing::get_instance();
+KM_Shipping_Methods::get_instance();
 KM_Order_Processing::get_instance();
 KM_Palletization_Manager::get_instance();
 KM_Big_Bag_Manager::get_instance();
-
-/**
- * Include your shipping file.
- */
-function km_include_shipping_methods() {
-	require_once 'includes/class-shipping-methods.php';
-	require_once 'includes/shipping-methods/class-shipping-method-1.php';
-	require_once 'includes/shipping-methods/class-shipping-method-1-express.php';
-	require_once 'includes/shipping-methods/class-shipping-method-2.php';
-	require_once 'includes/shipping-methods/class-shipping-method-2-express.php';
-	require_once 'includes/shipping-methods/class-shipping-method-drive.php';
-	KM_Shipping_Methods::get_instance();
-}
-add_action( 'woocommerce_shipping_init', 'km_include_shipping_methods' );

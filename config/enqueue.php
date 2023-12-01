@@ -16,6 +16,11 @@ function km_front_scripts_enqueue() {
 
 	wp_enqueue_style( 'km-child-style', $stylesheet_uri . '/style.css', array(), filemtime( $stylesheet_path . '/style.css' ), 'all' );
 
+	if ( !wp_style_is( $handle, $list = 'enqueued' ) ) {
+		if ( wp_style_is( 'elementor-frontend-css', 'enqueued' ) ) {
+			wp_enqueue_style( 'custom-woocommerce-style-css', plugins_url( '/assets/css/widget-woocommerce.min.css', WP_PLUGIN_DIR . '/elementor-pro/init.php' ), array(), '1.0.0' );
+		}
+	}
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );
 	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 	wp_enqueue_script( 'km-ajax-script' );
@@ -42,9 +47,8 @@ function km_front_scripts_enqueue() {
 
 	if ( is_checkout() ) {
 		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.css', array(), filemtime( $css_path . 'checkout.css' ), 'all' );
+		wp_enqueue_style( 'km-datetimepicker-style', $css_uri . 'datetimepicker.css', array(), filemtime( $css_path . 'datetimepicker.css' ), 'all' );
 		wp_enqueue_script( 'km-checkout-script', $js_uri . 'checkout.js', array( 'jquery' ), filemtime( $js_path . 'checkout.js' ), false );
-		//  wp_enqueue_script( 'km-checkout-jquery-script', 'https://code.jquery.com/jquery-3.7.1.min.js' );
-		// wp_enqueue_script( 'km-checkout-jquery-ui-script', 'https://code.jquery.com/ui/1.13.1/jquery-ui.min.js' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'km_front_scripts_enqueue' );

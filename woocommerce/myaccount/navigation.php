@@ -27,7 +27,7 @@ wp_get_current_user();
 <nav class="woocommerce-MyAccount-navigation">
 	<div class="entete-account-navigation">
 		<div style="display:flex;">
-			<h1 class="my-account-title"><?php esc_html( 'Mon compte', 'kingmateriaux' ); ?></h1><img src="/wp-content/uploads/2022/12/Frame-12.svg">
+			<h1 class="my-account-title"><?php esc_html_e('Mon compte','kingmateriaux');?></h1><img src="/wp-content/uploads/2022/12/Frame-12.svg">
 		</div>
 		<div class="username-account"> <?php echo 'Bonjour ' . esc_html( $current_user->user_login ); ?></div>
 		<hr>

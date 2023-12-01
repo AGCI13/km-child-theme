@@ -1,0 +1,94 @@
+.drive-datetimepicker {
+    margin-top:20px;
+    display:none;
+}
+.drive-datetimepicker h3{
+    font-size: 1.3em;
+}
+
+.drive-datetimepicker h4{
+    font-size: 1.15em;
+}
+
+.drive-datetimepicker .drive-datepicker-day {
+    margin-bottom:20px;
+}
+
+.drive-datetimepicker .drive-datepicker-day .day-list {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    gap: .5rem;
+    padding-bottom: 0.75rem;
+}
+
+.drive-datetimepicker .drive-datepicker-day .day,
+.drive-datetimepicker .slot {
+    white-space: nowrap;
+    color: #BE9E67;
+    background-color: #F7F7F7;
+    padding: 10px 12px !important;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.drive-datetimepicker .drive-datepicker-day .day:hover,
+.drive-datetimepicker .slot:hover {
+    border-color: #BE9E67;
+}
+
+.drive-datetimepicker .drive-datepicker-day .day.active,
+.drive-datetimepicker .slot.active {
+    color: white;
+    background-color: #BE9E67;
+}
+
+.drive-datetimepicker .drive-datepicker-time {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    gap: 1rem;
+}
+
+.drive-datetimepicker .time-slot {
+    width: max-content;
+}
+
+.drive-datetimepicker .slots {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    cursor: pointer;
+    gap: .5rem;
+}
+
+
+.drive-datetimepicker .day-list::-webkit-scrollbar {
+    width: 100%;
+    height: .6rem;
+}
+
+.drive-datetimepicker .day-list::-webkit-scrollbar-track {
+    background-color: #F7F7F7;
+    border-radius: 6px;
+}
+
+.drive-datetimepicker .day-list::-webkit-scrollbar-thumb {
+    background-color: rgb(208, 208, 208);
+    border-radius: 6px;
+}
+
+.drive-datetimepicker .day-list::-webkit-scrollbar-thumb:hover {
+    background: rgb(173, 173, 173);
+}

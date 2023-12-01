@@ -188,20 +188,20 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .uael-mc-offcanvas__items .woocommerce-cart-form__contents .product-name a{color:#BE9D68;}
 .uael-mc-offcanvas__items .elementor-menu-cart__footer-buttons a{background-color:#BE9D68;}
 /* Panier */
-.e-cart__column-start{}
-.e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 32px;font-weight: 900;line-height: 1.2em;width: fit-content;position: relative;z-index: 1;}
-.e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2:after{content: '';width: 100%;display: block;position: absolute;height: 25px;background: #D9D9D9;transform: rotate(-0.21deg);bottom: 2px;z-index: -1;}
-.elementor-widget-woocommerce-cart .e-cart__container{grid-template-columns: 70% auto;}
-.elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end{width: 320px;}
-.elementor-widget-woocommerce-cart .e-cart__container .e-cart__column.e-cart__column-end{}
-.elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end{position: sticky;top: 0px;}
-.elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end .e-sticky-right-column .e-cart-totals{box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.5);}
-.elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end .e-sticky-right-column .e-cart-totals .wc-proceed-to-checkout{position:relative;padding-bottom: 70px;}
-.elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end .e-sticky-right-column .e-cart-totals .wc-proceed-to-checkout:after{content: "";background:url('/wp-content/uploads/2023/11/rassurance-1.jpg');background-size:280px 46px;width: 280px;height: 46px;position: absolute;bottom: 4px;left: -10px;}
-.e-shop-table .shop_table .km-ecotaxe-row{border-top: 1px solid #D9D9D9;}
-.e-shop-table .shop_table .km-ecotaxe-row .km-ecotaxe-message p{font-family:Lato;font-size:16px;color:#4D4D4D;margin-left:10px;}
-.e-shop-table .shop_table tr td.actions{border:none !important;}
-#km-customer-email-marketing{padding: 18px 14% 14px 14%;background-color: #FBFBFB;border-radius: 8px;border: 1px solid #C6C6C6;}
+.shopengine-cart .e-cart__column-start{}
+.shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 32px;font-weight: 900;line-height: 1.2em;width: fit-content;position: relative;z-index: 1;}
+.shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2:after{content: '';width: 100%;display: block;position: absolute;height: 25px;background: #D9D9D9;transform: rotate(-0.21deg);bottom: 2px;z-index: -1;}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container{grid-template-columns: 70% auto;}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end{width: 320px;}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container .e-cart__column.e-cart__column-end{}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end{position: sticky;top: 0px;}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end .e-sticky-right-column .e-cart-totals{box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.5);}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end .e-sticky-right-column .e-cart-totals .wc-proceed-to-checkout{position:relative;padding-bottom: 70px;}
+.shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container .e-cart__column-end .e-sticky-right-column .e-cart-totals .wc-proceed-to-checkout:after{content: "";background:url('/wp-content/uploads/2023/11/rassurance-1.jpg');background-size:280px 46px;width: 280px;height: 46px;position: absolute;bottom: 4px;left: -10px;}
+.shopengine-cart .e-shop-table .shop_table .km-ecotaxe-row{border-top: 1px solid #D9D9D9;}
+.shopengine-cart .e-shop-table .shop_table .km-ecotaxe-row .km-ecotaxe-message p{font-family:Lato;font-size:16px;color:#4D4D4D;margin-left:10px;}
+.shopengine-cart .e-shop-table .shop_table tr td.actions{border:none !important;}
+ #km-customer-email-marketing{padding: 18px 14% 14px 14%;background-color: #FBFBFB;border-radius: 8px;border: 1px solid #C6C6C6;}
 #km-customer-email-marketing p.label{font-family:Lato;font-weight:600;font-size:22px;color:#262626;}
 #km-customer-email-marketing p.label span.highlighted{color:#BE9E67;}
 #km-customer-email-marketing p.form{display: flex;}
@@ -213,6 +213,35 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 
 /* Mon compte */
 .page-id-50 main#content{background-color:#F5F5F5;}
+.page-id-50 .woocommerce-MyAccount-navigation{box-shadow:inherit;}
+
+.page-id-50 .h2_grey_back h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 22px;font-weight: 900;line-height: 1.2em;}
+
+
+
+.page-id-50 .woocommerce-MyAccount-content-wrapper{}
+.page-id-50 .bloc-commandes{display: grid;grid-template-columns: repeat(auto-fill, minmax(50%, 1fr));}
+.page-id-50 .bloc-commandes .encart-commande{position: relative;box-shadow: 0px 4px 15px rgba(188, 188, 188, 1);margin: 10px;border-radius: 6px;padding: 20px 10px 20px 20px;}
+
+.page-id-50 span.order-number{font-family: "Arca Majora 3", Sans-serif;color:#000000;font-size:24px;font-weight:900;}
+
+
+.page-id-50 span.order-total{color: #000000;}
+.page-id-50 span.order-item-count{position: absolute;top: 20px;right: 10px;color: #000000;background-color: #D9D9D9;border-radius: 6px;padding: 5px 10px;font-size: 15px;}
+.page-id-50 .woocommerce-orders-table__cell-order-date time{color: #4D4D4D;}
+.page-id-50 .woocommerce-orders-table__cell-order-status .order-status{color: #4D4D4D;}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

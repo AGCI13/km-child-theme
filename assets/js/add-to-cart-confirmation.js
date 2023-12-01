@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (response.success) {
                     button.setAttribute('data-confirmed', 'true'); // Marquer le bouton comme confirmé
                     // Si le bouton est marqué comme confirmé, simuler un clic dessus
-                    if (addToCartButton.hasAttribute('data-confirmed')) 
+                    if (addToCartButton.hasAttribute('data-confirmed')) {
                         addToCartButton.click();
                     }
                 }
