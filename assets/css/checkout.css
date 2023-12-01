@@ -1,0 +1,27 @@
+/* Checkout */
+.page-id-49 .shopengine-multistep-navbar{display:none !important;}
+.page-id-49 .h2_grey_back h2{margin: inherit;}
+.page-id-49 .uael-logged-in-message a{color:#BE9D68 !important;}
+.page-id-49 .uael-login-form-social .uael-login-form-google{margin-top:20px;}
+.page-id-49 .uael-login-form-social .uaelGoogleContentWrapper{border: 1px solid black;border-radius: 6px;padding: 0px 40px;background-color: transparent;}
+.page-id-49 .uael-login-form-social .uaelGoogleContentWrapper .uaelGoogleButtonIcon{border: none;margin-left: 15px;background-color: transparent;}
+.page-id-49 .uael-login-form-social .uaelGoogleContentWrapper .uael-google-text{background-color: transparent;color: black;font-weight: 600;font-size: 18px;padding: 10px 22px 10px 5px;}
+.page-id-49 .uael-form.uael-login-form input[type="text"]:focus,
+.page-id-49 .uael-form.uael-login-form input[type="password"]:focus{border: 1px solid black;}
+.page-id-49 .elementor-widget-km_delivery_conditions h4{font-size: 18px;font-family: "Arca Majora 3", Sans-serif;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required{}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]{}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required label{font-style:italic;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required{color: #262626;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]{display:none !important;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required label{font-family: "Lato", Sans-serif;font-weight: 400;font-style: italic;cursor: pointer;display: block;width:100%;margin: 0px 10px 10px 0px;position: relative;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required label:before{font-size: calc( 20px / 1.2 );width: 20px;height: 20px;background-color: #FFFFFF;border-color: #A5AFB8;border-width: 1px;border-style: solid;border-radius: 4px;content: '';text-align: center;display: inline-block;;vertical-align: middle;-webkit-box-sizing: content-box;-moz-box-sizing: content-box;box-sizing: content-box;margin-right: 10px;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]:checked + label:after {content: '✔';position: absolute;top: 0;left: 5px;color: black;font-size: 20px;}
+.page-id-49 .elementor-widget-km_delivery_conditions p.validate-required label a{color:#BE9D68;}
+
+
+.page-id-49 .step-shipping{}
+.page-id-49 .step-payment:hover{cursor:pointer;}
+.page-id-49 .step-payment:hover .elementor-element-populated.lazyloaded{--e-bg-lazyload: url(/wp-content/uploads/2023/08/etape-complete-1.png) !important;}
+.page-id-49 .step-payment:hover .elementor-widget-heading:first-child .elementor-heading-title{color:white !important;}
+.page-id-49 .step-payment:hover .elementor-widget-heading:nth-child(2) .elementor-heading-title{color:#262626 !important;}

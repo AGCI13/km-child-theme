@@ -19,6 +19,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 		$this->id           = 'option1express';
 		$this->method_title = 'Option 1 Express';
 		$this->tax_status   = 'taxable';
+		$this->supports     = array();
 		$this->init();
 	}
 
@@ -47,9 +48,9 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'enabled'     => array(
-				'title'   => __( 'Activer', 'text-domain' ),
+				'title'   => __( 'Activer', 'kingmateriaux' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Activer cette méthode d\'expédition', 'text-domain' ),
+				'label'   => __( 'Activer cette méthode d\'expédition', 'kingmateriaux' ),
 				'default' => 'yes',
 			),
 			'title'       => array(
@@ -91,6 +92,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(
+			'id'    => $this->id,
 			'label' => $this->title,
 			'cost'  => $shipping_cost,
 		);

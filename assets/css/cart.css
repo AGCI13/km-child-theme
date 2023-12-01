@@ -8,7 +8,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: none;
+    border: none !important;
     background: transparent !important;
     color: #BE9E67 !important;
     text-decoration: underline !important;

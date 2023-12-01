@@ -125,7 +125,6 @@ class KM_Dynamic_Pricing {
 	public function change_product_price_based_on_shipping_zone( $price, $product ) {
 
 		if ( empty( $price ) || ! $this->has_shipping_class( $product ) ) {
-			error_log( 'Method change_product_price_based_on_shipping_zone ( $price, $product )  : Price is empty or product has no shipping class' );
 			return $price;
 		}
 

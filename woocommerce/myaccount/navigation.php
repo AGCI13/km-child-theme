@@ -16,32 +16,30 @@
  * @version 2.6.0
  */
 
-if (!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-do_action('woocommerce_before_account_navigation');
+do_action( 'woocommerce_before_account_navigation' );
 global $current_user;
 wp_get_current_user();
 ?>
-
 <nav class="woocommerce-MyAccount-navigation">
 	<div class="entete-account-navigation">
 		<div style="display:flex;">
-			<h1 class="my-account-title">Mon compte</h1><img src="/wp-content/uploads/2022/12/Frame-12.svg">
+			<h1 class="my-account-title"><?php esc_html( 'Mon compte', 'kingmateriaux' ); ?></h1><img src="/wp-content/uploads/2022/12/Frame-12.svg">
 		</div>
-		<div class="username-account"> <?php echo 'Bonjour ' .  $current_user->user_login ?></div>
+		<div class="username-account"> <?php echo 'Bonjour ' . esc_html( $current_user->user_login ); ?></div>
 		<hr>
 	</div>
 
-
 	<ul>
-		<?php foreach (wc_get_account_menu_items() as $endpoint => $label) : ?>
-			<li class="<?php echo wc_get_account_menu_item_classes($endpoint); ?>">
-				<a href="<?php echo esc_url(wc_get_account_endpoint_url($endpoint)); ?>"><?php echo esc_html($label); ?></a>
+		<?php foreach ( wc_get_account_menu_items() as $endpoint => $label ) : ?>
+			<li class="<?php echo wc_get_account_menu_item_classes( $endpoint ); ?>">
+				<a href="<?php echo esc_url( wc_get_account_endpoint_url( $endpoint ) ); ?>"><?php echo esc_html( $label ); ?></a>
 			</li>
 		<?php endforeach; ?>
 	</ul>
 </nav>
 
-<?php do_action('woocommerce_after_account_navigation'); ?>
+<?php do_action( 'woocommerce_after_account_navigation' ); ?>

@@ -41,7 +41,10 @@ function km_front_scripts_enqueue() {
 	wp_register_script( 'add-to-cart-confirmation', $js_uri . 'add-to-cart-confirmation.js', array(), filemtime( $js_path . 'add-to-cart-confirmation.js' ), false );
 
 	if ( is_checkout() ) {
+		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.css', array(), filemtime( $css_path . 'checkout.css' ), 'all' );
 		wp_enqueue_script( 'km-checkout-script', $js_uri . 'checkout.js', array( 'jquery' ), filemtime( $js_path . 'checkout.js' ), false );
+		//  wp_enqueue_script( 'km-checkout-jquery-script', 'https://code.jquery.com/jquery-3.7.1.min.js' );
+		// wp_enqueue_script( 'km-checkout-jquery-ui-script', 'https://code.jquery.com/ui/1.13.1/jquery-ui.min.js' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'km_front_scripts_enqueue' );

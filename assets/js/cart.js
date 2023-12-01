@@ -104,7 +104,6 @@ const movePiOverallEstimateCart = () => {
 
 const showCouponForm = () => {
     couponLabel = document.querySelector('#km-coupon-label');
-    console.log(     couponLabel );
 
     if (couponLabel) {
         couponLabel.addEventListener('click', () => {

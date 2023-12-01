@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Classe de la méthode d'expédition "Option 1".
+ * Classe de la méthode d'expédition Drive pickup
  */
-class Shipping_method_1 extends WC_Shipping_Method {
+class Shipping_method_drive extends WC_Shipping_Method {
 
 	/**
 	 * Instance unique de la classe.
@@ -19,9 +19,9 @@ class Shipping_method_1 extends WC_Shipping_Method {
 		parent::__construct();
 		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
 
-		$this->id                 = 'option1';
-		$this->method_title       = 'Option 1';
-		$this->method_description = 'Livraison option 1';
+		$this->id                 = 'drive';
+		$this->method_title       = 'Drive';
+		$this->method_description = 'Drive';
 		$this->tax_status         = 'taxable';
 		$this->supports           = array();
 		$this->init();
@@ -89,17 +89,12 @@ class Shipping_method_1 extends WC_Shipping_Method {
 			return;
 		}
 
-		$shipping_cost = $this->km_shipping_methods->calculate_shipping_method_price( $this->method_title );
-		if ( ! $shipping_cost || 0 === $shipping_cost ) {
-			return;
-		}
-
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(
-			'id'      => $this->id,
-			'label'   => $this->title,
-			'cost'    => $shipping_cost,
+			'id'    => $this->id,
+			'label' => $this->title,
+			'cost'  => 1,
 		);
 
 		$this->add_rate( $rate );

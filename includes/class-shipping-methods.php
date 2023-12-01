@@ -24,7 +24,6 @@ class KM_Shipping_Methods {
 	 */
 	public function __construct() {
 		$this->km_shipping_zone = KM_Shipping_zone::get_instance();
-
 		$this->register();
 	}
 
@@ -33,6 +32,8 @@ class KM_Shipping_Methods {
 	 */
 	public function register() {
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'add_shipping_methods' ), 10, 1 );
+		// TODO:Créer des packages pour isolation / VRAC / Bigbag ?
+		// add_filter( 'woocommerce_cart_shipping_packages', array( $this, 'custom_shipping_packages' ) );
 	}
 
 	/**
@@ -46,6 +47,7 @@ class KM_Shipping_Methods {
 		$methods['shipping_method_1_express'] = 'Shipping_method_1_express';
 		$methods['shipping_method_2']         = 'Shipping_method_2';
 		$methods['shipping_method_2_express'] = 'Shipping_method_2_express';
+		$methods['shipping_method_drive']     = 'Shipping_method_drive';
 		return $methods;
 	}
 
@@ -141,11 +143,17 @@ class KM_Shipping_Methods {
 			$total_shipping_cost += $isolation_shipping_cost;
 		}
 
-			// Calculer et ajouter les coûts de livraison pour les produits d'isolation, si nécessaire.
+		if ( $other_products_weight > 0 ) {
+			$other_products_shipping_cost = $this->calculate_shipping_for_product( $other_products_weight, $shipping_method_name );
+			error_log( 'Other products shipping cost: ' . $other_products_shipping_cost );
+			$total_shipping_cost += $other_products_shipping_cost;
+		}
+
+		// Calculer et ajouter les coûts de livraison pour les produits d'isolation, si nécessaire.
 		if ( $isolation_plasterboard_found && $isolation_weight > 0 ) {
 			$isolation_cost       = $this->calculate_shipping_for_product( $isolation_weight, $shipping_method_name );
 			$total_shipping_cost += $isolation_cost;
-			error_log( 'Other products shipping cost: ' . $isolation_cost );
+			error_log( 'Isolation shipping cost: ' . $isolation_cost );
 		}
 
 		error_log( 'Total shipping cost: ' . $total_shipping_cost );
@@ -192,33 +200,6 @@ class KM_Shipping_Methods {
 		return $total_price;
 	}
 
-
-	/**
-	 * Ajoute le prix de la livraison en tant que frais.
-	 *
-	 * @param WC_Cart $cart Le panier.
-	 */
-	public function add_shipping_cost_as_fee( $cart ) {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			return;
-		}
-
-		// S'assurer que cette action n'est exécutée qu'une seule fois.
-		if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
-			return;
-		}
-
-		if ( 'local_pickup_plus' === WC()->session->get( 'chosen_shipping_methods' )[0]
-		|| ! $this->km_shipping_zone->is_in_thirteen()
-		|| $cart->get_shipping_total() <= 0 ) {
-			return;
-		}
-		// Frais de port hors TVA.
-		$shipping_total = $cart->get_shipping_total();
-
-		$cart->add_fee( __( 'Frais de livraison', 'kingmateriaux' ), $shipping_total, true, 'standard' );
-	}
-
 	/**
 	 * Vérifie si un produit appartient à la catégorie 'isolation'.
 	 *
@@ -237,5 +218,57 @@ class KM_Shipping_Methods {
 	 */
 	private function is_plasterboard( $product ) {
 		return strpos( $product->get_name(), 'Plaque de plâtre' ) !== false;
+	}
+
+	/**
+	 * Ajoute un package personnalisé pour les produits d'isolation.
+	 *
+	 * @param array $packages Les packages existants.
+	 * @return array Les packages existants avec le package personnalisé ajouté.
+	 */
+	public function custom_shipping_packages( $packages ) {
+		// TODO:
+		// Initialisez vos packages personnalisés ici.
+		// Vous pouvez itérer sur $packages existants et ajuster selon vos critères.
+		// Par exemple, vous pouvez séparer des produits en fonction de leur catégorie,
+		// de leur classe d'expédition ou de tout autre critère personnalisé.
+
+		// Créez un nouveau package si nécessaire
+		$custom_package = array(
+			'contents'        => array(), // Les articles à expédier dans ce package
+			'contents_cost'   => 0,       // Coût total des contenus
+			'applied_coupons' => array(), // Coupons appliqués à ce package
+			'user'            => array(
+				'ID' => get_current_user_id(),
+			),
+			'destination'     => array(
+				'country'   => '',
+				'state'     => '',
+				'postcode'  => '',
+				'city'      => '',
+				'address'   => '',
+				'address_2' => '',
+			),
+		);
+
+		// Exemple de logique pour ajouter des articles au package personnalisé
+		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+			if ( $cart_item->get_shipping_class() === 'isolation' ) {
+				// Ajoutez l'article au package personnalisé
+				$custom_package['contents'][ $cart_item_key ] = $cart_item;
+				$custom_package['contents_cost']             += $cart_item['line_total'];
+			} else {
+				// Sinon, laissez l'article dans le package par défaut
+				$packages[0]['contents'][ $cart_item_key ] = $cart_item;
+			}
+		}
+
+		// Assurez-vous d'ajuster la destination si nécessaire
+		$custom_package['destination'] = $packages[0]['destination'];
+
+		// Ajoutez le package personnalisé aux packages existants
+		$packages[] = $custom_package;
+
+		return $packages;
 	}
 }
