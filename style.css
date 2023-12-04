@@ -15,7 +15,7 @@ Gris foncé : #414042
 
 Provisoire 
 */
-.product .product-palett-meta, #km-shipping-info-debug{
+.single-product .product-debug-meta, #km-shipping-info-debug{
   background: yellow;
   padding: 5px 10px;
   margin-top: 20px;
@@ -31,11 +31,11 @@ Provisoire
   overflow-y: auto;
 }
 
-.product .product-palett-meta h4, #km-shipping-info-debug h4{
+.single-product .product-debug-meta h4, #km-shipping-info-debug h4{
   font-size: 14px;
 }
 
-.product .product-palett-meta p{
+.single-product .product-debug-meta p{
   margin-bottom:0;
 }
 

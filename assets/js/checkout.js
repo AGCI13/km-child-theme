@@ -4,17 +4,7 @@ jQuery(document).ready(function ($) {
     document.querySelectorAll('.step-shipping').forEach(element => {
         element.classList.add('active');
     });
-
-    document.querySelectorAll('.modal-debug-close').forEach(element => {
-        element.addEventListener('click', () => {
-            document.getElementById('km-shipping-info-debug').style.display = 'none';
-        });
-    });
-
-    setTimeout(() => {
-        checkoutNavigation();
-    }, 500);
-
+    
     togglShippingAdress();
 
     //Fist load
@@ -22,9 +12,11 @@ jQuery(document).ready(function ($) {
         "updated_checkout",
         function () {
             setTimeout(function () {
+                checkoutNavigation();
                 loadShippingMethods();
                 loadDriveDateTimePicker();
                 reapplySelectedClasses();
+                setDebugClosable();
             }, 200);
         });
 });
@@ -222,4 +214,12 @@ const reapplySelectedClasses = () => {
             optionInput.closest('.km-shipping-option').classList.add('selected');
         });
     }
+}
+
+const setDebugClosable = () => {
+    document.querySelectorAll('.modal-debug-close').forEach(element => {
+        element.addEventListener('click', () => {
+            document.getElementById('km-shipping-info-debug').style.display = 'none';
+        });
+    });
 }

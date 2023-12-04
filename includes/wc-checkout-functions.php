@@ -46,37 +46,40 @@ function km_override_checkout_init(): void {
 add_action( 'woocommerce_checkout_init', 'km_override_checkout_init' );
 
 function km_display_shipping_info_in_footer() {
+	$km_shipping_zone = KM_Shipping_Zone::get_instance();
+	if ( ! is_checkout() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! $km_shipping_zone->is_in_thirteen() ) {
+		return;
+	}
 	// Vérifier si sur la page de paiement
-	if ( is_checkout() && is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+
 		// Noms des cookies que vous pourriez avoir définis
 		$shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
 
 		echo '<div id="km-shipping-info-debug">';
 		echo '<img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
 		echo '<h3>DEBUG</h3><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
-		foreach ( $shipping_methods as $method ) {
-			$cookie_name = 'km_shipping_cost_' . $method;
+	foreach ( $shipping_methods as $method ) {
+		$cookie_name = 'km_shipping_cost_' . $method;
 
-			if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
-				$shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
+		if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
+			$shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
 
-				echo '<h4>Coûts de livraison pour ' . esc_html( $method ) . ':</h4>';
-				echo '<ul>';
-				foreach ( $shipping_info as $key => $value ) {
-					if ( strpos( $key, 'poids' ) !== false ) {
-						$value = esc_html( $value ) . ' Kg';
-					} elseif ( strpos( $key, 'placo' ) !== false ) {
-						$value = esc_html( $value );
-					} else {
-						$value = esc_html( $value ) . ' €';
-					}
-					echo '<li>' . esc_html( $key ) . ': ' . esc_html( $value ) . '</li>';
+			echo '<h4>Coûts de livraison pour ' . esc_html( $method ) . ':</h4>';
+			echo '<ul>';
+			foreach ( $shipping_info as $key => $value ) {
+				if ( strpos( $key, 'poids' ) !== false ) {
+					$value = esc_html( $value ) . ' Kg';
+				} elseif ( strpos( $key, 'placo' ) !== false ) {
+					$value = esc_html( $value );
+				} else {
+					$value = esc_html( $value ) . ' €';
 				}
-				echo '</ul>';
+				echo '<li>' . esc_html( $key ) . ': ' . esc_html( $value ) . '</li>';
 			}
+			echo '</ul>';
 		}
-
-		echo '</div>';
 	}
+
+	echo '</div>';
 }
 add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );

@@ -31,6 +31,7 @@ require_once 'includes/shipping-methods/class-shipping-method-1-express.php';
 require_once 'includes/shipping-methods/class-shipping-method-2.php';
 require_once 'includes/shipping-methods/class-shipping-method-2-express.php';
 require_once 'includes/shipping-methods/class-shipping-method-drive.php';
+require_once 'includes/shipping-methods/class-shipping-method-out-13.php';
 
 KM_Shipping_Zone::get_instance();
 KM_Dynamic_Pricing::get_instance();

@@ -281,27 +281,4 @@ function km_add_pallet_description_under_product_name( $cart_item, $cart_item_ke
 }
 add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
 
-/**
- * Ajoute les métadonnées de la palette sur la page produit
- *
- * @return void
- */
-function km_palett_product_meta_in_cart() {
-	global $product;
-
-	// Obtenir l'ID du produit.
-	$product_id = $product->get_id();
-
-	// Récupérer les valeurs des métadonnées.
-	$quantite_par_palette = get_post_meta( $product_id, '_quantite_par_palette', true ) ?: 'Non renseigné';
-	$palette_a_partir_de  = get_post_meta( $product_id, '_palette_a_partir_de', true ) ?: 'Non renseigné';
-
-	// Afficher les métadonnées sur la page produit.
-	echo '<div class="product-palett-meta"><h4>DEBUG</h4>'
-	. '<p>Quantité par palette : ' . esc_html( $quantite_par_palette ) . '</p>'
-	. '<p>Palette à partir de : ' . esc_html( $palette_a_partir_de ) . '</p>'
-	. '</div>';
-}
-// Ajouter l'action au résumé du produit WooCommerce.
-add_action( 'woocommerce_after_add_to_cart_form', 'km_palett_product_meta_in_cart' );
 

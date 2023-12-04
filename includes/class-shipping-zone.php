@@ -68,7 +68,7 @@ class KM_Shipping_Zone {
 		add_action( 'wp_ajax_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
 		add_action( 'wp_ajax_nopriv_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
 	}
-	
+
 	/**
 	 *  Checks if the current shipping zone is in the thirtheen.
 	 *

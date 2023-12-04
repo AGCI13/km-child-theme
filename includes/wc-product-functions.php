@@ -20,7 +20,8 @@ function km_variable_product_price( $v_price, $v_product ) {
 		$v_product->get_variation_price( 'min', true ),
 		$v_product->get_variation_price( 'max', true ),
 	);
-	$prod_price  = $prod_prices[0] !== $prod_prices[1] ? sprintf( __( 'À partir de %1$s', 'woocommerce' ), wc_price( $prod_prices[0] ) ) : wc_price( $prod_prices[0] );
+	/* translators: 1: product price 2: product regular price */
+	$prod_price = $prod_prices[0] !== $prod_prices[1] ? sprintf( __( 'À partir de %1$s', 'woocommerce' ), wc_price( $prod_prices[0] ) ) : wc_price( $prod_prices[0] );
 
 	// Regular Price.
 	$regular_prices = array(
@@ -131,3 +132,70 @@ function add_custom_body_class_for_unpurchasable_products( $classes ) {
 }
 
 add_filter( 'body_class', 'add_custom_body_class_for_unpurchasable_products' );
+
+
+/**
+ * Ajoute les métadonnées de la palette sur la page produit
+ *
+ * @return void
+ */
+function km_debug_single_product() {
+	global $product;
+
+	// Obtenir l'ID du produit.
+	$product_id = $product->get_id();
+
+	// Récupérer les valeurs des métadonnées.
+	$quantite_par_palette = get_post_meta( $product_id, '_quantite_par_palette', true ) ?: 'Non renseigné';
+	$palette_a_partir_de  = get_post_meta( $product_id, '_palette_a_partir_de', true ) ?: 'Non renseigné';
+	$product_info         = '';
+
+	if ( $product->is_type( 'variable' ) ) {
+		foreach ( $product->get_available_variations() as $variation ) {
+			// Get variation name
+			$variation_name = $variation['attributes']['attribute_pa_poids'];
+			// Get variation price
+			$variation_id    = $variation['variation_id'];
+			$variation_obj   = new WC_Product_Variation( $variation_id );
+			$variation_price = $variation_obj->get_price();
+			// Get shipping class
+			$shipping_class = $variation_obj->get_shipping_class_id();
+			// Get shipping class name
+			if ( $shipping_class ) {
+				$shipping_class_name = get_term_by( 'term_id', $shipping_class, 'product_shipping_class' )->name;
+			} else {
+				$shipping_class_name = 'Aucune';
+			}
+
+			$price_including_taxes = wc_get_price_including_tax( $variation_obj );
+
+			$product_info .= '<p>Prix HT' . esc_html( $variation_name ) . ' : ' . esc_html( $variation_price ) . '</p>';
+			$product_info .= '<p>Prix TTC' . esc_html( $variation_name ) . ' : ' . esc_html( $price_including_taxes ) . '</p>';
+			$product_info .= '<p>Classe de livraison ' . esc_html( $variation_name ) . ' : ' . esc_html( $shipping_class_name ) . '</p>';
+		}
+	} else {
+		// Get product shipping classe
+		$shipping_class = $product->get_shipping_class_id();
+		// Get including taxes price
+		$price_including_taxes = wc_get_price_including_tax( $product );
+		// Get shipping class name
+		if ( $shipping_class ) {
+			$shipping_class_name = get_term_by( 'term_id', $shipping_class, 'product_shipping_class' )->name;
+		} else {
+			$shipping_class_name = 'Aucune';
+		}
+
+		$product_info .= '<p>Prix HT: ' . esc_html( $product->get_price() ) . '</p>';
+		$product_info .= '<p>Prix TTC: ' . esc_html( $price_including_taxes ) . '</p>';
+		$product_info .= '<p>Classe de livraison: ' . esc_html( $shipping_class_name ) . '</p>';
+	}
+
+	// Afficher les métadonnées sur la page produit.
+	echo '<div class="product-debug-meta"><h4>DEBUG</h4>'
+	. $product_info
+	. '<p>Quantité par palette : ' . esc_html( $quantite_par_palette ) . '</p>'
+	. '<p>Palette à partir de : ' . esc_html( $palette_a_partir_de ) . '</p>'
+	. '</div>';
+}
+// Ajouter l'action au résumé du produit WooCommerce.
+add_action( 'woocommerce_after_single_product', 'km_debug_single_product' );

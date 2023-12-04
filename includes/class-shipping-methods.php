@@ -48,6 +48,7 @@ class KM_Shipping_Methods {
 		$methods['shipping_method_2']         = 'Shipping_method_2';
 		$methods['shipping_method_2_express'] = 'Shipping_method_2_express';
 		$methods['shipping_method_drive']     = 'Shipping_method_drive';
+		$methods['shipping_method_out_13']    = 'Shipping_method_out_13';
 		return $methods;
 	}
 
@@ -227,7 +228,6 @@ class KM_Shipping_Methods {
 		foreach ( $cart_items as $cart_item ) {
 			$product = $cart_item['data'];
 
-			error_log( $product->get_name() );
 			if ( strpos( $product->get_name(), 'Plaque de plâtre' ) !== false ) {
 				return true;
 			}
