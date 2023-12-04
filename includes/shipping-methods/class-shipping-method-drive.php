@@ -12,6 +12,9 @@ class Shipping_method_drive extends WC_Shipping_Method {
 	 */
 	private $km_shipping_methods;
 
+	public $method_location;
+	public $cost;
+
 	/**
 	 *  Constructor.
 	 */
@@ -38,6 +41,7 @@ class Shipping_method_drive extends WC_Shipping_Method {
 		$this->enabled            = $this->get_option( 'enabled' );
 		$this->title              = $this->get_option( 'title' );
 		$this->method_description = $this->get_option( 'description' );
+		$this->method_location    = $this->get_option( 'location' );
 		$this->cost               = $this->get_option( 'cost' );
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -76,6 +80,11 @@ class Shipping_method_drive extends WC_Shipping_Method {
 				'description' => __( 'Optional cost for local pickup.', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true,
+			),
+			'location'    => array(
+				'title'   => __( 'Adresse de retrait', 'woocommerce' ),
+				'type'    => 'textarea',
+				'default' => '',
 			),
 		);
 	}
@@ -187,9 +196,19 @@ class Shipping_method_drive extends WC_Shipping_Method {
 				</div>
 			</div>
 		</div>
+		
+		<?php if ( $this->method_location ) : ?>
+		<div class="drive-location-adress">
+			<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/location-pin.svg' ); ?>" alt="King Drive pin">
+			<?php echo wp_kses_post( wpautop( $this->method_location ) ); ?>
+		</div>
+		<?php endif; ?>
+
 		<input type="hidden" name="drive_date" class="drive_date" value="">
 		<input type="hidden" name="drive_time" class="drive_time" value="">
 	</div>
+
+
 		<?php
 	}
 }

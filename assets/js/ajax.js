@@ -1,26 +1,31 @@
-const kmAjaxCall = async (action, data = null) => {
+const kmAjaxCall = (action, data = null) => {
+    return new Promise((resolve, reject) => {
+        let params = {};
+        params['action'] = action;
 
-    let params = new URLSearchParams();
-    params.append('action', action);
-
-    if (data) {
-        for (let key in data) {
-            if (Array.isArray(data[key])) {
-                data[key].forEach((item) => {
-                    params.append(key, item);
-                });
-            } else {
-                params.append(key, data[key]);
+        if (data) {
+            for (let key in data) {
+                if (Array.isArray(data[key])) {
+                    data[key].forEach((item) => {
+                        if (!params[key]) params[key] = [];
+                        params[key].push(item);
+                    });
+                } else {
+                    params[key] = data[key];
+                }
             }
         }
-    }
-    
-    let response = await fetch(km_ajax.ajaxurl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: params
+
+        jQuery.ajax({
+            url: km_ajax.ajaxurl,
+            type: 'POST',
+            data: params,
+            success: function(response) {
+                resolve(response);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                reject(new Error(textStatus));
+            }
+        });
     });
-    return await response.json();
-}
+};

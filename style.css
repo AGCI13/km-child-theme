@@ -6,9 +6,6 @@
  * Description:    A plain-vanilla &amp; lightweight theme for Elementor page builder
  */
 
- 
-
-
 
 
 /*
@@ -18,17 +15,32 @@ Gris foncé : #414042
 
 Provisoire 
 */
-.product .product-debug-meta{
-    background: yellow;
-    width: fit-content;
-    padding: 5px 10px;
-    margin-top: 20px;
+.product .product-palett-meta, #km-shipping-info-debug{
+  background: yellow;
+  padding: 5px 10px;
+  margin-top: 20px;
+  position: fixed;
+  left: 0;
+  bottom:0;
+  max-width: 230px;
+  font-size: 13px;
+  resize: horizontal;
 }
-.product .product-debug-meta h4{
-  font-size: 15px;
+#km-shipping-info-debug{
+  height:calc(100% - 32px);
+  overflow-y: auto;
 }
-.product .product-debug-meta p {
-  margin-bottom:3px;
+
+.product .product-palett-meta h4, #km-shipping-info-debug h4{
+  font-size: 14px;
+}
+
+.product .product-palett-meta p{
+  margin-bottom:0;
+}
+
+.unpurchasable-product .elementor-add-to-cart{
+  display: none;
 }
 
 
@@ -68,7 +80,7 @@ Provisoire
 
 .btn-primary:hover{
   /*background: linear-gradient(180deg, #be9f69 0%, #bb9c67 100%);*/
-  background: linear-gradient(180deg, #8C703F 0%, #8C703F 100%);
+  background: linear-gradient(180deg, #8C703F 0%, #8C703F 100%) !important;
 }
 
 .btn-primary:focus,
@@ -92,10 +104,6 @@ Provisoire
   border: none!important;
 }
 
-
-
-
-
 .km-ecotaxe-message{
   display: flex;
 }
@@ -112,6 +120,33 @@ font-size: 13px;
 .woocommerce div.product form.cart .variations select option:disabled{
   display: none;
 }
+
+#uael-mc__btn{
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#uael-mc__btn .uael-mc__btn-subtotal{
+  display: none;
+}
+
+#uael-mc__btn .uael-mc__btn-text{
+  display: flex;
+  order:1;
+}
+
+#uael-mc__btn .uael-mc__btn-text .uael-mc__btn-inner-text{
+  margin-right: 0;
+  font-weight: 400;
+  color: white;
+  margin-top: 6px;
+}
+
+#uael-mc__btn:hover .uael-mc__btn-text .uael-mc__btn-inner-text{
+color: #BE9E67;
+}
+
 
 
 /* Input */
@@ -182,11 +217,23 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .page-id-563 .uael-form.uael-login-form input[type="text"]:focus,
 .page-id-563 .uael-form.uael-login-form input[type="password"]:focus{border: 1px solid black;}
 /* Sidebar dynamique panier */
+.uael-mc-offcanvas__header{margin-top:20px;}
+.uael-mc-offcanvas__items {display: flex;flex-direction: column;}
+.elementor-menu-cart__footer-buttons {order: -1;margin: 0px 0px 20px 0px;padding-top: 0px !important;}
+.elementor-menu-cart__footer-buttons .elementor-button{padding:14px 20px !important;border-radius:0px !important;}
+.woocommerce-cart-form__contents {order: 1;}
+.elementor-menu-cart__subtotal{display:none;}
 .uael-mc-offcanvas .uael-mc-offcanvas__title{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 32px;font-weight: 900;line-height: 1.2em;width: fit-content;position: relative;z-index: 1;}
 .uael-mc-offcanvas .uael-mc-offcanvas__title:after{content: '';width: 100%;display: block;position: absolute;height: 25px;background: #D9D9D9;transform: rotate(-0.21deg);bottom: -7px;z-index: -1;}
 .uael-mc-offcanvas__header .uael-mc-offcanvas__header-badge{color:white;height: 30px;font-size: 16px;color: white;width: 30px;}
 .uael-mc-offcanvas__items .woocommerce-cart-form__contents .product-name a{color:#BE9D68;}
 .uael-mc-offcanvas__items .elementor-menu-cart__footer-buttons a{background-color:#BE9D68;}
+.elementor-menu-cart__product, .elementor-menu-cart__subtotal{padding-bottom:6px !important;padding-top:6px !important}
+.elementor-menu-cart__product-name, .elementor-menu-cart__product-price{line-height: 1.2em;}
+
+
+
+
 /* Panier */
 .shopengine-cart .e-cart__column-start{}
 .shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 32px;font-weight: 900;line-height: 1.2em;width: fit-content;position: relative;z-index: 1;}
@@ -348,6 +395,17 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .single-product .produits-similaires li.product span.price span.woocommerce-Price-amount{color:#BE9D68;}
 .single-product .produits-similaires li.product span.price ins{font-weight: 400;text-decoration:inherit;}
 .single-product .produits-similaires li.product span.price ins span.woocommerce-Price-amount{color: #BE9D68 !important;}
+.single-product .elementor-widget-theme-post-content h2{color:#262626;}
+.single-product .elementor-widget-theme-post-content p, .single-product .elementor-widget-theme-post-content ol li{color:#262626;font-family: "Lato", Sans-serif;font-size: 16px;font-weight: 400;}
+.single-product .elementor-widget-theme-post-content a{color: #BE9D68;}
+
+
+
+
+
+
+
+
 /* Mentions légales */
 .page-id-1975 .faq-mentions-legales .elementor-accordion-item{border-top:inherit;border-left:inherit;border-right:inherit;}
 .page-id-1975 .faq-mentions-legales .elementor-accordion-item .elementor-tab-content{border:inherit;}

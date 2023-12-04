@@ -56,7 +56,6 @@ class KM_Shipping_Zone {
 		$this->get_zip_and_country_from_cookie();
 		$this->shipping_zone_id   = $this->get_shipping_zone_id_from_cookie();
 		$this->shipping_zone_name = $this->get_shipping_zone_name();
-
 		$this->register();
 	}
 
@@ -69,7 +68,7 @@ class KM_Shipping_Zone {
 		add_action( 'wp_ajax_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
 		add_action( 'wp_ajax_nopriv_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
 	}
-
+	
 	/**
 	 *  Checks if the current shipping zone is in the thirtheen.
 	 *

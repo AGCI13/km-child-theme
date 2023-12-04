@@ -50,14 +50,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
 
-
     const submitPostcode = (event) => {
         let country_modal = event.target.querySelector('.country').value;
         let zip_modal = event.target.querySelector('.zip_code').value;
         let label_modal_postcode = event.target.querySelector('.zip_code_label');
         let nonce = event.target.querySelector('#nonce_postcode');
-        console.log( nonce );
-        console.log( nonce.value );
+
         //Front simple validation
         if (zip_modal.length < 5 && country_modal === 'FR' || zip_modal.length < 4 && country_modal === 'BE') {
             label_modal_postcode.textContent = 'Veuillez rentrez un code postal valide';

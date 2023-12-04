@@ -5,6 +5,7 @@
  */
 class Shipping_method_1 extends WC_Shipping_Method {
 
+
 	/**
 	 * Instance unique de la classe.
 	 *
@@ -18,13 +19,12 @@ class Shipping_method_1 extends WC_Shipping_Method {
 	public function __construct() {
 		parent::__construct();
 		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
-		$this->id                 = 'option1';
-		$this->method_title       = 'Option 1';
-		$this->method_description = 'Livraison option 1';
-		$this->tax_status         = 'taxable';
+
+		$this->id           = 'option1';
+		$this->method_title = 'Option 1';
+		$this->tax_status   = 'taxable';
 		$this->init();
 	}
-
 
 	/**
 	 * Initialise les paramètres de la méthode d'expédition.

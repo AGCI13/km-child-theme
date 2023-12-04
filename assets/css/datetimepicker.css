@@ -3,11 +3,11 @@
     display:none;
 }
 .drive-datetimepicker h3{
-    font-size: 1.3em;
+    font-size: 1.22em;
 }
 
 .drive-datetimepicker h4{
-    font-size: 1.15em;
+    font-size: 1.1.5em;
 }
 
 .drive-datetimepicker .drive-datepicker-day {
@@ -22,6 +22,7 @@
     list-style: none;
     overflow-x: auto;
     gap: .5rem;
+    margin-top: 14px;
     padding-bottom: 0.75rem;
 }
 
@@ -56,6 +57,7 @@
     padding: 0;
     list-style: none;
     gap: 1rem;
+    margin-bottom:30px;
 }
 
 .drive-datetimepicker .time-slot {

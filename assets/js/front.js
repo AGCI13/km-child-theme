@@ -52,7 +52,7 @@ jQuery(document).ready(function ($) {
 		$('.uael-login-form-wrapper .elementor-col-100.uael-login-form-footer').insertAfter($('.uael-login-form-wrapper .elementor-col-100.elementor-field-required').eq(1));
 	}
 	//Page single
-	if ($('body').hasClass('single')) {
+	if ($('body').hasClass('single-post')) {
 		/* Scroll du sommaire */
 		var sommaire = document.querySelector('.sommaire');
 		var contenu = document.querySelector('.contenu');

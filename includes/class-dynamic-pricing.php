@@ -166,8 +166,22 @@ class KM_Dynamic_Pricing {
 	 */
 	public function change_price_html( $price, $product ) {
 		if ( ! $product->is_type( 'variable' ) ) {
-			// Pour les produits simple, continuez avec la logique existante.
+			// Pour les produits simples, vérifiez s'ils ont une classe de livraison.
 			if ( ! $product->get_shipping_class_id() ) {
+				return $this->unavailable_message;
+			}
+		} else {
+			// Pour les produits variables, vérifiez si au moins une variation a une classe de livraison.
+			$has_shipping_class = false;
+			$variations         = $product->get_available_variations();
+			foreach ( $variations as $variation ) {
+				$variation_obj = wc_get_product( $variation['variation_id'] );
+				if ( $variation_obj && $variation_obj->get_shipping_class_id() ) {
+					$has_shipping_class = true;
+					break;
+				}
+			}
+			if ( ! $has_shipping_class ) {
 				return $this->unavailable_message;
 			}
 		}
@@ -180,10 +194,24 @@ class KM_Dynamic_Pricing {
 	 * @param bool $is_purchasable Si le produit est achetable ou non.
 	 */
 	public function no_shipping_class_is_purchasable( $is_purchasable, $product ) {
-		if ( ! $this->has_shipping_class( $product ) ) {
-			return false;
+		// Vérifie d'abord la classe de livraison du produit lui-même.
+		if ( $this->has_shipping_class( $product ) ) {
+			return $is_purchasable;
 		}
-		return $is_purchasable;
+
+		// Si le produit est variable, vérifie les classes de livraison de toutes les variations.
+		if ( $product->is_type( 'variable' ) ) {
+			$variations = $product->get_children();
+			foreach ( $variations as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				if ( $this->has_shipping_class( $variation ) ) {
+					return $is_purchasable;
+				}
+			}
+		}
+
+		// Aucune classe de livraison trouvée, donc non achetable
+		return false;
 	}
 
 	/**
@@ -261,10 +289,9 @@ class KM_Dynamic_Pricing {
 	 * @return string Le prix du produit.
 	 */
 	public function display_required_postcode_message( $price, $product ) {
-
 		// Vous pouvez ajouter une condition pour vérifier si un code postal a été entré ou non.
 		// Si aucun code postal n'est entré, affichez le message.
-		if ( ! isset( $_COOKIE['zip_code'] ) || empty( $_COOKIE['zip_code'] ) ) {
+		if ( $this->km_shipping_zone->get_zip_and_country_from_cookie() === false ) {
 			return __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' );
 		}
 		// Sinon, retournez le prix habituel.

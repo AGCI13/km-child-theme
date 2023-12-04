@@ -61,12 +61,31 @@
 }
 
 .woocommerce-cart-form .product-quantity .quantity .qty-modifier {
-    width: 17px;
+    width: 25px;
+    height: 28px;
     cursor: pointer;
+    display: flex;
+    justify-content: stretch;
+    background: #f7f7f7;
+    max-height: 100%;
+    align-items: stretch;
+    padding: 6px;
+    border-radius: 3px;
+    transition: all .2s ease-in-out;
+}
+
+.woocommerce-cart-form .product-quantity .quantity .qty-modifier:hover {
+    background: #e5e5e5;
 }
 
 .woocommerce-cart-form .product-quantity .quantity .qty-modifier img {
     width: 100% !important;
+}
+
+.elementor-widget-woocommerce-cart .woocommerce .input-text.qty {
+    border: 1px solid #ebebeb !important;
+    margin-left: 3px !important;
+    margin-right: 3px !important;
 }
 
 .cart-collaterals .redeem-coupon {
@@ -76,26 +95,27 @@
     gap: .5rem;
 }
 
-.cart-collaterals #km-coupon-label{
+.cart-collaterals #km-coupon-label {
     cursor: pointer;
 }
-.cart-collaterals #km-coupon-label:before{
-color:#BE9E67 !important;
+
+.cart-collaterals #km-coupon-label:before {
+    color: #BE9E67 !important;
 }
 
-.cart-collaterals #km-coupon-label.active{
+.cart-collaterals #km-coupon-label.active {
     cursor: default;
 }
 
-.cart-collaterals #km-coupon-label.active .redeem-coupon{
+.cart-collaterals #km-coupon-label.active .redeem-coupon {
     display: flex;
 }
 
-.cart-collaterals #km-coupon-label.active:before{
-    color:#000 !important;
+.cart-collaterals #km-coupon-label.active:before {
+    color: #000 !important;
 }
- 
- .cart-collaterals .order-total strong .woocommerce-Price-amount {
+
+.cart-collaterals .order-total strong .woocommerce-Price-amount {
     font-size: 20px;
 }
 

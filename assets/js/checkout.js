@@ -5,19 +5,28 @@ jQuery(document).ready(function ($) {
         element.classList.add('active');
     });
 
+    document.querySelectorAll('.modal-debug-close').forEach(element => {
+        element.addEventListener('click', () => {
+            document.getElementById('km-shipping-info-debug').style.display = 'none';
+        });
+    });
+
     setTimeout(() => {
         checkoutNavigation();
     }, 500);
 
-    jQuery(document.body).on(
-        "payment_method_selected update_checkout updated_checkout checkout_error applied_coupon_in_checkout removed_coupon_in_checkout adding_to_cart added_to_cart removed_from_cart wc_cart_button_updated cart_page_refreshed cart_totals_refreshed wc_fragments_loaded init_add_payment_method wc_cart_emptied updated_wc_div updated_cart_totals country_to_state_changed updated_shipping_method applied_coupon removed_coupon",
-        function (e) {
+    togglShippingAdress();
+
+    //Fist load
+    $(document.body).on(
+        "updated_checkout",
+        function () {
             setTimeout(function () {
                 loadShippingMethods();
                 loadDriveDateTimePicker();
-            }, 500);
-        }
-    );
+                reapplySelectedClasses();
+            }, 200);
+        });
 });
 
 const loadShippingMethods = () => {
@@ -25,27 +34,71 @@ const loadShippingMethods = () => {
     const wcShippingMethod = document.querySelector('.woocommerce-shipping-totals.shipping');
 
     // There is mutliple element with .km-shipping-header class. Eveytime we click on one of them, we remove the selected class on all children of .km-shipping-header with .select-shipping class and add it to the clicked one
-    let shippingHeader = wcShippingMethod.querySelectorAll('.woocommerce-shipping-methods');
-    shippingHeader.forEach(function (header) {
-        header.addEventListener('click', function () {
-            shippingHeader.forEach(function (header) {
-                header.classList.remove('selected');
-            });
-            header.classList.add('selected');
-            //Get inner text of header and set it to the hidden input field shipping_method
-            let headerText = header.innerText;
-            let shippingMethod = wcShippingMethod.querySelector('.shipping_method');
-            shippingMethod.value = headerText;
-        });
+    let shippingMethods = wcShippingMethod.querySelectorAll('.woocommerce-shipping-methods');
+    let shippingOptions = wcShippingMethod.querySelectorAll('.km-shipping-option');
+    let shippingInputs = wcShippingMethod.querySelectorAll('input[type="radio"].shipping_method');
 
-        let shippingOptions = wcShippingMethod.querySelectorAll('.km-shipping-option');
-        shippingOptions.forEach(function (option) {
-            option.addEventListener('click', function () {
+    //When click on a particular header
+    shippingMethods.forEach(function (shippingMethod) {
+        shippingMethod.addEventListener('click', function () {
+            //if this element has selected class, return
+            if (shippingMethod.classList.contains('selected')) {
+                return;
+            }
+
+            //Save selected shipping method in local storage
+            localStorage.setItem('selectedShipping', shippingMethod.id);
+
+            shippingMethods.forEach(function (shippingMethod) {
+                shippingMethod.classList.remove('selected');
+            });
+            shippingMethod.classList.add('selected');
+
+            //Check if header [data-shipping] attribute is equal to "drive"
+            if (shippingMethod.id === 'shipping-method-drive') {
+                //Remove selected class from all radio button
                 shippingOptions.forEach(function (option) {
                     option.classList.remove('selected');
                 });
-                option.querySelector('input[type="radio"]').checked = true;
-                option.classList.add('selected');               
+
+                // Réinitialiser les options de livraison
+                shippingInputs.forEach(function (input) {
+                    input.checked = false;
+                });
+
+                // Stocker la sélection dans localStorage
+                localStorage.setItem('selectedShippingOption', '');
+
+                shippingMethod.querySelector('input[type="radio"]').checked = true;
+
+                //Update checkout
+                jQuery(document.body).trigger('update_checkout');
+            }
+        });
+
+        //When click on a particular option, remove selected class on all other options and add selected class on that option
+        shippingOptions.forEach(function (option) {
+            option.addEventListener('click', function () {
+                if (option.classList.contains('selected')) {
+                    return;
+                }
+
+                // Supprimer la classe selected de toutes les options de livraison
+                shippingOptions.forEach(function (option) {
+                    option.classList.remove('selected');
+                });
+                // Ajouter la classe selected à l'option de livraison sélectionnée
+                option.classList.add('selected');
+
+                // Cocher l'option de livraison sélectionnée
+                const shippingInput = option.querySelector('input[type="radio"]');
+                shippingInput.checked = true;
+
+                // Stocker la sélection dans localStorage
+                localStorage.setItem('selectedShippingOption', shippingInput.value);
+
+                //Update checkout
+                jQuery(document.body).trigger('update_checkout');
             });
         });
     });
@@ -122,4 +175,51 @@ const checkoutNavigation = () => {
             stepPayment.click();
         });
     });
+}
+
+const togglShippingAdress = () => {
+    const billingFields = document.querySelector('.woocommerce-billing-fields');
+    const showBillingBtn = document.querySelector('.bool-action.false');
+    const hideBillingBtn = document.querySelector('.bool-action.true');
+
+    // Définir la visibilité initiale des champs de facturation au chargement de la page
+    const toggleBillingFields = () => {
+        if (hideBillingBtn.classList.contains('selected')) {
+            billingFields.style.display = 'none';
+        } else {
+            billingFields.style.display = 'block';
+        }
+    };
+
+    toggleBillingFields(); // Appeler la fonction pour définir l'état initial
+
+    // Lorsque l'utilisateur clique sur "Oui", masquer les champs de facturation
+    hideBillingBtn.addEventListener('click', function () {
+        billingFields.style.display = 'none';
+        this.classList.add('selected');
+        showBillingBtn.classList.remove('selected');
+    });
+
+    // Lorsque l'utilisateur clique sur "Non", afficher les champs de facturation
+    showBillingBtn.addEventListener('click', function () {
+        billingFields.style.display = 'block';
+        this.classList.add('selected');
+        hideBillingBtn.classList.remove('selected');
+    });
+}
+
+// Fonction pour réappliquer les classes selected
+const reapplySelectedClasses = () => {
+    var selectedShipping = localStorage.getItem('selectedShipping');
+    var selectedShippingOption = localStorage.getItem('selectedShippingOption');
+
+    if (selectedShipping) {
+        document.querySelector('#' + selectedShipping).classList.add('selected');
+    }
+
+    if (selectedShippingOption) {
+        document.querySelectorAll('.km-shipping-option input[value="' + selectedShippingOption + '"]').forEach(function (optionInput) {
+            optionInput.closest('.km-shipping-option').classList.add('selected');
+        });
+    }
 }

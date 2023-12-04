@@ -102,12 +102,17 @@ class KM_Shipping_Methods {
 	 * @return float Total shipping cost.
 	 */
 	public function calculate_shipping_method_price( $shipping_method_name ) {
-		$cart_items                   = WC()->cart->get_cart();
-		$total_shipping_cost          = 0.0;
-		$vrac_weight                  = 0.0;
-		$isolation_weight             = 0.0;
-		$other_products_weight        = 0.0;
-		$isolation_plasterboard_found = false;
+		$cart_items            = WC()->cart->get_cart();
+		$total_shipping_cost   = 0.0;
+		$vrac_weight           = 0.0;
+		$isolation_weight      = 0.0;
+		$other_products_weight = 0.0;
+
+		if ( ! $cart_items ) {
+			return 0;
+		}
+
+		$cart_has_plasterboard = $this->cart_has_plasterboard( $cart_items );
 
 		foreach ( $cart_items as $cart_item ) {
 			$product        = $cart_item['data'];
@@ -115,48 +120,49 @@ class KM_Shipping_Methods {
 
 			if ( strpos( $product->get_name(), 'VRAC A LA TONNE' ) !== false ) {
 				$vrac_weight += $product_weight;
-			} elseif ( $this->is_isolation_product( $product ) ) {
-				$isolation_weight += $product_weight;
-				if ( $this->is_plasterboard( $product ) ) {
-					$isolation_plasterboard_found = true;
-				}
+			} elseif ( $cart_has_plasterboard && $this->is_isolation_product( $product ) ) {
+					$isolation_weight += $product_weight;
 			} else {
 				$other_products_weight += $product_weight;
 			}
 		}
 
-		// Debug.
-		error_log( '======================== NEW BATCH ===================' );
-		error_log( 'VRAC weight: ' . $vrac_weight );
-		error_log( 'Isolation weight: ' . $isolation_weight );
-		error_log( 'Other products weight: ' . $other_products_weight );
-
 		if ( $vrac_weight > 0 ) {
-			$vrac_shipping_cost = $this->calculate_shipping_for_product( $vrac_weight, $shipping_method_name );
-			error_log( 'VRAC shipping cost: ' . $vrac_shipping_cost );
+			$vrac_shipping_cost   = $this->calculate_shipping_for_product( $vrac_weight, $shipping_method_name );
 			$total_shipping_cost += $vrac_shipping_cost;
 		}
 
 		if ( $isolation_weight > 0 ) {
 			$isolation_shipping_cost = $this->calculate_shipping_for_product( $isolation_weight, $shipping_method_name );
-			error_log( 'Isolation shipping cost: ' . $isolation_shipping_cost );
-			$total_shipping_cost += $isolation_shipping_cost;
+			$total_shipping_cost    += $isolation_shipping_cost;
 		}
 
 		if ( $other_products_weight > 0 ) {
 			$other_products_shipping_cost = $this->calculate_shipping_for_product( $other_products_weight, $shipping_method_name );
-			error_log( 'Other products shipping cost: ' . $other_products_shipping_cost );
-			$total_shipping_cost += $other_products_shipping_cost;
+			$total_shipping_cost         += $other_products_shipping_cost;
 		}
 
-		// Calculer et ajouter les coûts de livraison pour les produits d'isolation, si nécessaire.
-		if ( $isolation_plasterboard_found && $isolation_weight > 0 ) {
-			$isolation_cost       = $this->calculate_shipping_for_product( $isolation_weight, $shipping_method_name );
-			$total_shipping_cost += $isolation_cost;
-			error_log( 'Isolation shipping cost: ' . $isolation_cost );
-		}
+		/**
+		 * For degugging purposes only.
+		 */
+		$detailed_shipping_cost = array(
+			'placo_present'         => $cart_has_plasterboard ? 'Oui' : 'Non',
+			'vrac_poids'            => $vrac_weight ?: 0,
+			'vrac_prix'             => $vrac_shipping_cost ?: 0,
+			'isolation_poids'       => $isolation_weight ?: 0,
+			'isolation_prix'        => $isolation_shipping_cost ?: 0,
+			'autres_produits_poids' => $other_products_weight ?: 0,
+			'autres_produits_prix'  => $other_products_shipping_cost ?: 0,
+			'total_ht'              => $total_shipping_cost ?: 0,
+			'total_ttc'             => $total_shipping_cost * 1.2 ?: 0,
+		);
 
-		error_log( 'Total shipping cost: ' . $total_shipping_cost );
+		// Convertir le tableau en chaîne JSON pour le stockage dans le cookie.
+		$cookie_value = wp_json_encode( $detailed_shipping_cost );
+
+		// Enregistrer le cookie avec la durée de vie correcte (24 heures à partir de maintenant).
+		setcookie( sanitize_title( 'km_shipping_cost_' . $shipping_method_name ), $cookie_value, time() + 60 * 60 * 24 * 30, '/' );
+
 		return $total_shipping_cost;
 	}
 
@@ -186,7 +192,7 @@ class KM_Shipping_Methods {
 
 		foreach ( $weight_classes as $weight_class => $range ) {
 			if ( $remaining_weight > $range[1] ) {
-				$times                     = floor( $remaining_weight / $range[1] );
+				$times                     = ceil( $remaining_weight / $range[1] );
 				$delivery_option_full_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_method_name . ' - ' . $weight_class;
 				$total_price              += $times * $this->get_shipping_price( $delivery_option_full_name );
 				$remaining_weight         %= $range[1];
@@ -211,13 +217,22 @@ class KM_Shipping_Methods {
 	}
 
 	/**
-	 * Vérifie si un produit est une plaque de plâtre.
+	 * Vérifie si le panier contient une plaque de platre
 	 *
-	 * @param WC_Product $product Le produit à vérifier.
-	 * @return bool Vrai si le produit est une plaque de plâtre, faux sinon.
+	 * @param array $cart_items Les articles du panier.
+	 * @return bool Vrai si le panier contient une plaque de platre, faux sinon.
 	 */
-	private function is_plasterboard( $product ) {
-		return strpos( $product->get_name(), 'Plaque de plâtre' ) !== false;
+	private function cart_has_plasterboard( $cart_items ) {
+		// Find if cart has plasterboard.
+		foreach ( $cart_items as $cart_item ) {
+			$product = $cart_item['data'];
+
+			error_log( $product->get_name() );
+			if ( strpos( $product->get_name(), 'Plaque de plâtre' ) !== false ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -227,8 +242,8 @@ class KM_Shipping_Methods {
 	 * @return array Les packages existants avec le package personnalisé ajouté.
 	 */
 	public function custom_shipping_packages( $packages ) {
-		// TODO:
-		// Initialisez vos packages personnalisés ici.
+		// POSTPONED :
+		// Dans le futur, les packages personnalisés seront enregistrés ici.
 		// Vous pouvez itérer sur $packages existants et ajuster selon vos critères.
 		// Par exemple, vous pouvez séparer des produits en fonction de leur catégorie,
 		// de leur classe d'expédition ou de tout autre critère personnalisé.

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-// Hide Price Range for WooCommerce Variable Products
+// Hide Price Range for WooCommerce Variable Products.
 add_filter( 'woocommerce_variable_sale_price_html', 'km_variable_product_price', 10, 2 );
 add_filter( 'woocommerce_variable_price_html', 'km_variable_product_price', 10, 2 );
 /**
@@ -15,15 +15,14 @@ add_filter( 'woocommerce_variable_price_html', 'km_variable_product_price', 10, 
  * @return string The updated variable product price.
  */
 function km_variable_product_price( $v_price, $v_product ) {
-
-	// Product Price
+	// Product Price.
 	$prod_prices = array(
 		$v_product->get_variation_price( 'min', true ),
 		$v_product->get_variation_price( 'max', true ),
 	);
 	$prod_price  = $prod_prices[0] !== $prod_prices[1] ? sprintf( __( 'À partir de %1$s', 'woocommerce' ), wc_price( $prod_prices[0] ) ) : wc_price( $prod_prices[0] );
 
-	// Regular Price
+	// Regular Price.
 	$regular_prices = array(
 		$v_product->get_variation_regular_price( 'min', true ),
 		$v_product->get_variation_regular_price( 'max', true ),
@@ -113,28 +112,22 @@ function km_tonnage_calculation() {
 	);
 	wp_send_json_success( $json );
 }
+
 /**
- * Ajoute les métadonnées de la palette sur la page produit
- * 
- * @return void
+ * Ajoute une classe au body pour les produits non achetables
+ *
+ * @param array $classes Les classes du body.
+ * @return array Les classes du body.
  */
-function km_test_palett_meta() {
-	global $product;
 
-	// Obtenir l'ID du produit.
-	$product_id = $product->get_id();
+function add_custom_body_class_for_unpurchasable_products( $classes ) {
+	$product = wc_get_product( get_the_ID() );
 
-	// Récupérer les valeurs des métadonnées.
-	$quantite_par_palette = get_post_meta( $product_id, '_quantite_par_palette', true ) ?: 'Non renseigné';
-	$palette_a_partir_de  = get_post_meta( $product_id, '_palette_a_partir_de', true ) ?: 'Non renseigné';
+	if ( is_product() && ! $product->is_purchasable() ) {
+		$classes[] = 'unpurchasable-product';
+	}
 
-	// Afficher les métadonnées sur la page produit.
-	echo '<div class="product-debug-meta"><h4>DEBUG</h4>'
-	. '<p>Quantité par palette : ' . esc_html( $quantite_par_palette ) . '</p>'
-	. '<p>Palette à partir de : ' . esc_html( $palette_a_partir_de ) . '</p>'
-	. '</div>';
+	return $classes;
 }
 
-// Ajouter l'action au résumé du produit WooCommerce.
-add_action( 'woocommerce_after_add_to_cart_form', 'km_test_palett_meta' );
-
+add_filter( 'body_class', 'add_custom_body_class_for_unpurchasable_products' );

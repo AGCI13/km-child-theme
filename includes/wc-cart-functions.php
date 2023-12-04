@@ -60,9 +60,9 @@ function after_cart_coupon_content() {
 	// Add email to WC session
 	$email = WC()->session->get( 'wac_email' );
 
-	// if ( is_user_logged_in() || ! empty( $email ) ) {
-	// return;
-	// }
+	if ( is_user_logged_in() || ! empty( $email ) ) {
+		return;
+	}
 	?>
 	<div id="km-customer-email-marketing">
 		<p class="label">
@@ -79,34 +79,6 @@ add_action( 'woocommerce_after_cart_table', 'after_cart_coupon_content' );
 /**
  *  --------------- START ECO-TAX ----------------------
  */
-
-// /**
-// * Ajoute l'éco-taxe en tant que frais dans le panier
-// *
-// * @param WC_Cart $cart
-// * @return void
-// */
-// function km_add_ecotaxe_as_fee( $cart ) {
-// if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-// return;
-// }
-
-// $ecotaxe_total        = 0;
-// $km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
-
-// Calculer le total de l'éco-taxe pour tous les produits éligibles dans le panier
-// foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-// if ( $km_dynamique_pricing->product_is_bulk_or_bigbag( $cart_item['data'] ) ) {
-// $ecotaxe_total += $km_dynamique_pricing->ecotaxe_rate * $cart_item['quantity'];
-// }
-// }
-
-// Si l'éco-taxe totale est supérieure à zéro, l'ajouter en tant que frais.
-// if ( $ecotaxe_total > 0 ) {
-// $cart->add_fee( __( 'Écotaxe', 'kingmateriaux' ), $ecotaxe_total, true );
-// }
-// }
-// add_action( 'woocommerce_cart_calculate_fees', 'km_add_ecotaxe_as_fee', 1, 1 );
 
 /**
  * Affiche la mention de l'éco-taxe sous le prix unitaire
@@ -187,11 +159,12 @@ add_action( 'woocommerce_before_calculate_totals', 'km_add_ecotaxe_to_cart_item_
  */
 function km_ecotaxe_message_display() {
 	?>
-	 
 	<tr>
 		<td colspan="100%" class="km-ecotaxe-row" >
 			<div  class="km-ecotaxe-message">	
-				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/ecotaxe.png' ); ?>" alt=""><p><?php esc_html_e( "Cette taxe s'applique pour contribuer à limiter et/ou à atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?></p>
+				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/ecotaxe.png' ); ?>" alt="">
+				<p><?php esc_html_e( "Cette taxe s'applique pour contribuer à limiter et/ou à atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
+			</p>
 			</div>
 		</td>
 	</tr>
@@ -292,3 +265,43 @@ function km_add_cart_totals_after_order_total() {
 	}
 }
 add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
+
+/**
+ * Ajoute le champ de saisie du code promo après le total de la commande
+ *
+ * @param array  $cart_item
+ * @param string $cart_item_key
+ * @return void
+ */
+function km_add_pallet_description_under_product_name( $cart_item, $cart_item_key ) {
+	$product_name = $cart_item['data']->get_name();
+	if ( strpos( $product_name, 'Palette' ) !== false ) {
+		echo '<small class="cart-item-meta">⚠ Les palettes de parpaings sont consignées au prix de 28,80 € TTC la palette. Nous vous invitons à retourner la ou les palettes dans nos locaux, nous vous rembourserons 20,40 € TTC par palette. ⚠</small>';
+	}
+}
+add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
+
+/**
+ * Ajoute les métadonnées de la palette sur la page produit
+ *
+ * @return void
+ */
+function km_palett_product_meta_in_cart() {
+	global $product;
+
+	// Obtenir l'ID du produit.
+	$product_id = $product->get_id();
+
+	// Récupérer les valeurs des métadonnées.
+	$quantite_par_palette = get_post_meta( $product_id, '_quantite_par_palette', true ) ?: 'Non renseigné';
+	$palette_a_partir_de  = get_post_meta( $product_id, '_palette_a_partir_de', true ) ?: 'Non renseigné';
+
+	// Afficher les métadonnées sur la page produit.
+	echo '<div class="product-palett-meta"><h4>DEBUG</h4>'
+	. '<p>Quantité par palette : ' . esc_html( $quantite_par_palette ) . '</p>'
+	. '<p>Palette à partir de : ' . esc_html( $palette_a_partir_de ) . '</p>'
+	. '</div>';
+}
+// Ajouter l'action au résumé du produit WooCommerce.
+add_action( 'woocommerce_after_add_to_cart_form', 'km_palett_product_meta_in_cart' );
+
