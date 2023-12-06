@@ -12,6 +12,13 @@
 
 .drive-datetimepicker .drive-datepicker-day {
     margin-bottom:20px;
+    display: flex;
+    align-items: baseline;
+    gap:.5rem;
+}
+.drive-datetimepicker .drive-datepicker-day .btn-confirm{
+width: fit-content;
+font-size:15px;
 }
 
 .drive-datetimepicker .drive-datepicker-day .day-list {

@@ -128,32 +128,24 @@ class Shipping_method_drive extends WC_Shipping_Method {
 			return;
 		}
 
-		$days = array();
-		for ( $i = 0; $i < 20; $i++ ) {
-			$day = date_i18n( 'l d F', strtotime( '+' . $i . ' days' ) );
-
-			if ( str_contains( $day, 'dimanche' ) ) {
-				continue;
-			}
-			$days[] = $day;
-		}
 		?>
 	<div class="drive-datetimepicker">
+		<h3><?php esc_html_e( 'Sélectionnez une date*', 'kingmateriaux' ); ?></h3>
 		<div class="drive-datepicker-day">	
-			<h3><?php esc_html_e( 'Sélectionnez une date', 'kingmateriaux' ); ?></h3>
 			<ul class="day-list">
-			<?php foreach ( $days as $i => $day ) : ?>
-				<li class="day">
-					<?php echo esc_html( $day ); ?>
-				</li>
-			<?php endforeach; ?>
-			<li class="day load-more-days">
-				<?php esc_html_e( '+ Plus de jours', 'kingmateriaux' ); ?>
-			</li>
+				<?php echo km_get_drive_available_days(); ?>
 			</ul>
+			<div class="load-more-days modal-actions inline">
+				<button class="btn-confirm btn btn-secondary">
+					<span class="btn-confirm-label">
+						<?php esc_html_e( '+ de jours', 'kingmateriaux' ); ?>
+					</span>
+					<span class="btn-confirm-loader"></span>
+				</button>
+			</div>
 		</div>
 
-		<h3><?php esc_html_e( 'Sélectionnez un créneau horaire', 'kingmateriaux' ); ?></h3>
+		<h3><?php esc_html_e( 'Sélectionnez un créneau horaire*', 'kingmateriaux' ); ?></h3>
 		<div class="drive-datepicker-time">
 		<!-- Morning Slots -->
 			<div class="time-slot morning">
@@ -203,12 +195,17 @@ class Shipping_method_drive extends WC_Shipping_Method {
 			<?php echo wp_kses_post( wpautop( $this->method_location ) ); ?>
 		</div>
 		<?php endif; ?>
-
-		<input type="hidden" name="drive_date" class="drive_date" value="">
-		<input type="hidden" name="drive_time" class="drive_time" value="">
+		<p id="drive-date-wrapper" class="form-row must-validate validate-required">
+			<span class="woocommerce-input-wrapper">
+				<input type="hidden" name="drive_date" class="input-text drive_date" value="">
+			</span>
+		</p>
+		<p id="drive-time-wrapper"  class="form-row must-validate validate-required">
+			<span class="woocommerce-input-wrapper">
+				<input type="hidden" name="drive_time" class="input-text drive_time" value="">
+			</span>
+		</p>
 	</div>
-
-
 		<?php
 	}
 }

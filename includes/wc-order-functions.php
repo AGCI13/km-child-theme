@@ -167,3 +167,40 @@ function km_display_items_column( $column ) {
 	}
 }
 add_action( 'manage_shop_order_posts_custom_column', 'km_display_items_column' );
+
+
+/**
+ * Ajoute les données du calendrier du drive à la commande
+ *
+ * @param WC_Order $order
+ * @return void
+ */
+function display_drive_details_in_admin_order( $order ) {
+	// Get the drive date and the drive time from the order meta.
+	$drive_date = get_post_meta( $order->get_id(), '_drive_date', true );
+	$drive_time = get_post_meta( $order->get_id(), '_drive_time', true );
+
+	// If there is no drive date and no drive time, we don't need to display anything.
+	if ( empty( $drive_date ) && empty( $drive_time ) ) {
+		return;
+	}
+
+	// We will store our HTML in this variable.
+	$html = '<strong>Récupération de la commande au Drive le ';
+
+	// If we have a drive date, add it to the HTML.
+	if ( $drive_date ) {
+		$html .= $drive_date;
+	}
+
+	// If we have a drive time, add it to the HTML.
+	if ( $drive_time ) {
+		$html .= ' à ' . $drive_time;
+	}
+
+	$html .= '</strong>';
+
+	// Display the HTML.
+	echo $html;
+}
+add_action( 'woocommerce_admin_order_data_after_shipping_address', 'display_drive_details_in_admin_order' );

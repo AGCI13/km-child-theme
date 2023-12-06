@@ -8,6 +8,8 @@ require_once 'config/enqueue.php';
 
 require_once 'widgets/register-widgets.php';
 
+require_once 'includes/marketing-ops-functions.php';
+
 require_once 'includes/taxonomies/product-taxo-colors.php';
 require_once 'includes/taxonomies/product-taxo-uses.php';
 

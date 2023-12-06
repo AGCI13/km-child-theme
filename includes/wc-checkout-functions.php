@@ -56,8 +56,8 @@ function km_display_shipping_info_in_footer() {
 		$shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
 
 		echo '<div id="km-shipping-info-debug">';
-		echo '<img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
-		echo '<h3>DEBUG</h3><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
+		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
+		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
 	foreach ( $shipping_methods as $method ) {
 		$cookie_name = 'km_shipping_cost_' . $method;
 
@@ -80,6 +80,69 @@ function km_display_shipping_info_in_footer() {
 		}
 	}
 
-	echo '</div>';
+	echo '</div></div>';
 }
 add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
+
+
+/**
+ * Ajoute un champ de date et d'heure de retrait
+ *
+ * @return void
+ */
+function validate_drive_date_time() {
+	if ( isset( $_POST['drive_date'] ) && empty( $_POST['drive_date'] ) ) {
+		wc_add_notice( __( 'Veuillez choisir une date dans le calendrier du King Drive.', 'kingmateriaux' ), 'error' );
+	}
+
+	if ( isset( $_POST['drive_time'] ) && empty( $_POST['drive_time'] ) ) {
+		wc_add_notice( __( 'Veuillez choisir un créneau horaire dans le calendrier du King Drive.', 'kingmateriaux' ), 'error' );
+	}
+}
+add_action( 'woocommerce_checkout_process', 'validate_drive_date_time' );
+
+
+/**
+ * Ajouter le montant des frais de livraison dans le total du panier avec le hook woocommerce_review_order_before_shipping
+ *
+ * @return void
+ */
+function km_add_shipping_cost_to_cart_total() {
+	$shipping_cost = WC()->cart->get_cart_shipping_total();
+
+	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+	if ( in_array( 'drive', $chosen_shipping_methods ) ) {
+		return;
+	}
+	?>
+	<tr class="shipping">
+		<th><?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?></th>
+		<td data-title="<?php esc_attr_e( 'Livraison', 'kingmateriaux' ); ?>"><span class="shipping-cost"><?php echo $shipping_cost; ?></td>
+	</tr>
+	<?php
+}
+add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', );
+
+
+function km_get_drive_available_days() {
+	$offset = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : 0;
+	$days   = '';
+
+	for ( $i = $offset; $i < $offset + 20; $i++ ) {
+		$day = date_i18n( 'l d F', strtotime( '+' . $i . ' days' ) );
+
+		if ( false !== strpos( $day, 'dimanche' ) ) {
+			continue;
+		}
+		$days .= '<li class="day">' . esc_html( $day ) . '</li>';
+	}
+
+	return $days;
+}
+
+function km_get_more_drive_available_days() {
+	$days = km_get_drive_available_days();
+	wp_send_json_success( $days );
+}
+add_action( 'wp_ajax_get_drive_available_days', 'km_get_more_drive_available_days' );
+add_action( 'wp_ajax_nopriv_get_drive_available_days', 'km_get_more_drive_available_days' );

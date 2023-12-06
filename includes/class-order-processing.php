@@ -38,6 +38,24 @@ class KM_Order_Processing {
 
 	private function register() {
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'add_custom_order_meta' ), 50, 3 );
+		add_action( 'woocommerce_checkout_create_order', array( $this, 'save_drive_checkout_fields' ), 10, 2 );
+	}
+
+	/**
+	 * Save drive checkout fields
+	 *
+	 * @param WC_Order $order
+	 * @param array    $data
+	 * @return void
+	 */
+	public function save_drive_checkout_fields( $order, $data ) {
+		if ( isset( $_POST['drive_date'] ) ) {
+			$order->update_meta_data( '_drive_date', sanitize_text_field( $_POST['drive_date'] ) );
+		}
+
+		if ( isset( $_POST['drive_time'] ) ) {
+			$order->update_meta_data( '_drive_time', sanitize_text_field( $_POST['drive_time'] ) );
+		}
 	}
 
 	/**

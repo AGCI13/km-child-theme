@@ -88,7 +88,7 @@ $checkout         = WC()->checkout();
 					<!-- End Shipping adress -->
 					
 					<h4><?php esc_html_e( 'Pour valider votre mode de livraison, veuillez accepter les conditions suivantes :', 'kingmateriaux' ); ?></h4>
-					<div class="shipping-condition">
+					<div class="must-validate validate-required">
 						<p>	
 							<input type="checkbox" name="delivery_access_confirmation" id="delivery-access-confirmation" required>
 							<label for="delivery-access-confirmation"><?php esc_html_e( 'Conditions d’accès au chantier', 'kingmateriaux' ); ?>
@@ -98,7 +98,7 @@ $checkout         = WC()->checkout();
 							<?php esc_html_e( ' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'kingmateriaux' ); ?></p>
 						</p>
 					</div>
-					<div  class="shipping-condition">
+					<div class="must-validate validate-required">
 						<p>	
 							<input type="checkbox" name="unloading_access_confirmation" id="unloading-access-confirmation" required>
 							<label for="unloading-access-confirmation"><?php esc_html_e( 'Conditions de déchargement', 'kingmateriaux' ); ?>

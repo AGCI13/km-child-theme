@@ -32,8 +32,6 @@ class KM_Shipping_Methods {
 	 */
 	public function register() {
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'add_shipping_methods' ), 10, 1 );
-		// TODO:Créer des packages pour isolation / VRAC / Bigbag ?
-		// add_filter( 'woocommerce_cart_shipping_packages', array( $this, 'custom_shipping_packages' ) );
 	}
 
 	/**
@@ -122,7 +120,7 @@ class KM_Shipping_Methods {
 			if ( strpos( $product->get_name(), 'VRAC A LA TONNE' ) !== false ) {
 				$vrac_weight += $product_weight;
 			} elseif ( $cart_has_plasterboard && $this->is_isolation_product( $product ) ) {
-					$isolation_weight += $product_weight;
+				$isolation_weight += $product_weight;
 			} else {
 				$other_products_weight += $product_weight;
 			}
@@ -233,57 +231,5 @@ class KM_Shipping_Methods {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Ajoute un package personnalisé pour les produits d'isolation.
-	 *
-	 * @param array $packages Les packages existants.
-	 * @return array Les packages existants avec le package personnalisé ajouté.
-	 */
-	public function custom_shipping_packages( $packages ) {
-		// POSTPONED :
-		// Dans le futur, les packages personnalisés seront enregistrés ici.
-		// Vous pouvez itérer sur $packages existants et ajuster selon vos critères.
-		// Par exemple, vous pouvez séparer des produits en fonction de leur catégorie,
-		// de leur classe d'expédition ou de tout autre critère personnalisé.
-
-		// Créez un nouveau package si nécessaire
-		$custom_package = array(
-			'contents'        => array(), // Les articles à expédier dans ce package
-			'contents_cost'   => 0,       // Coût total des contenus
-			'applied_coupons' => array(), // Coupons appliqués à ce package
-			'user'            => array(
-				'ID' => get_current_user_id(),
-			),
-			'destination'     => array(
-				'country'   => '',
-				'state'     => '',
-				'postcode'  => '',
-				'city'      => '',
-				'address'   => '',
-				'address_2' => '',
-			),
-		);
-
-		// Exemple de logique pour ajouter des articles au package personnalisé
-		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-			if ( $cart_item->get_shipping_class() === 'isolation' ) {
-				// Ajoutez l'article au package personnalisé
-				$custom_package['contents'][ $cart_item_key ] = $cart_item;
-				$custom_package['contents_cost']             += $cart_item['line_total'];
-			} else {
-				// Sinon, laissez l'article dans le package par défaut
-				$packages[0]['contents'][ $cart_item_key ] = $cart_item;
-			}
-		}
-
-		// Assurez-vous d'ajuster la destination si nécessaire
-		$custom_package['destination'] = $packages[0]['destination'];
-
-		// Ajoutez le package personnalisé aux packages existants
-		$packages[] = $custom_package;
-
-		return $packages;
 	}
 }

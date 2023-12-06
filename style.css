@@ -6,6 +6,9 @@
  * Description:    A plain-vanilla &amp; lightweight theme for Elementor page builder
  */
 
+ 
+
+
 
 
 /*
@@ -22,7 +25,7 @@ Provisoire
   position: fixed;
   left: 0;
   bottom:0;
-  max-width: 230px;
+  width: 230px;
   font-size: 13px;
   resize: horizontal;
 }
@@ -94,7 +97,7 @@ Provisoire
 }
 .btn-secondary:focus,
 .btn-secondary:hover,
-.btn-secondary:active{color: white !important;background-color: #8C703F !important;border-color: #8C703F !important;}
+.btn-secondary:active{text-decoration:underline; color: #a18555 !important;background-color: #ffffff !important;border-color: #a18555 !important;}
 
 
 .btn-link{
@@ -103,6 +106,10 @@ Provisoire
   background-color:transparent;
   border: none!important;
 }
+
+
+
+
 
 .km-ecotaxe-message{
   display: flex;
@@ -261,22 +268,86 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 /* Mon compte */
 .page-id-50 main#content{background-color:#F5F5F5;}
 .page-id-50 .woocommerce-MyAccount-navigation{box-shadow:inherit;}
-
 .page-id-50 .h2_grey_back h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 22px;font-weight: 900;line-height: 1.2em;}
-
-
-
 .page-id-50 .woocommerce-MyAccount-content-wrapper{}
+/* Commandes */
 .page-id-50 .bloc-commandes{display: grid;grid-template-columns: repeat(auto-fill, minmax(50%, 1fr));}
 .page-id-50 .bloc-commandes .encart-commande{position: relative;box-shadow: 0px 4px 15px rgba(188, 188, 188, 1);margin: 10px;border-radius: 6px;padding: 20px 10px 20px 20px;}
-
 .page-id-50 span.order-number{font-family: "Arca Majora 3", Sans-serif;color:#000000;font-size:24px;font-weight:900;}
-
-
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-total{margin: 8px 0px;}
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-total{font-size: 18px;font-family: lato;}
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-date{margin:0px 0px 8px 0px;}
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-date time{font-size: 18px;font-family: lato;}
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-status{margin:0px 0px 20px 0px;}
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-status .order-status{font-size: 18px;font-family: lato;}
+.page-id-50 .encart-commande .woocommerce-orders-table__cell-order-status .order-status span{padding: 4px 18px 6px 18px;border-radius: 15px;}
+.page-id-50 .order-status .status-processing{background-color: #A6D4D7;color:#325D66;}
+.page-id-50 .order-status .status-on-hold{background-color: #A6D4D7;color:#325D66;}
+.page-id-50 .order-status .status-completed{background-color: #CFDFCA;color:#3C6C2B;}
 .page-id-50 span.order-total{color: #000000;}
 .page-id-50 span.order-item-count{position: absolute;top: 20px;right: 10px;color: #000000;background-color: #D9D9D9;border-radius: 6px;padding: 5px 10px;font-size: 15px;}
 .page-id-50 .woocommerce-orders-table__cell-order-date time{color: #4D4D4D;}
 .page-id-50 .woocommerce-orders-table__cell-order-status .order-status{color: #4D4D4D;}
+
+
+
+
+
+/* Détails commande */
+.page-id-50.woocommerce-view-order{}
+.page-id-50.woocommerce-view-order .woocommerce-MyAccount-content{background-color:white;width: 72% !important;padding: 40px !important;}
+
+
+.page-id-50.woocommerce-view-order .return-button{position:relative;margin: 0px 0px 20px 20px;color: #BE9D68 !important;font-size: 16px;font-family: 'Lato', sans-serif;font-weight: 600;display: inline-flex;align-items: center;gap: 10px;}
+.page-id-50.woocommerce-view-order .return-button:before{content: url('/wp-content/uploads/2023/11/arrow-breadcrumb.png');position: absolute;width: 16px;height: 16px;top: 2px;left: -20px;}
+.page-id-50.woocommerce-view-order .return-button:hover{text-decoration: underline;}
+
+
+
+
+
+.page-id-50.woocommerce-view-order .order-details-header{display: flex;flex-direction: column;position: relative;box-shadow: 0px 4px 15px rgba(188, 188, 188, 1);margin: 10px 10px 20px 10px;border-radius: 6px;padding: 20px 10px 10px 20px;}
+.page-id-50.woocommerce-view-order .order-details-row {display: flex;justify-content: space-between;align-items: center;margin-bottom: 10px;}
+.page-id-50.woocommerce-view-order .order-details-title{font-family: "Arca Majora 3", Sans-serif;color: #000000;font-size: 24px;font-weight: 900;}
+.page-id-50.woocommerce-view-order .order-details-price{font-size: 20px;color: #000000;font-weight: 400;font-family: Lato;}
+.page-id-50.woocommerce-view-order .order-details-date{font-size: 18px;font-family: lato;color:#4d4d4d;}
+.page-id-50.woocommerce-view-order .order-details-status{font-size: 18px;font-family: lato;color:#4D4D4D;}
+.page-id-50.woocommerce-view-order .order-details-status span{padding: 4px 18px 6px 18px;border-radius: 15px;}
+.page-id-50.woocommerce-view-order .order-details-status .status-processing{background-color: #A6D4D7;color:#325D66;}
+.page-id-50.woocommerce-view-order .order-details-status .status-on-hold{background-color: #A6D4D7;color:#325D66;}
+.page-id-50.woocommerce-view-order .order-details-status .status-completed{background-color: #CFDFCA;color:#3C6C2B;}
+.page-id-50.woocommerce-view-order .order-details-items{color: #000000;background-color: #D9D9D9;border-radius: 6px;padding: 5px 10px;font-size: 15px;}
+.page-id-50.woocommerce-view-order .download-invoice{position: relative;color: #BE9E67 !important;font-size: 20px;font-family: Lato;font-weight: 500;margin: 20px 0px 20px 35px;}
+.page-id-50.woocommerce-view-order .download-invoice:before{content: url('/wp-content/uploads/2023/12/picto-telecharger.png');position: absolute;width: 18px;height: 22px;top: -2px;left: -25px;}
+.page-id-50.woocommerce-view-order .download-invoice:hover{text-decoration: underline;}
+.page-id-50.woocommerce-view-order .order-status-tracker{margin-top: 40px;display: flex;align-items: center;justify-content: space-between;position: relative;}
+.page-id-50.woocommerce-view-order .tracker-step{text-align: center;position: relative;}
+.page-id-50.woocommerce-view-order .tracker-icon{width: 20px;height: 20px;background-size: cover;display: inline-block;margin-top: 20px;}
+.page-id-50.woocommerce-view-order .tracker-icon.check{background-image: url('/wp-content/uploads/2023/12/statut-check.png');}
+.page-id-50.woocommerce-view-order .tracker-text{font-family:Lato;color:#000000;font-size:18px;font-weight:600;}
+.page-id-50.woocommerce-view-order .tracker-text .waiting{font-size:16px;font-weight:400;font-style:italic;}
+.page-id-50.woocommerce-view-order .tracker-line{flex-grow: 1;height: 2px;background-color: #ccc;margin: 0 20px;}
+
+.page-id-50.woocommerce-view-order .h2_grey_back h2{font-size:26px;}
+
+
+
+
+
+.page-id-50.woocommerce-view-order .order-products {font-family: Lato;font-size:16px;font-weight:400;color:#262626;}
+.page-id-50.woocommerce-view-order .order-product {display: flex;margin-bottom: 20px;}
+.page-id-50.woocommerce-view-order .order-product-image img {max-width: 100px;margin-right: 20px;border-radius:20px;}
+.page-id-50.woocommerce-view-order .order-product-details {display: flex;flex-direction: column;justify-content: space-around;}
+.page-id-50.woocommerce-view-order .order-product-name {margin-bottom: 5px;}
+.page-id-50.woocommerce-view-order .order-product-price {font-weight: bold;font-size: 22px;color: #262626;margin-bottom: 5px;}
+.page-id-50.woocommerce-view-order .order-product-quantity {font-size: 20px;color: #262626;}
+.page-id-50.woocommerce-view-order .order-totals {margin-top: 20px;display: flex;flex-direction: column;align-items: flex-start;}
+.page-id-50.woocommerce-view-order .subtotal, .page-id-50.woocommerce-view-order .shipping, .total {font-weight: bold;margin-bottom: 5px;}
+.page-id-50.woocommerce-view-order .subtotal-amount, .page-id-50.woocommerce-view-order .shipping-amount, .total-amount {margin-bottom: 10px;}
+
+
+
+
 
 
 
@@ -422,13 +493,20 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
   }
   .btn-confirm-loader {
     display: none;
-    color: #FFF;
     font-size: 6px;
     position: relative;
     text-indent: -9999em;
     transform: translateZ(0);
     animation-delay: -0.16s;
   }
+
+  .btn-primary .btn-confirm-loader{
+    color: #FFF;
+  }
+  .btn-confirm-loader .btn-confirm-loader{
+    color: #BE9E67;
+  }
+
   .btn-confirm-loader:before,
   .btn-confirm-loader:after {
     content: '';
