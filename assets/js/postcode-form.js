@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     //Traiement de la réponse
                     setCookie('zip_code', zip_modal + '-' + country_modal, 1);
                     setCookie('shipping_zone', response.data, 1);
-                    window.location.href = window.location.href.split('?')[0];
                     modal_postcode.style.display = 'none';
+                    location.reload();
                 } else {
                     // Gestion des erreurs
                     if (response.data && typeof response.data.message === 'string') {

@@ -12,14 +12,18 @@ class Shipping_method_2_express extends WC_Shipping_Method {
 	/**
 	 *  Constructor.
 	 */
-	public function __construct() {
-		parent::__construct();
+	public function __construct($instance_id = 0) {
 		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
 
 		$this->id                 = 'option2express';
 		$this->method_title       = 'Option 2 Express';
 		$this->method_description = 'Livraison option 2 Express';
 		$this->tax_status         = 'taxable';
+		$this->instance_id        = absint( $instance_id );
+		$this->supports           = array(
+			'settings',
+			'shipping-zones',
+		);
 		$this->init();
 	}
 
@@ -66,6 +70,18 @@ class Shipping_method_2_express extends WC_Shipping_Method {
 				'description' => __( 'Entrez la description pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => 'Description de ' . $this->method_title,
 			),
+			'access_condition' => array(
+				'title'       => 'Condition d\'accès au chantier',
+				'type'        => 'textarea',
+				'description' => __( 'Entrez la condition d\'accès. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
+				'default'     => 'Accessible aux poids lourds.',
+			),
+			'unload_condition' => array(
+				'title'       => 'Condition de déchargement',
+				'type'        => 'textarea',
+				'description' => __( 'Entrez la condition de déchargement. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
+				'default'     => 'Ouverture et/ou portail de minimum de 3m de large, pas d\'angle droit/pente, ni câbles téléphoniques à moins de 3m.',
+			),
 		);
 	}
 
@@ -100,7 +116,7 @@ class Shipping_method_2_express extends WC_Shipping_Method {
 		$this->add_rate( $rate );
 	}
 
-	/**
+/**
 	 * Affiche la description de la méthode d'expédition.
 	 *
 	 * @param WC_Shipping_Rate $method
@@ -108,10 +124,9 @@ class Shipping_method_2_express extends WC_Shipping_Method {
 	 * @return void
 	 */
 	public function display_shipping_method_description( $method, $index ) {
-		if ( $method->method_id !== $this->id || ! $this->method_description ) {
-			return;
-		}
+		if ( $method->method_id === $this->id && ! empty( $this->method_description ) ) {
+			echo '<div class="shipping-method-description shipping-method-' . esc_html( $this->id ) . '-description">' . esc_html( $this->method_description ) . '</div>';
 
-		echo '<div class="shipping-method-description shipping-method-' . esc_html( $this->id ) . '-description">' . esc_html( $this->method_description ) . '</div>';
+		}
 	}
 }

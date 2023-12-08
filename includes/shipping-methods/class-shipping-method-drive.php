@@ -18,14 +18,18 @@ class Shipping_method_drive extends WC_Shipping_Method {
 	/**
 	 *  Constructor.
 	 */
-	public function __construct() {
-		parent::__construct();
+	public function __construct( $instance_id = 0 ) {
 		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
 
 		$this->id                 = 'drive';
 		$this->method_title       = 'Retrait au King Drive';
 		$this->method_description = 'Drive';
 		$this->tax_status         = 'taxable';
+		$this->instance_id        = absint( $instance_id );
+		$this->supports           = array(
+			'settings',
+			'shipping-zones',
+		);
 		$this->init();
 	}
 
@@ -108,9 +112,10 @@ class Shipping_method_drive extends WC_Shipping_Method {
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(
-			'id'    => $this->id,
-			'label' => $this->title,
-			'cost'  => $this->cost,
+			'id'      => $this->id,
+			'label'   => $this->title,
+			'package' => $package,
+			'cost'    => $this->cost,
 		);
 
 		$this->add_rate( $rate );
@@ -146,7 +151,7 @@ class Shipping_method_drive extends WC_Shipping_Method {
 		</div>
 
 		<h3><?php esc_html_e( 'Sélectionnez un créneau horaire*', 'kingmateriaux' ); ?></h3>
-		<div class="drive-datepicker-time">
+		<div class="drive-datepicker-time shopengine_woocommerce_shipping_methods">
 		<!-- Morning Slots -->
 			<div class="time-slot morning">
 			<h4>Matin</h4>

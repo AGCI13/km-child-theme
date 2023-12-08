@@ -55,8 +55,10 @@ function km_display_shipping_info_in_footer() {
 		// Noms des cookies que vous pourriez avoir définis
 		$shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
 
-		echo '<div id="km-shipping-info-debug">';
+		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
 		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
+		echo '<h3>  WC()->session</h3><pre>' . var_export( WC()->session, true ) . '</pre>';
+
 		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
 	foreach ( $shipping_methods as $method ) {
 		$cookie_name = 'km_shipping_cost_' . $method;
@@ -64,8 +66,9 @@ function km_display_shipping_info_in_footer() {
 		if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
 			$shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
 
-			echo '<h4>Coûts de livraison pour ' . esc_html( $method ) . ':</h4>';
-			echo '<ul>';
+			echo '<table>';
+			echo '<thead><tr><th colspan="2">Coûts de livraison pour ' . esc_html( $method ) . ':</th></tr></thead>';
+			echo '<tbody>';
 			foreach ( $shipping_info as $key => $value ) {
 				if ( strpos( $key, 'poids' ) !== false ) {
 					$value = esc_html( $value ) . ' Kg';
@@ -74,9 +77,10 @@ function km_display_shipping_info_in_footer() {
 				} else {
 					$value = esc_html( $value ) . ' €';
 				}
-				echo '<li>' . esc_html( $key ) . ': ' . esc_html( $value ) . '</li>';
+				echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
 			}
-			echo '</ul>';
+			echo '</tbody>';
+			echo '</table>';
 		}
 	}
 
@@ -108,9 +112,9 @@ add_action( 'woocommerce_checkout_process', 'validate_drive_date_time' );
  * @return void
  */
 function km_add_shipping_cost_to_cart_total() {
-	$shipping_cost = WC()->cart->get_cart_shipping_total();
-
+	$shipping_cost           = WC()->cart->get_cart_shipping_total();
 	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
 	if ( in_array( 'drive', $chosen_shipping_methods ) ) {
 		return;
 	}
@@ -134,7 +138,7 @@ function km_get_drive_available_days() {
 		if ( false !== strpos( $day, 'dimanche' ) ) {
 			continue;
 		}
-		$days .= '<li class="day">' . esc_html( $day ) . '</li>';
+		$days .= '<li class="day" data-date="' . esc_html( $day ) . '">' . esc_html( $day ) . '</li>';
 	}
 
 	return $days;

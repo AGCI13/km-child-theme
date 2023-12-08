@@ -204,3 +204,34 @@ function display_drive_details_in_admin_order( $order ) {
 	echo $html;
 }
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'display_drive_details_in_admin_order' );
+
+/**
+ * Ajoute les données du calendrier du drive à l'email de commande
+ *
+ * @param WC_Order $order
+ * @param int      $order_id
+ * @return void
+ */
+function km_maybe_copy_shipping_to_billing( $order_id ) {
+	if ( isset( $_POST['different_billing_address'] ) && 'false' === $_POST['different_billing_address'] ) {
+		// La case est cochée, copier l'adresse de livraison dans l'adresse de facturation.
+		$shipping_fields = array(
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'postcode',
+			'country',
+			'state',
+		);
+
+		foreach ( $shipping_fields as $field ) {
+			if ( isset( $_POST[ 'shipping_' . $field ] ) && ! empty( $_POST[ 'shipping_' . $field ] ) ) {
+				update_post_meta( $order_id, '_billing_' . $field, sanitize_text_field( $_POST[ 'shipping_' . $field ] ) );
+			}
+		}
+	}
+}
+add_action( 'woocommerce_checkout_update_order_meta', 'km_maybe_copy_shipping_to_billing' );

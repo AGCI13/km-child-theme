@@ -23,6 +23,26 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 
 		do_action( 'woocommerce_before_checkout_billing_form', $checkout ); ?>
 
+		<!-- Start Shipping adress -->
+		<div class="shipping_address">
+			<div class="elementor-element elementor-widget h2_grey_back">
+				<h2><?php esc_html_e( 'Adresse de livraison', 'kingmateriaux' ); ?></h2>
+			</div>
+			<?php do_action( 'woocommerce_before_checkout_shipping_form', $checkout ); ?>
+
+				<div class="woocommerce-shipping-fields__field-wrapper">
+				<?php
+				$fields = $checkout->get_checkout_fields( 'shipping' );
+
+				foreach ( $fields as $key => $field ) {
+					woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+				}
+				do_action( 'woocommerce_checkout_shipping' );
+				?>
+				</div>
+			<?php do_action( 'woocommerce_after_checkout_shipping_form', $checkout ); ?>
+		</div>
+		<!-- End Shipping adress -->
 
 		<div class="woocommerce-billing-fields__field-wrapper">
 			<div class="elementor-element elementor-widget h2_grey_back">
@@ -30,15 +50,14 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 			</div>
 
 			<div class="woocommerce-billing-actions">
-			<h4><?php esc_html_e( 'Utiliser l’adresse de livraison comme adresse de facturation ?', 'kingmateriaux' ); ?></h4>
-
-
+				<h4><?php esc_html_e( 'Utiliser l’adresse de livraison comme adresse de facturation ?', 'kingmateriaux' ); ?></h4>
 				<span class="bool-action true selected">
 						<?php esc_html_e( 'Oui', 'kingmateriaux' ); ?>	
 				</span>
-					<span class="bool-action false">
-						<?php esc_html_e( 'Non', 'kingmateriaux' ); ?>	
-					</span>
+				<span class="bool-action false">
+					<?php esc_html_e( 'Non', 'kingmateriaux' ); ?>	
+				</span>
+				<input type="hidden" class="woocommerce-form__input woocommerce-form__input-checkbox" name="different_billing_address" id="different_billing_address" value="true"/> 
 			</div>
 
 			<div class="woocommerce-billing-fields">

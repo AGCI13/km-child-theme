@@ -299,6 +299,20 @@ class KM_Shipping_Zone {
 			wp_send_json_error( array( 'message' => __( 'Le code postal BE doit contenir 4 chiffres.', 'kingmateriaux' ) ) );
 		}
 
+		// Assurez-vous que la classe WC_Customer est disponible.
+		if ( class_exists( 'WC_Customer' ) && did_action( 'wp_loaded' ) ) {
+			// Obtenir l'instance du client actuel.
+			$customer = WC()->customer;
+
+			// Définir les nouvelles informations d'adresse de livraison.
+			$customer->set_shipping_country( $country );
+			$customer->set_shipping_state( substr( $zip_code, 0, 2 ) );
+			$customer->set_shipping_postcode( $zip_code );
+
+			// Enregistrer les modifications.
+			$customer->save();
+		}
+
 		return array(
 			'zip_code' => $zip_code,
 			'country'  => $country,

@@ -57,6 +57,9 @@ class KM_Dynamic_Pricing {
 	 * @return void
 	 */
 	private function register() {
+		if ( is_admin() ) {
+			return;
+		}
 
 		if ( ! $this->km_shipping_zone->is_in_thirteen() ) {
 
@@ -77,7 +80,10 @@ class KM_Dynamic_Pricing {
 
 			add_filter( 'woocommerce_available_variation', array( $this, 'disable_variation_if_no_shipping_product' ), 10, 3 );
 
+		} else {
+			add_filter( 'woocommerce_get_price_html', array( $this, 'not_sold_in_thirteen' ), 10, 2 );
 		}
+
 		add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
 	}
 
@@ -100,6 +106,19 @@ class KM_Dynamic_Pricing {
 		}
 
 		return $variation_data;
+	}
+
+	/**
+	 * Change le prix du produit en fonction de la zone de livraison.
+	 *
+	 * @return void
+	 */
+	public function not_sold_in_thirteen( $price, $product ) {
+		if ( get_field( 'dont_sell_in_thirteen', $product->get_id() ) === true ) {
+			add_filter( 'woocommerce_is_purchasable', '__return_false' );
+			return $this->unavailable_message;
+		}
+		return $price;
 	}
 
 	/**

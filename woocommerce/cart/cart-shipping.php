@@ -32,8 +32,9 @@ if ( $available_methods ) {
 		}
 	}
 }
-$km_shipping_zone = KM_Shipping_zone::get_instance();
-$checkout         = WC()->checkout();
+$km_shipping_zone   = KM_Shipping_zone::get_instance();
+$checkout           = WC()->checkout();
+$chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' );
 ?>
 <tr class="woocommerce-shipping-totals shipping" style="display:table-row">
 	<td>
@@ -49,87 +50,67 @@ $checkout         = WC()->checkout();
 						<span class="shipping-cost"><?php esc_html_e( 'Inclus', 'kingmateriaux' ); ?></span>
 					<?php endif; ?>
 				</div>
-				<div class="km-shipping-options">
-					<?php foreach ( $shipping_methods as $method ) : ?>
-						<div class="km-shipping-option">
-							<span class="select-shipping-option <?php echo $chosen_method === $method->id ? 'selected' : ''; ?>" data-shipping="shipping-option"></span>
-							<div class="km-shipping-option-content">
-									<?php
-									if ( 1 < count( $shipping_methods ) ) {
-										printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
-									} else {
-										printf( '<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ) ); // WPCS: XSS ok.
-									}
-									printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
-									do_action( 'woocommerce_after_shipping_rate', $method, $index );
-									?>
+				<?php if ( preg_match( "/\b{'option'}\b/i", $chosen_method ) !== false ) : ?>
+					<div class="km-shipping-options">
+						<?php foreach ( $shipping_methods as $method ) : ?>
+							<div class="km-shipping-option">
+								<span class="select-shipping-option <?php echo $chosen_method === $method->id ? 'selected' : ''; ?>" data-shipping="shipping-option"></span>
+								<div class="km-shipping-option-content">
+										<?php
+										if ( 1 < count( $shipping_methods ) ) {
+											printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
+										} else {
+											printf( '<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ) ); // WPCS: XSS ok.
+										}
+										printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
+										do_action( 'woocommerce_after_shipping_rate', $method, $index );
+										?>
+								</div>
 							</div>
-						</div>
-					<?php endforeach; ?>
+						<?php endforeach; ?>
 
-					<!-- Start Shipping adress -->
-					<div class="shipping_address">
-						<h4><?php esc_html_e( 'Votre adresse de livraison', 'kingmateriaux' ); ?></h4>
-						<?php do_action( 'woocommerce_before_checkout_shipping_form', $checkout ); ?>
+						<!-- Start Shipping Conditions -->					
+								<?php if ( ! empty( $chosen_method_data['unload_condition'] ) || ! empty( $chosen_method_data['access_condition'] ) ) : ?>
+									<h4><?php esc_html_e( 'Pour valider votre mode de livraison, veuillez accepter les conditions suivantes :', 'kingmateriaux' ); ?></h4>
 
-						<div class="woocommerce-shipping-fields__field-wrapper">
-							<?php
-							$fields = $checkout->get_checkout_fields( 'shipping' );
+									<?php if ( ! empty( $chosen_method_data['access_condition'] ) ) : ?>
+										<div class="shipping-condition validate-required">
+											<input type="checkbox" name="delivery_access_confirmation" id="delivery-access-confirmation" required>
+											<label for="delivery-access-confirmation"><?php echo esc_html( $chosen_method_data['access_condition'] ); ?><span style="color:red">*</span></label>
+										</div>
+									<?php endif; ?>
 
-							foreach ( $fields as $key => $field ) {
-								woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
-							}
-
-							do_action( 'woocommerce_checkout_shipping' );
-							?>
-						</div>
-						<?php do_action( 'woocommerce_after_checkout_shipping_form', $checkout ); ?>
+									<?php if ( ! empty( $chosen_method_data['unload_condition'] ) ) : ?>
+										<div class="shipping-condition validate-required">
+											<input type="checkbox" name="delivery_unloading_confirmation" id="delivery-unloading-confirmation" required>
+											<label for="delivery-unloading-confirmation"><?php echo esc_html( $chosen_method_data['unload_condition'] ); ?><span style="color:red">*</span></label>
+										</div>
+									<?php endif; ?>
+								<?php endif; ?>
+						<!-- End Shipping Conditions -->
+						
 					</div>
-					<!-- End Shipping adress -->
-					
-					<h4><?php esc_html_e( 'Pour valider votre mode de livraison, veuillez accepter les conditions suivantes :', 'kingmateriaux' ); ?></h4>
-					<div class="must-validate validate-required">
-						<p>	
-							<input type="checkbox" name="delivery_access_confirmation" id="delivery-access-confirmation" required>
-							<label for="delivery-access-confirmation"><?php esc_html_e( 'Conditions d’accès au chantier', 'kingmateriaux' ); ?>
-							<span style="color:red">*</span></label>
-						</p>
-						<p>	
-							<?php esc_html_e( ' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'kingmateriaux' ); ?></p>
-						</p>
-					</div>
-					<div class="must-validate validate-required">
-						<p>	
-							<input type="checkbox" name="unloading_access_confirmation" id="unloading-access-confirmation" required>
-							<label for="unloading-access-confirmation"><?php esc_html_e( 'Conditions de déchargement', 'kingmateriaux' ); ?>
-							<span style="color:red">*</span></label>
-						</p>
-						<p>	
-							<?php esc_html_e( ' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'kingmateriaux' ); ?></p>
-						</p>
-					</div>
-				</div>
+					<?php endif; ?>	
 			</div>
 		<?php endif; ?>	
 
-		<?php if ( $drive_methods ) : ?>
-			<div id="shipping-method-drive" class="woocommerce-shipping-methods">
-					<div class="km-shipping-header" data-shipping="drive">
-						<span class="select-shipping" data-shipping="drive"></span>
-						<h3><?php esc_html_e( 'Retrait au King Drive', 'kingmateriaux' ); ?> <small class="drive-location"><?php esc_html_e( '(Rognac 13340)', 'kingmateriaux' ); ?></small></h3>
-						<span class="shipping-cost"><?php esc_html_e( 'Gratuit', 'kingmateriaux' ); ?></span>
+			<?php if ( $drive_methods ) : ?>
+				<div id="shipping-method-drive" class="woocommerce-shipping-methods">
+				<?php foreach ( $drive_methods as $method ) : ?>
+						<div class="km-shipping-header" data-shipping="drive">
+							<span class="select-shipping" data-shipping="drive"></span>
+							<h3><?php echo esc_html( wc_cart_totals_shipping_method_label( $method ) ); ?> <small class="drive-location"><?php esc_html_e( '(Rognac 13340)', 'kingmateriaux' ); ?></small></h3>
+							<span class="shipping-cost"><?php esc_html_e( 'Gratuit', 'kingmateriaux' ); ?></span>
+						</div>
+							<?php
+							printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
+							printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
+							?>
+						<?php endforeach; ?>
+						<?php do_action( 'woocommerce_after_shipping_rate', $method, $index ); ?>
 					</div>
-			
-					<?php foreach ( $drive_methods as $method ) : ?>
-						<?php
-						printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
-						printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
-						do_action( 'woocommerce_after_shipping_rate', $method, $index );
-						?>
-					<?php endforeach; ?>
-				</div>
 			<?php endif; ?>
-
+			
 			<?php if ( is_cart() ) : ?>
 				<p class="woocommerce-shipping-destination">
 					<?php

@@ -162,16 +162,22 @@ table.shopengine_woocommerce_shipping_methods td {
 
 .woocommerce-shipping-methods .km-shipping-option {
     width: calc(50% - 1rem);
-    padding: 15px;
+    padding: 11px 11px 11px 8px;
     border: 1px solid rgb(192, 192, 192);
     border-radius: 5px;
     cursor: pointer;
+    font-size:14px;
+}
+.woocommerce-shipping-methods .shipping-condition{
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
 }
 
 .woocommerce-shipping-methods .km-shipping-option label {
     font-weight: 600;
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .woocommerce-shipping-methods .km-shipping-option input[type="radio"] {
@@ -214,6 +220,13 @@ label[for="shipping_method_0_drive"],
 
 /** Billing adress */
 
+.woocommerce-checkout .woocommerce-billing-fields{
+    display: none;
+}
+.woocommerce-checkout .woocommerce-billing-fields.active{
+    display: block;
+}
+
 .woocommerce-checkout .woocommerce-billing-fields__field-wrapper h4 {
     font-size: 18px;
 }
@@ -243,4 +256,24 @@ label[for="shipping_method_0_drive"],
     color: white;
     background-color: #BE9E67;
     border: 1px solid #BE9E67;
+}
+
+/* Style de base du loader - vous pouvez personnaliser ceci */
+.shopengine-loader {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.shopengine-loader .spinner {
+    border: 4px solid rgba(0,0,0,.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-top: 4px solid #000;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

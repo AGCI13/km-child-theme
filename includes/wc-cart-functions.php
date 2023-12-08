@@ -202,10 +202,13 @@ add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_tot
  */
 
 function display_shipping_info_text() {
-	if ( KM_Shipping_Zone::get_instance()->is_in_thirteen() ) {
+	$km_shpping_zone = KM_Shipping_Zone::get_instance();
+	if ( $km_shpping_zone->is_in_thirteen() ) {
 		$value = __( 'Choix à l\'étape suivante', 'kingmateriaux' );
-	} else {
+	} elseif ( $km_shpping_zone->zip_code && $km_shpping_zone->shipping_zone_id ) {
 		$value = __( 'Incluse', 'kingmateriaux' );
+	} else {
+		return;
 	}
 	?>
 		<tr class="shipping-info">
@@ -280,5 +283,3 @@ function km_add_pallet_description_under_product_name( $cart_item, $cart_item_ke
 	}
 }
 add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
-
-

@@ -1,12 +1,10 @@
-jQuery(document).ready(function ($) {
+document.addEventListener('DOMContentLoaded', function () {
+    const stepShippingElements = document.querySelectorAll('.step-shipping');
+    stepShippingElements.forEach(element => element.classList.add('active'));
+
     //On est obligé d'utilisé jQuery pour le checkout car il est chargé en AJAX et les events sont détectés par jQuery
-
-    document.querySelectorAll('.step-shipping').forEach(element => {
-        element.classList.add('active');
-    });
-
     //Fist load, keep loading order !!!
-    $(document.body).on(
+    jQuery(document.body).on(
         "updated_checkout",
         function () {
             setTimeout(function () {
@@ -14,286 +12,325 @@ jQuery(document).ready(function ($) {
                 reapplySelectedClasses();
                 loadShippingMethods();
                 loadDriveDateTimePicker();
-                setDebugClosable();
+                handleBillingFields();
+                handleEnterKeydown();
             }, 200);
         });
-});
 
-const loadShippingMethods = () => {
+    const loadShippingMethods = () => {
+        const wcShippingMethod = document.querySelector('.woocommerce-shipping-totals.shipping');
+        const billingActions = document.querySelector('.woocommerce-billing-actions');
+        const billingFields = document.querySelector('.woocommerce-billing-fields');
+        const shippingSection = document.querySelector('.shipping_address');
+        let shippingMethods = wcShippingMethod.querySelectorAll('.woocommerce-shipping-methods');
+        let shippingOptions = wcShippingMethod.querySelectorAll('.km-shipping-option');
+        let shippingInputs = wcShippingMethod.querySelectorAll('input[type="radio"].shipping_method');
 
-    const wcShippingMethod = document.querySelector('.woocommerce-shipping-totals.shipping');
-    const billingActions = document.querySelector('.woocommerce-billing-actions');
-    const billingFields = document.querySelector('.woocommerce-billing-fields');
+        shippingMethods.forEach(shippingMethod => {
+            shippingMethod.addEventListener('click', () => handleShippingMethodClick(shippingMethod, shippingOptions, shippingInputs, billingActions, billingFields, shippingSection));
+        });
 
-    // There is mutliple element with .km-shipping-header class. Eveytime we click on one of them, we remove the selected class on all children of .km-shipping-header with .select-shipping class and add it to the clicked one
-    let shippingMethods = wcShippingMethod.querySelectorAll('.woocommerce-shipping-methods');
-    let shippingOptions = wcShippingMethod.querySelectorAll('.km-shipping-option');
-    let shippingInputs = wcShippingMethod.querySelectorAll('input[type="radio"].shipping_method');
+        shippingOptions.forEach(option => {
+            option.addEventListener('click', () => handleShippingOptionClick(option, shippingOptions));
+        });
 
-    //For each shipping methods groups
-    shippingMethods.forEach(function (shippingMethod) {
+    }
 
-        // FORMS VALIDATION
-        // if selected shippingMethod contains selected class, add validate-required class to all must-validate element
-        if (shippingMethod.classList.contains('selected')) {
-            if (shippingMethod.id === 'shipping-method-shipping') {
-                togglShippingAdress(billingFields);
+    const handleShippingMethodClick = (shippingMethod, shippingOptions, shippingInputs, billingActions, billingFields, shippingSection) => {
+        if (shippingMethod.classList.contains('selected')) return;
+
+        const selectedShippingMethodId = shippingMethod.id;
+        localStorage.setItem('selectedShipping', selectedShippingMethodId);
+        document.querySelectorAll('.woocommerce-shipping-methods.selected').forEach(el => el.classList.remove('selected'));
+        shippingMethod.classList.add('selected');
+
+        if (selectedShippingMethodId === 'shipping-method-shipping') {
+            reapplyShippingOption(shippingOptions);
+            toggleBillingFieldsRequired(true);
+            billingActions.style.display = 'block';
+            billingFields.style.display = 'none';
+            shippingSection.style.display = 'block';
+        }
+        if (selectedShippingMethodId === 'shipping-method-drive') {
+            document.querySelector('input#shipping_method_0_drive').click();
+            billingActions.style.display = 'none';
+            billingFields.style.display = 'block';
+            shippingSection.style.display = 'none';
+        }
+        jQuery(document.body).trigger('update_checkout');
+    }
+
+    const handleShippingOptionClick = (option, shippingOptions) => {
+        if (option.classList.contains('selected')) return;
+
+        shippingOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+
+        const shippingInput = option.querySelector('input[type="radio"]');
+        shippingInput.checked = true;
+        localStorage.setItem('selectedShippingOption', shippingInput.value);
+
+        jQuery(document.body).trigger('update_checkout');
+    }
+
+    const reapplyShippingOption = (shippingOptions) => {
+        const selectedShippingOption = localStorage.getItem('selectedShippingOption');
+        if (selectedShippingOption) {
+            const selectedOptionInput = document.querySelector(`input[value="${selectedShippingOption}"]`);
+            if (selectedOptionInput) {
+                const selectedOption = selectedOptionInput.closest('.km-shipping-option');
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                    selectedOptionInput.checked = true;
+                }
             }
-            if (shippingMethod.id === 'shipping-method-drive') {
-                billingActions.style.display = 'none';
-            }
+        }
+    }
 
-            shippingMethod.querySelectorAll('.must-validate').forEach(function (element) {
-                element.classList.add('validate-required');
+    const loadDriveDateTimePicker = () => {
+
+        let dateTimePickers = document.querySelectorAll('.drive-datetimepicker');
+
+        dateTimePickers.forEach(function (dateTimePicker) {
+
+            const dayInputs = document.querySelectorAll('.drive-datepicker-day .day');
+            const timeSlots = document.querySelectorAll('.drive-datepicker-time .slot');
+
+            //When click on a particular day, remove active class on all other days and add active class on that day
+            dayInputs.forEach(function (day) {
+                day.addEventListener('click', function () {
+                    dayInputs.forEach(function (day) {
+                        day.classList.remove('active');
+                    });
+                    day.classList.add('active');
+                    //Get inner text of day and set it to the hidden input field drive_date
+                    let dayText = day.innerText;
+                    let driveDate = dateTimePicker.querySelector('.drive_date');
+                    driveDate.value = dayText;
+                    dateTimePicker.querySelector('#drive-date-wrapper').classList.add('woocommerce-validated');
+                });
             });
+
+
+            //Same for slot
+            timeSlots.forEach(function (slot) {
+                slot.addEventListener('click', function () {
+                    timeSlots.forEach(function (slot) {
+                        slot.classList.remove('active');
+                    });
+                    slot.classList.add('active');
+                    //Get inner text of day and set it to the hidden input field drive_date
+                    let slotText = slot.innerText;
+                    let driveTime = dateTimePicker.querySelector('.drive_time');
+                    driveTime.value = slotText;
+                    dateTimePicker.querySelector('#drive-time-wrapper').classList.add('woocommerce-validated');
+                });
+            });
+
+            jQuery('form.checkout').on('checkout_place_order', function () {
+                var driveDate = jQuery('.drive_date').val();
+                var driveTime = jQuery('.drive_time').val();
+
+                // Validation pour drive_date
+                if (!driveDate) {
+                    // Affiche une erreur et empêche la soumission du formulaire
+                    return false;
+                }
+
+                // Validation pour drive_time
+                if (!driveTime) {
+                    // Affiche une erreur et empêche la soumission du formulaire
+                    return false;
+                }
+
+                return true; // Tout est valide
+            });
+
+            let loadMoreCount = 1;
+            dateTimePicker.querySelector('.load-more-days').addEventListener('click', function (event) {
+                let offset = loadMoreCount * 20; // Chaque fois, ajoutez 20 jours supplémentaires
+                handleLoading(event, true);
+                kmAjaxCall('get_drive_available_days', { offset: offset })
+                    .then(response => {
+                        if (response.success) {
+                            dateTimePicker.querySelector('.day-list').innerHTML += response.data;
+                            loadMoreCount++;
+                            loadDriveDateTimePicker();
+                        }
+                        handleLoading(event, false);
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la récupération des jours supplémentaires:', error);
+                    });
+            });
+        });
+    }
+
+    const checkoutNavigation = () => {
+        const multistepNavbars = document.querySelectorAll('.km-multistep-navbar');
+        const elementorCheckoutNavbar = document.querySelector('.shopengine-multistep-navbar');
+        const step0Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="0"]');
+        const step1Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="1"]');
+        const placeOrderButton = document.querySelector('#custom_paiement_btn');
+
+        multistepNavbars.forEach(navbar => {
+            let stepShipping = navbar.querySelector('.step-shipping');
+            let stepPayment = navbar.querySelector('.step-payment');
+
+            stepShipping.addEventListener('click', () => {
+                step0Btn.click();
+                if (step0Btn.parentElement.classList.contains('active')) {
+                    stepShipping.classList.add('active');
+                    stepPayment.classList.remove('active');
+                }
+            });
+
+            stepPayment.addEventListener('click', () => {
+                step1Btn.click();
+
+                if (step1Btn.parentElement.classList.contains('active')) {
+                    stepPayment.classList.add('active');
+                    stepShipping.classList.remove('active');
+                }
+            });
+            placeOrderButton.addEventListener('click', () => {
+                stepPayment.click();
+            });
+        });
+    }
+
+    const togglShippingAdress = (billingFields) => {
+        const showBillingBtn = document.querySelector('.bool-action.false');
+        const hideBillingBtn = document.querySelector('.bool-action.true');
+
+        // Définir la visibilité initiale des champs de facturation au chargement de la page
+        if (hideBillingBtn.classList.contains('selected')) {
+            billingFields.style.display = 'none';
         } else {
-            shippingMethod.querySelectorAll('.must-validate').forEach(function (element) {
-                element.classList.remove('validate-required');
-            });
+            billingFields.style.display = 'block';
         }
 
-        // SHIPING METHOD SELECTION
-        shippingMethod.addEventListener('click', function () {
-            //if this element has selected class, return
-            if (shippingMethod.classList.contains('selected')) {
+        // Lorsque l'utilisateur clique sur "Oui", masquer les champs de facturation
+        hideBillingBtn.addEventListener('click', function () {
+            billingFields.style.display = 'none';
+            this.classList.add('selected');
+            showBillingBtn.classList.remove('selected');
+        });
+
+        // Lorsque l'utilisateur clique sur "Non", afficher les champs de facturation
+        showBillingBtn.addEventListener('click', function () {
+            billingFields.style.display = 'block';
+            this.classList.add('selected');
+            hideBillingBtn.classList.remove('selected');
+        });
+    }
+
+    // Fonction pour réappliquer les classes selected
+    const reapplySelectedClasses = () => {
+        var selectedShipping = localStorage.getItem('selectedShipping');
+        var selectedShippingOption = localStorage.getItem('selectedShippingOption');
+        var selectedShippingWrapper = document.querySelector('#' + selectedShipping);
+
+        if (!selectedShipping || !selectedShippingWrapper) return;
+
+        selectedShippingWrapper.classList.add('selected');
+
+        if (!selectedShippingOption) return;
+
+        if (selectedShipping === 'shipping-method-shipping') {
+            selectedShippingWrapper.querySelectorAll('.km-shipping-option input[value="' + selectedShippingOption + '"]').forEach(function (optionInput) {
+                optionInput.closest('.km-shipping-option').classList.add('selected');
+            });
+        }
+    }
+
+    const handleBillingFields = () => {
+        const showBillingBtn = document.querySelector('.bool-action.false');
+        const hideBillingBtn = document.querySelector('.bool-action.true');
+        const billingFields = document.querySelector('.woocommerce-billing-fields');
+
+        hideBillingBtn.addEventListener('click', function () {
+            toggleBillingFieldsRequired(false);
+            this.classList.add('selected');
+            showBillingBtn.classList.remove('selected');
+            billingFields.classList.remove('active');
+        });
+
+        showBillingBtn.addEventListener('click', function () {
+            toggleBillingFieldsRequired(true);
+            this.classList.add('selected');
+            hideBillingBtn.classList.remove('selected');
+            billingFields.classList.add('active');
+        });
+
+        // Initialisez l'état requis des champs de facturation en fonction du choix actuel
+        if (hideBillingBtn.classList.contains('selected')) {
+            toggleBillingFieldsRequired(false);
+        } else {
+            toggleBillingFieldsRequired(true);
+        }
+    }
+
+    const toggleBillingFieldsRequired = (isRequired) => {
+        const billingFields = [
+            '#billing_first_name_field',
+            '#billing_last_name_field',
+            '#billing_address_1_field',
+            '#billing_city_field',
+            '#billing_postcode_field',
+            '#billing_phone_field',
+            '#billing_email_field'
+        ];
+
+        billingFields.forEach(field => {
+            const billingField = document.querySelector(field);
+
+            if (!billingField) {
                 return;
             }
 
-            //Save selected shipping method in local storage
-            localStorage.setItem('selectedShipping', shippingMethod.id);
+            const input = billingField.querySelector('input');
 
-            shippingMethods.forEach(function (shippingMethod) {
-                shippingMethod.classList.remove('selected');
-            });
-            shippingMethod.classList.add('selected');
-
-            //Check if header [data-shipping] attribute is equal to "drive"
-            if (shippingMethod.id === 'shipping-method-drive') {
-                //Remove selected class from all radio button
-                shippingOptions.forEach(function (option) {
-                    option.classList.remove('selected');
-                });
-
-
-                // Réinitialiser les options de livraison
-                shippingInputs.forEach(function (input) {
-                    input.checked = false;
-                });
-
-                // Stocker la sélection dans localStorage
-                localStorage.setItem('selectedShippingOption', '');
-
-                shippingMethod.querySelector('input[type="radio"]').checked = true;
-
-                billingActions.style.display = 'none';
-                billingFields.style.display = 'block';
-
-                //Update checkout
-                jQuery(document.body).trigger('update_checkout');
+            if (isRequired) {
+                billingField.classList.add('validate-required');
+                billingField.classList.add('shopengine-checkout-form-billing');
+            } else {
+                billingField.classList.remove('shopengine-checkout-form-billing');
+                billingField.classList.remove('validate-required');
             }
 
-            if (shippingMethod.id === 'shipping-method-shipping') {
-                billingActions.style.display = 'block';
+            input.required = isRequired;
+        });
+
+        // preventUpdateOnFieldChange('.shipping_address input#shipping_postcode');
+    };
+
+    const handleEnterKeydown = () => {
+        const checkoutForm = document.querySelector('form.checkout');
+        const paymentButton = document.querySelector('#custom_paiement_btn');
+
+        checkoutForm.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                paymentButton.click();
             }
         });
-
-        //When click on a particular option, remove selected class on all other options and add selected class on that option
-        shippingOptions.forEach(function (option) {
-
-            option.addEventListener('click', function () {
-                if (option.classList.contains('selected')) {
-                    return;
-                }
-
-                // Supprimer la classe selected de toutes les options de livraison
-                shippingOptions.forEach(function (option) {
-                    option.classList.remove('selected');
-                    option.classList.remove('validate-required');
-                });
-
-                // Ajouter la classe selected à l'option de livraison sélectionnée
-                option.classList.add('selected');
-
-                // Cocher l'option de livraison sélectionnée
-                const shippingInput = option.querySelector('input[type="radio"]');
-                shippingInput.checked = true;
-
-                // Stocker la sélection dans localStorage
-                localStorage.setItem('selectedShippingOption', shippingInput.value);
-
-                //Update checkout
-                jQuery(document.body).trigger('update_checkout');
-            });
-        });
-    });
-}
-
-const loadDriveDateTimePicker = () => {
-
-    let dateTimePickers = document.querySelectorAll('.drive-datetimepicker');
-
-    dateTimePickers.forEach(function (dateTimePicker) {
-
-        let dayInput = dateTimePicker.querySelectorAll('.day');
-        let timeSlot = dateTimePicker.querySelectorAll('.slot');
-
-        //When click on a particular day, remove active class on all other days and add active class on that day
-        dayInput.forEach(function (day) {
-            day.addEventListener('click', function () {
-                dayInput.forEach(function (day) {
-                    day.classList.remove('active');
-                });
-                day.classList.add('active');
-                //Get inner text of day and set it to the hidden input field drive_date
-                let dayText = day.innerText;
-                let driveDate = dateTimePicker.querySelector('.drive_date');
-                driveDate.value = dayText;
-                dateTimePicker.querySelector('#drive-date-wrapper').classList.add('woocommerce-validated');
-            });
-        });
-
-
-        //Same for slot
-        timeSlot.forEach(function (slot) {
-            slot.addEventListener('click', function () {
-                timeSlot.forEach(function (slot) {
-                    slot.classList.remove('active');
-                });
-                slot.classList.add('active');
-                //Get inner text of day and set it to the hidden input field drive_date
-                let slotText = slot.innerText;
-                let driveTime = dateTimePicker.querySelector('.drive_time');
-                driveTime.value = slotText;
-                dateTimePicker.querySelector('#drive-time-wrapper').classList.add('woocommerce-validated');
-            });
-        });
-
-        jQuery('form.checkout').on('checkout_place_order', function () {
-            var driveDate = jQuery('.drive_date').val();
-            var driveTime = jQuery('.drive_time').val();
-
-            // Validation pour drive_date
-            if (!driveDate) {
-                // Affiche une erreur et empêche la soumission du formulaire
-                return false;
-            }
-
-            // Validation pour drive_time
-            if (!driveTime) {
-                // Affiche une erreur et empêche la soumission du formulaire
-                return false;
-            }
-
-            return true; // Tout est valide
-        });
-
-        let loadMoreCount = 1;
-        dateTimePicker.querySelector('.load-more-days').addEventListener('click', function (event) {
-            let offset = loadMoreCount * 20; // Chaque fois, ajoutez 20 jours supplémentaires
-            handleLoading(event, true);
-            kmAjaxCall('get_drive_available_days', { offset: offset })
-            .then(response => {
-                if (response.success) {
-                    dateTimePicker.querySelector('.day-list').innerHTML += response.data;
-                    loadMoreCount++;
-                    loadDriveDateTimePicker();
-                }
-                handleLoading(event, false);
-            })
-            .catch(error => {
-                console.error('Erreur lors de la récupération des jours supplémentaires:', error);
-            });
-        });
-    });
-}
-
-const checkoutNavigation = () => {
-    const multistepNavbars = document.querySelectorAll('.km-multistep-navbar');
-    const elementorCheckoutNavbar = document.querySelector('.shopengine-multistep-navbar');
-    const step0Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="0"]');
-    const step1Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="1"]');
-    const placeOrderButton = document.querySelector('#custom_paiement_btn');
-
-    multistepNavbars.forEach(navbar => {
-        let stepShipping = navbar.querySelector('.step-shipping');
-        let stepPayment = navbar.querySelector('.step-payment');
-
-        stepShipping.addEventListener('click', () => {
-            step0Btn.click();
-            if (step0Btn.parentElement.classList.contains('active')) {
-                stepShipping.classList.add('active');
-                stepPayment.classList.remove('active');
-            }
-        });
-
-        stepPayment.addEventListener('click', () => {
-            step1Btn.click();
-
-            if (step1Btn.parentElement.classList.contains('active')) {
-                stepPayment.classList.add('active');
-                stepShipping.classList.remove('active');
-            }
-        });
-        placeOrderButton.addEventListener('click', () => {
-            stepPayment.click();
-        });
-    });
-}
-
-const togglShippingAdress = (billingFields) => {
-    const showBillingBtn = document.querySelector('.bool-action.false');
-    const hideBillingBtn = document.querySelector('.bool-action.true');
-
-    // Définir la visibilité initiale des champs de facturation au chargement de la page
-    if (hideBillingBtn.classList.contains('selected')) {
-        billingFields.style.display = 'none';
-    } else {
-        billingFields.style.display = 'block';
     }
 
-    // Lorsque l'utilisateur clique sur "Oui", masquer les champs de facturation
-    hideBillingBtn.addEventListener('click', function () {
-        billingFields.style.display = 'none';
-        this.classList.add('selected');
-        showBillingBtn.classList.remove('selected');
-    });
+    // // Empêcher l'update_checkout pour certains champs
+    // function preventUpdateOnFieldChange(selector) {
+    //     document.querySelectorAll(selector).forEach(field => {
+    //         field.addEventListener('change', event => {
+    //             event.stopPropagation();
 
-    // Lorsque l'utilisateur clique sur "Non", afficher les champs de facturation
-    showBillingBtn.addEventListener('click', function () {
-        billingFields.style.display = 'block';
-        this.classList.add('selected');
-        hideBillingBtn.classList.remove('selected');
-    });
-}
-
-// Fonction pour réappliquer les classes selected
-const reapplySelectedClasses = () => {
-    var selectedShipping = localStorage.getItem('selectedShipping');
-    var selectedShippingOption = localStorage.getItem('selectedShippingOption');
-
-    if (selectedShipping) {
-        document.querySelector('#' + selectedShipping).classList.add('selected');
-    }
-
-    if (selectedShippingOption) {
-        document.querySelectorAll('.km-shipping-option input[value="' + selectedShippingOption + '"]').forEach(function (optionInput) {
-            optionInput.closest('.km-shipping-option').classList.add('selected');
-        });
-    }
-}
-
-const setDebugClosable = () => {
-    document.querySelectorAll('.modal-debug-close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', () => {
-            document.querySelectorAll('.debug-content').forEach(element => {
-                if (element.style.display === "none") {
-                    element.style.display = "block";
-                    element.parentElement.style.height = "calc(100% - 32px)";
-                } else {
-                    element.style.display = "none";
-                    element.parentElement.style.height = "auto";
-                }
-            });
-        });
-    });
-}
+    //             kmAjaxCall('handle_shipping_postcode_change_on_checkout', { postcode: event.target.value }).then
+    //                 (response => {
+    //                     if (response.success) {
+    //                         jQuery(document.body).trigger('update_checkout');
+    //                     }
+    //                 });
+    //           // TODO : AJAX Contrôle si différent et l\actuelet si in or out 13
+    //         });
+    //     });
+    // }
+});

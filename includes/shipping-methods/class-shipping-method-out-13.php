@@ -12,14 +12,19 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 	/**
 	 *  Constructor.
 	 */
-	public function __construct() {
-		parent::__construct();
+	public function __construct( $instance_id = 0 ) {
 		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
 
 		$this->id                 = 'out13';
 		$this->method_title       = 'Hors 13';
 		$this->method_description = 'Livraison hors 13';
 		$this->tax_status         = 'taxable';
+
+		$this->instance_id = absint( $instance_id );
+		$this->supports    = array(
+			'settings',
+			'shipping-zones',
+		);
 		$this->init();
 	}
 
@@ -104,10 +109,8 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 	 * @return void
 	 */
 	public function display_shipping_method_description( $method, $index ) {
-		if ( $method->method_id !== $this->id || ! $this->method_description ) {
-			return;
+		if ( $method->method_id === $this->id && ! empty( $this->method_description ) ) {
+			echo '<div class="shipping-method-description shipping-method-' . esc_html( $this->id ) . '-description">' . esc_html( $this->method_description ) . '</div>';
 		}
-
-		echo '<div class="shipping-method-description shipping-method-' . esc_html( $this->id ) . '-description">' . esc_html( $this->method_description ) . '</div>';
 	}
 }

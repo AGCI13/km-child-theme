@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			tidioIframe.style.zIndex = '98';
 		}
 	}, 1500);
+	setDebugClosable(); 
 });
 
 const handleLoading = (event, show = false) => {
@@ -35,6 +36,24 @@ const handleLoading = (event, show = false) => {
 		submit_label.style.visibility = 'visible';
 	}
 }
+
+const setDebugClosable = () => {
+	document.querySelectorAll('.modal-debug-close').forEach(closeBtn => {
+		
+        closeBtn.addEventListener('click', () => {
+            document.querySelectorAll('.debug-content').forEach(element => {
+                if (element.style.display === "none") {
+                    element.style.display = "block";
+                    element.parentElement.style.height = "calc(100% - 32px)";
+                } else {
+                    element.style.display = "none";
+                    element.parentElement.style.height = "auto";
+                }
+            });
+        });
+    });
+}
+
 
 jQuery(document).ready(function ($) {
 	/* catégorie cliquable en entier */
@@ -88,4 +107,3 @@ jQuery(document).ready(function ($) {
 		}
 	});
 });
-
