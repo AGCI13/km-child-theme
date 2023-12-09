@@ -4,7 +4,7 @@ span.innerHTML += 'Voir le produit >';
 document.addEventListener('DOMContentLoaded', () => {
 	setTimeout(() => {
 		const tidioIframe = document.getElementById('tidio-chat-iframe');
-		if (tidioIframe) {
+		if(tidioIframe){
 			tidioIframe.style.zIndex = '98';
 		}
 	}, 1500);
@@ -107,3 +107,4 @@ jQuery(document).ready(function ($) {
 		}
 	});
 });
+

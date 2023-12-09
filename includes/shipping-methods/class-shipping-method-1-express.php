@@ -13,6 +13,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 	 *  Constructor.
 	 *   */
 	public function __construct( $instance_id = 0 ) {
+		parent::__construct( $instance_id );
 		$this->id           = 'option1express';
 		$this->method_title = 'Option 1 Express';
 		$this->tax_status   = 'taxable';

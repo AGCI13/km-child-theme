@@ -8,11 +8,12 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div class="error"><p><strong>Attention</strong>: WooCommerce est requis pour que ce <strong>thÃ¨me personnalisÃ© fonctionne.</strong> Veuillez l\'activer.</p></div>';
+			echo '<div class="error"><p><strong>Attention</strong>: WooCommerce est requis pour que ce <strong>thème personnalisé fonctionne.</strong> Veuillez l\'activer.</p></div>';
 		}
 	);
 	return;
 }
+
 
 // Importation des fichiers
 require_once 'config/enqueue.php';

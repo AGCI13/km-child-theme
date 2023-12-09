@@ -116,3 +116,26 @@ td.date.column-date, th#date{
 .woocommerce-admin-page td.name.column-name.has-row-actions.column-primary , .woocommerce-admin-page table.wp-list-table .column-name {
   width: 17%!important;
 }
+
+#datepicker-container .ui-datepicker {
+  width: 680px !important;
+}
+
+#datepicker-container  .ui-state-active,
+#datepicker-container  .ui-widget-content .ui-state-active,
+ #datepicker-container  .ui-widget-header .ui-state-active,
+ #datepicker-container .ui-state-highlight,  
+ #datepicker-container.ui-widget-content .ui-state-highlight, 
+  #datepicker-container .ui-widget-header .ui-state-highlight{
+  background: #ffc880 !important;
+}
+
+#datepicker-container .ui-state-default,  
+ #datepicker-container .ui-widget-content .ui-state-default,  
+ #datepicker-container .ui-widget-header .ui-state-default{
+  background: transparent !important;
+ }
+
+#day-picker-container input {
+    margin-left: 15px;
+}

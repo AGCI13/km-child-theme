@@ -44,13 +44,26 @@ do_action('woocommerce_before_account_orders', $has_orders); ?>
     							<?php $order_date = $order->get_date_created()->date('d/m/Y'); // Format the date ?>
     							<time datetime="<?php echo esc_attr($order->get_date_created()->date('c')); ?>"><?php echo esc_html($order_date); ?></time>
 								<?php elseif ('order-status' === $column_id) : ?>
-    								<span class="order-status"><?php echo esc_html('Status: ' . wc_get_order_status_name($order->get_status())); ?></span>
-							<?php elseif ('order-actions' === $column_id) : ?>
+									<?php $order_status = $order->get_status(); ?>
+									<span class="order-status">Statut : 
+										<span class="status-<?php echo esc_attr($order_status); ?>">
+											<?php echo esc_html(wc_get_order_status_name($order_status)); ?>
+										</span>
+									</span>
+								<?php elseif ('order-actions' === $column_id) : ?>
 								<?php
 								$actions = wc_get_account_orders_actions($order);
 								if (!empty($actions)) {
 									foreach ($actions as $key => $action) {
-										echo '<a href="' . esc_url($action['url']) . '" class="woocommerce-button button ' . sanitize_html_class($key) . '">' . esc_html($action['name']) . '</a>';
+										if ($key === 'view') {
+											echo '<a class="btn btn-primary" href="' . esc_url($action['url']) . '" class="woocommerce-button button ' . sanitize_html_class($key) . '">Détail de la commande</a>';
+										}
+										if ($key === 'invoice') {
+											continue;
+										}
+										if ($key !== 'view') {
+											echo '<a href="' . esc_url($action['url']) . '" class="woocommerce-button button ' . sanitize_html_class($key) . '">' . esc_html($action['name']) . '</a>';
+										}
 									}
 								}
 								?>
@@ -66,7 +79,7 @@ do_action('woocommerce_before_account_orders', $has_orders); ?>
 					echo wp_kses_post(sprintf(_n('%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce'), $order->get_formatted_order_total(), $item_count));
 					?>
 				</div>
-
+<?php /*
 				<div style="margin-bottom:5%;">
 					<a class="accordion">Détails de la commandes</a>
 					<div class="panel">
@@ -104,7 +117,7 @@ do_action('woocommerce_before_account_orders', $has_orders); ?>
 						?>
 					</p>
 				</div>
-	
+*/ ?>
 			
 
 			</div> <!-- Fin .encart-commande -->
@@ -140,20 +153,3 @@ do_action('woocommerce_before_account_orders', $has_orders); ?>
 <?php endif; ?>
 
 <?php do_action('woocommerce_after_account_orders', $has_orders); ?>
-
-<script>
-	var acc = document.getElementsByClassName("accordion");
-	var i;
-
-	for (i = 0; i < acc.length; i++) {
-		acc[i].addEventListener("click", function() {
-			this.classList.toggle("active");
-			var panel = this.nextElementSibling;
-			if (panel.style.display === "block") {
-				panel.style.display = "none";
-			} else {
-				panel.style.display = "block";
-			}
-		});
-	}
-</script>

@@ -113,7 +113,7 @@ function km_add_shipping_cost_to_cart_total() {
 
 	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-	if ( in_array( 'drive', $chosen_shipping_methods, true ) ) {
+	if ( empty( $chosen_shipping_methods ) || in_array( 'drive', $chosen_shipping_methods, true ) ) {
 		return;
 	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) ) {
 		$shipping_cost = 'Inclus';
@@ -130,23 +130,49 @@ function km_add_shipping_cost_to_cart_total() {
 }
 add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', );
 
-
+/**
+ * Génère la liste de jour disponible pour le drive en fonction des réglages dans Woocommerce > Expédition > King Drive.
+ *
+ * @return string
+ */
 function km_get_drive_available_days() {
-	$offset = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : 0;
-	$days   = '';
+	$days = '';
 
-	for ( $i = $offset; $i < $offset + 20; $i++ ) {
-		$day = date_i18n( 'l d F', strtotime( '+' . $i . ' days' ) );
+	// Get the days of the week and the specific dates to exclude
+	$drive_settings         = get_option( 'woocommerce_drive_settings', '' );
+	$unavailable_days       = isset( $drive_settings['unavailable_days'] ) ? $drive_settings['unavailable_days'] : '';
+	$unavailable_days_array = ! empty( $unavailable_days ) ? explode( ',', $unavailable_days ) : array();
 
-		if ( false !== strpos( $day, 'dimanche' ) ) {
+	$unavailable_dates       = isset( $drive_settings['unavailable_dates'] ) ? $drive_settings['unavailable_dates'] : '';
+	$unavailable_dates_array = ! empty( $unavailable_dates ) ? explode( ',', $unavailable_dates ) : array();
+
+	$drive_day_offset = isset( $drive_settings['day_offset'] ) ? intval( $drive_settings['day_offset'] ) : 0;
+	$offset           = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : $drive_day_offset;
+
+	$day_num = isset( $drive_settings['day_num'] ) && is_numeric( $drive_settings['day_num'] ) ? intval( $drive_settings['day_num'] ) : 20;
+
+	for ( $i = $offset; $i < $offset + $day_num; $i++ ) {
+		$date           = strtotime( '+' . $i . ' days' );
+		$day_name       = strtolower( date_i18n( 'l', $date ) );
+		$formatted_date = date_i18n( 'Y-m-d', $date );
+
+		if ( in_array( $day_name, $unavailable_days_array ) || in_array( $formatted_date, $unavailable_dates_array ) ) {
+			++$offset;
 			continue;
 		}
-		$days .= '<li class="day" data-date="' . esc_html( $day ) . '">' . esc_html( $day ) . '</li>';
+
+		$day_label = date_i18n( 'l d F', $date );
+		$days     .= '<li class="day" data-date="' . esc_html( $formatted_date ) . '">' . esc_html( $day_label ) . '</li>';
 	}
 
 	return $days;
 }
 
+/**
+ * Relance la fonction km_get_drive_available_days() pour charger plus de jours.
+ *
+ * @return string
+ */
 function km_get_more_drive_available_days() {
 	$days = km_get_drive_available_days();
 	wp_send_json_success( $days );

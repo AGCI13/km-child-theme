@@ -112,15 +112,14 @@ table.shopengine_woocommerce_shipping_methods td {
     height: 22px;
 }
 
-.woocommerce-shipping-methods .select-shipping-option {
+.woocommerce-shipping-methods .select-shipping-option{
     width: 18px;
     height: 18px;
     margin-right: 8px;
     min-width: 18px;
 }
-
 .woocommerce-shipping-methods .km-shipping-header .select-shipping::after,
-.woocommerce-shipping-methods .select-shipping-option::after {
+.woocommerce-shipping-methods .select-shipping-option::after{
     content: '';
     background-color: #BE9D68;
     border-radius: 50%;
@@ -137,7 +136,7 @@ table.shopengine_woocommerce_shipping_methods td {
     height: 13px;
 }
 
-.woocommerce-shipping-methods .km-shipping-option.selected {
+.woocommerce-shipping-methods .km-shipping-option.selected{
     border-color: #BE9D68;
     border-width: 2px;
 }
@@ -188,7 +187,7 @@ table.shopengine_woocommerce_shipping_methods td {
     display: none;
 }
 
-.woocommerce-shipping-methods .km-shipping-option input[type="radio"]::after {
+.woocommerce-shipping-methods .km-shipping-option input[type="radio"]::after{
     content: '';
     position: absolute;
     display: block;
@@ -215,9 +214,9 @@ table.shopengine_woocommerce_shipping_methods td {
 .woocommerce-shipping-methods .shipping-cost {
     font-style: italic;
     font-weight: 600;
-    color: #BE9E67;
-    margin-left: auto;
-    margin-right: 10px;
+    color:#BE9E67;
+    margin-left:auto;
+    margin-right:10px;
 }
 
 .woocommerce-shipping-methods .km-shipping-option:hover {
@@ -244,9 +243,9 @@ label[for="shipping_method_0_drive"],
     font-size: 18px;
 }
 
-.woocommerce-billing-actions {
-    margin-bottom: 30px;
-    margin-top: 20px;
+.woocommerce-billing-actions{
+    margin-bottom:30px; 
+    margin-top:20px;
 }
 
 .woocommerce-billing-actions .bool-action {
@@ -257,7 +256,7 @@ label[for="shipping_method_0_drive"],
     cursor: pointer;
     font-weight: 600;
     border: 1px solid transparent;
-    margin-right: 14px;
+    margin-right:14px; 
     font-size: 1em;
 }
 

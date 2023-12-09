@@ -5,12 +5,12 @@
  */
 class Shipping_method_drive extends WC_Shipping_Method {
 
+
 	/**
 	 * Instance unique de la classe.
 	 *
 	 * @var KM_Shipping_Methods
 	 */
-	private $km_shipping_methods;
 
 	public $method_location;
 	public $cost;
@@ -19,6 +19,7 @@ class Shipping_method_drive extends WC_Shipping_Method {
 	 *  Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
+		parent::__construct( $instance_id );
 		$this->id                 = 'drive';
 		$this->method_title       = 'Retrait au King Drive';
 		$this->method_description = 'Drive';
@@ -56,25 +57,25 @@ class Shipping_method_drive extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled'     => array(
+			'enabled'           => array(
 				'title'   => __( 'Activer', 'kingmateriaux' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Activer cette méthode d\'expédition', 'kingmateriaux' ),
 				'default' => 'yes',
 			),
-			'title'       => array(
+			'title'             => array(
 				'title'       => 'Nom affiché',
 				'type'        => 'text',
 				'description' => __( 'Entrez le nom affiché pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => $this->method_title,
 			),
-			'description' => array(
+			'description'       => array(
 				'title'       => 'Description',
 				'type'        => 'textarea',
 				'description' => __( 'Entrez la description pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => 'Description de ' . $this->method_title,
 			),
-			'cost'        => array(
+			'cost'              => array(
 				'title'       => __( 'Cost', 'woocommerce' ),
 				'type'        => 'text',
 				'placeholder' => '0',
@@ -82,10 +83,34 @@ class Shipping_method_drive extends WC_Shipping_Method {
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'location'    => array(
+			'location'          => array(
 				'title'   => __( 'Adresse de retrait', 'woocommerce' ),
 				'type'    => 'textarea',
 				'default' => '',
+			),
+			'day_offset'        => array(
+				'title'       => __( 'Jour de décalage', 'kingmateriaux' ),
+				'type'        => 'number',
+				'description' => __( 'Entrez le nombre de jours de à ajouter au jour de la commande.', 'kingmateriaux' ),
+				'default'     => 1,
+			),
+			'day_num'           => array(
+				'title'       => __( 'Nombre de jours à charger', 'kingmateriaux' ),
+				'type'        => 'number',
+				'description' => __( 'Entrez le nombre de jours à afficher pour le retrait.', 'kingmateriaux' ),
+				'default'     => 20,
+			),
+			'unavailable_days'  => array(
+				'title'       => __( 'Jours exclus', 'kingmateriaux' ),
+				'type'        => 'hidden',
+				'description' => __( 'Sélectionnez les jours à exclure pour le retrait.', 'kingmateriaux' ),
+				'default'     => '',
+			),
+			'unavailable_dates' => array(
+				'title'       => __( 'Dates exclues', 'kingmateriaux' ),
+				'type'        => 'hidden',
+				'description' => __( 'Sélectionnez les dates à exclure pour le retrait.', 'kingmateriaux' ),
+				'default'     => '',
 			),
 		);
 	}

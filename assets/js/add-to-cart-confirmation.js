@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
             handleLoading(e, true);
 
             action = this.getAttribute('data-action');
-
+            
             if (!action) {
                 return;
             }

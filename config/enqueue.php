@@ -57,12 +57,19 @@ add_action( 'wp_enqueue_scripts', 'km_front_scripts_enqueue' );
  *
  * @return void
  */
-function km_admin_scripts_enqueue() {
-	$admin_stylesheet_path = get_stylesheet_directory() . '/assets/css/';
-	$admin_stylesheet_uri  = get_stylesheet_directory_uri() . '/assets/css/';
+function km_admin_scripts_enqueue( $hook ) {
+	$stylesheet_uri  = get_stylesheet_directory_uri();
+	$stylesheet_path = get_stylesheet_directory();
+	$js_uri          = $stylesheet_uri . '/assets/js/';
+	$css_uri         = $stylesheet_uri . '/assets/css/';
+	$js_path         = $stylesheet_path . '/assets/js/';
+	$css_path        = $stylesheet_path . '/assets/css/';
 
-	if ( file_exists( $admin_stylesheet_path ) ) {
-		wp_enqueue_style( 'km-admin-style', $admin_stylesheet_uri . 'admin-style.css', array(), filemtime( $admin_stylesheet_path . 'admin-style.css' ), 'all' );
+	wp_enqueue_style( 'km-admin-style', $css_uri . 'admin-style.css', array(), filemtime( $css_path . 'admin-style.css' ), 'all' );
+
+	if ( 'woocommerce_page_wc-settings' === $hook ) {
+		wp_enqueue_script( 'jquery-ui-datepicker' );
+		wp_enqueue_script( 'km-admin-script', $js_uri . 'admin-script.js', array( 'jquery' ), filemtime( $js_path . 'admin-script.js' ), false );
 	}
 }
 add_action( 'admin_enqueue_scripts', 'km_admin_scripts_enqueue' );

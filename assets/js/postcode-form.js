@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     }
 
+
     const submitPostcode = (event) => {
         let country_modal = event.target.querySelector('.country').value;
         let zip_modal = event.target.querySelector('.zip_code').value;
