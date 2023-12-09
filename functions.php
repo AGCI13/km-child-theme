@@ -14,7 +14,6 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 	return;
 }
 
-
 // Importation des fichiers
 require_once 'config/enqueue.php';
 

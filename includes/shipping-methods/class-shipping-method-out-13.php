@@ -13,8 +13,6 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 	 *  Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->km_shipping_methods = KM_Shipping_Methods::get_instance();
-
 		$this->id                 = 'out13';
 		$this->method_title       = 'Hors 13';
 		$this->method_description = 'Livraison hors 13';
@@ -43,7 +41,6 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 		$this->method_description = $this->get_option( 'description' );
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_after_shipping_rate', array( $this, 'display_shipping_method_description' ), 10, 2 );
 	}
 
 	/**
@@ -82,9 +79,6 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 	 * @return void
 	 */
 	public function calculate_shipping( $package = array() ): void {
-		if ( $this->km_shipping_methods->km_shipping_zone->is_in_thirteen() ) {
-			return;
-		}
 
 		if ( 'yes' !== $this->get_option( 'enabled', 'yes' ) ) {
 			return;
@@ -95,22 +89,9 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 		$rate = array(
 			'id'    => $this->id,
 			'label' => $this->title,
-			'cost'  => 0,
+			'cost'  => 'Inclus',
 		);
 
 		$this->add_rate( $rate );
-	}
-
-	/**
-	 * Affiche la description de la méthode d'expédition.
-	 *
-	 * @param WC_Shipping_Rate $method
-	 * @param int              $index
-	 * @return void
-	 */
-	public function display_shipping_method_description( $method, $index ) {
-		if ( $method->method_id === $this->id && ! empty( $this->method_description ) ) {
-			echo '<div class="shipping-method-description shipping-method-' . esc_html( $this->id ) . '-description">' . esc_html( $this->method_description ) . '</div>';
-		}
 	}
 }

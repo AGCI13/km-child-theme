@@ -57,8 +57,6 @@ function km_display_shipping_info_in_footer() {
 
 		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
 		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
-		echo '<h3>  WC()->session</h3><pre>' . var_export( WC()->session, true ) . '</pre>';
-
 		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
 	foreach ( $shipping_methods as $method ) {
 		$cookie_name = 'km_shipping_cost_' . $method;
@@ -112,16 +110,21 @@ add_action( 'woocommerce_checkout_process', 'validate_drive_date_time' );
  * @return void
  */
 function km_add_shipping_cost_to_cart_total() {
-	$shipping_cost           = WC()->cart->get_cart_shipping_total();
+
 	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-	if ( in_array( 'drive', $chosen_shipping_methods ) ) {
+	if ( in_array( 'drive', $chosen_shipping_methods, true ) ) {
 		return;
+	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) ) {
+		$shipping_cost = 'Inclus';
+	} else {
+		$shipping_cost = WC()->cart->get_cart_shipping_total();
 	}
+
 	?>
 	<tr class="shipping">
-		<th><?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?></th>
-		<td data-title="<?php esc_attr_e( 'Livraison', 'kingmateriaux' ); ?>"><span class="shipping-cost"><?php echo $shipping_cost; ?></td>
+		<th><?php esc_html_e( 'Frais de livraison', 'kingmateriaux' ); ?></th>
+		<td data-title="<?php esc_attr_e( 'Frais de livraison', 'kingmateriaux' ); ?>"><span class="shipping-cost"><?php echo $shipping_cost; ?></td>
 	</tr>
 	<?php
 }

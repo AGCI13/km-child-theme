@@ -51,9 +51,10 @@ table.shopengine_woocommerce_shipping_methods td {
 .woocommerce-shipping-methods {
     background-color: white;
     border-radius: 5px;
-    box-shadow: 0px 4px 15px 0px #BCBCBC;
+    box-shadow: 0px 4px 15px 0px #dbdbdb;
     padding: 20px;
     margin-bottom: 20px;
+    transition: box-shadow 0.2s ease-in-out;
 }
 
 .woocommerce-shipping-methods h3 {
@@ -69,6 +70,9 @@ table.shopengine_woocommerce_shipping_methods td {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.woocommerce-shipping-methods:not(.selected){
     cursor: pointer;
 }
 
@@ -118,7 +122,6 @@ table.shopengine_woocommerce_shipping_methods td {
 .woocommerce-shipping-methods .km-shipping-header .select-shipping::after,
 .woocommerce-shipping-methods .select-shipping-option::after {
     content: '';
-    display: block;
     background-color: #BE9D68;
     border-radius: 50%;
     width: 0;
@@ -126,6 +129,7 @@ table.shopengine_woocommerce_shipping_methods td {
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
 }
 
 .woocommerce-shipping-methods.selected .km-shipping-header .select-shipping::after {
@@ -199,6 +203,15 @@ table.shopengine_woocommerce_shipping_methods td {
     right: 0;
 }
 
+.woocommerce-shipping-methods:not(.selected):hover {
+    box-shadow: 0px 4px 15px 0px #bababa;
+}
+
+.woocommerce-shipping-methods:not(.selected):hover .select-shipping::after {
+    width: 13px;
+    height: 13px;
+}
+
 .woocommerce-shipping-methods .shipping-cost {
     font-style: italic;
     font-weight: 600;
@@ -260,8 +273,15 @@ label[for="shipping_method_0_drive"],
 
 /* Style de base du loader - vous pouvez personnaliser ceci */
 .shopengine-loader {
-    text-align: center;
-    padding: 20px 0;
+    position: absolute;
+    background: #ffffff8c;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .shopengine-loader .spinner {
