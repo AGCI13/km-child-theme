@@ -19,9 +19,20 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 
 	protected function render() {
 
-		$checkout = WC()->checkout();
-
+		$checkout        = WC()->checkout();
+		$shipping_fields = $checkout->get_checkout_fields( 'shipping' );
+		$billing_fields  = $checkout->get_checkout_fields( 'billing' );
 		do_action( 'woocommerce_before_checkout_billing_form', $checkout ); ?>
+
+		<div class="mandatory-fields">
+				<?php
+				foreach ( $billing_fields as $key => $field ) {
+					if ( 'billing_phone' === $key || 'billing_email' === $key ) {
+						woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+					}
+				}
+				?>
+		</div>
 
 		<!-- Start Shipping adress -->
 		<div class="shipping_address">
@@ -32,12 +43,10 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 
 				<div class="woocommerce-shipping-fields__field-wrapper">
 				<?php
-				$fields = $checkout->get_checkout_fields( 'shipping' );
 
-				foreach ( $fields as $key => $field ) {
+				foreach ( $shipping_fields as $key => $field ) {
 					woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
 				}
-				do_action( 'woocommerce_checkout_shipping' );
 				?>
 				</div>
 			<?php do_action( 'woocommerce_after_checkout_shipping_form', $checkout ); ?>
@@ -62,16 +71,16 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 
 			<div class="woocommerce-billing-fields">
 				<?php
-				$fields = $checkout->get_checkout_fields( 'billing' );
-
-				foreach ( $fields as $key => $field ) {
+				foreach ( $billing_fields as $key => $field ) {
+					if ( 'billing_phone' === $key || 'billing_email' === $key ) {
+						continue;
+					}
 					woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
 				}
-
-				do_action( 'woocommerce_checkout_billing' );
 				?>
 				</div>
 			</div>
+
 		<?php
 		do_action( 'woocommerce_after_checkout_billing_form', $checkout );
 	}

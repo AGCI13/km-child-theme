@@ -89,15 +89,15 @@ class Shipping_method_drive extends WC_Shipping_Method {
 				'default' => '',
 			),
 			'day_offset'        => array(
-				'title'       => __( 'Jour de décalage', 'kingmateriaux' ),
+				'title'       => __( 'Nbre jour de préparation minimum', 'kingmateriaux' ),
 				'type'        => 'number',
-				'description' => __( 'Entrez le nombre de jours de à ajouter au jour de la commande.', 'kingmateriaux' ),
+				'description' => __( 'Entrez le nombre de jours de préparation par défaut.', 'kingmateriaux' ),
 				'default'     => 1,
 			),
 			'day_num'           => array(
-				'title'       => __( 'Nombre de jours à charger', 'kingmateriaux' ),
+				'title'       => __( 'Nombre de jours à charger dans le calendrier', 'kingmateriaux' ),
 				'type'        => 'number',
-				'description' => __( 'Entrez le nombre de jours à afficher pour le retrait.', 'kingmateriaux' ),
+				'description' => __( 'Entrez le nombre de jours à afficher pour le retrait. À ce nombre de jour viendront s\'ajouter les jours de préparation défini dans chaque produit.', 'kingmateriaux' ),
 				'default'     => 20,
 			),
 			'unavailable_days'  => array(

@@ -632,12 +632,12 @@ body.modal-open{overflow: hidden!important;}
 
 @media (max-width: 768px) {
   /* Accueil */
-  .home .grille-produit .elementor-widget-container{display: flex;overflow-x: auto;scroll-snap-type: x mandatory;scrollbar-color: #BE9D68 #BE9D68; }
+  .home .grille-produit .elementor-widget-container{display: flex;overflow-x: auto;scroll-snap-type: x mandatory;scrollbar-color: #BE9D68 #BE9D68;max-width: inherit !important;}
   .home .grille-produit .elementor-widget-container::-webkit-scrollbar {height: 6px;}
   .home .grille-produit .elementor-widget-container::-webkit-scrollbar-track {background: #d9d9d9;border-radius: 10px;}
   .home .grille-produit .elementor-widget-container::-webkit-scrollbar-thumb {background-color: #BE9D68;border-radius: 10px;}
   .home .grille-produit .products{display: flex;flex-wrap: nowrap;gap: 10px;}
-  .home .grille-produit .products li{flex: 0 0 auto;scroll-snap-align: start;max-height: 300px;width: 290px !important;}
+  .home .grille-produit .products li{flex: 0 0 auto;scroll-snap-align: start;max-height: 300px;width: 200px !important;}
   .home .grille-produit .uael-woo-products-thumbnail-wrap {max-height: 150px;overflow: hidden;}
   .home .grille-produit .uael-woo-products-summary-wrap {max-height: 150px;}
   .home .grille-produit .uael-woo-products-thumbnail-wrap img {max-height: 100%;object-fit: cover;}

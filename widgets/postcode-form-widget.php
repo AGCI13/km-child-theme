@@ -19,13 +19,17 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 
 	protected function render() {
 
-		wp_enqueue_style( 'km-postcode-form-style' );
-		wp_enqueue_script( 'km-postcode-form-script' );
-
 		$shipping_zone = KM_Shipping_Zone::get_instance();
 
-		$zip_code         = $shipping_zone->zip_code ?: '';
-		$shipping_zone_id = $shipping_zone->shipping_zone_id ?: '';
+		$zip_code = $shipping_zone->zip_code ? $shipping_zone->zip_code : '';
+
+		$shipping_zone_id = $shipping_zone->shipping_zone_id ? $shipping_zone->shipping_zone_id : '';
+
+		$show_popup = '';
+		if ( ( is_home() || is_front_page() || is_product() || is_product_category() ) && empty( $shipping_zone_id ) ) {
+			$show_popup = 'active';
+		}
+
 		?>
 		<div class="header_postcode">
 				<?php if ( $zip_code && $shipping_zone_id ) : ?>
@@ -35,7 +39,7 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 			<?php endif; ?>
 		</div>
 
-		<div class="km-modal modal-postcode <?php echo esc_html( $zip_code ); ?> <?php $shipping_zone_id ? 'active' : ''; ?>">
+		<div class="km-modal modal-postcode <?php echo esc_html( $zip_code ); ?> <?php echo esc_html( $show_popup ); ?>">
 			<div class="km-modal-dialog" role="document">
 				<form class="form-postcode" method="POST"> 
 					<img class="modal-postcode-close km-modal-close" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ); ?>" alt="close modal"></span>

@@ -1,13 +1,13 @@
-document.addEventListener('DOMContentLoaded', function () {
+jQuery(document).ready(function ($) {
     const billingActions = document.querySelector('.woocommerce-billing-actions');
     const billingFields = document.querySelector('.woocommerce-billing-fields');
     const shippingSection = document.querySelector('.shipping_address');
     const stepShippingElements = document.querySelectorAll('.step-shipping');
     stepShippingElements.forEach(element => element.classList.add('active'));
 
-    //On est obligé d'utilisé jQuery pour le checkout car il est chargé en AJAX et les events sont détectés par jQuery
+    //On est obligé d'utilisé $ pour le checkout car il est chargé en AJAX et les events sont détectés par $
     //Fist load, keep loading order !!!
-    jQuery(document.body).on(
+    $(document.body).on(
         "updated_checkout",
         function () {
             setTimeout(function () {
@@ -20,21 +20,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 200);
         });
 
-    jQuery(document.body).on('update_checkout', () => {
+    $(document.body).on('update_checkout', () => {
         showLoader('.shopengine-checkout-shipping-methods');
     });
 
-    jQuery(document.body).on('updated_checkout', () => {
+    $(document.body).on('updated_checkout', () => {
         hideLoader('.shopengine-checkout-shipping-methods');
     });
 
-    function showLoader(selector) {
+    const showLoader = (selector) => {
         const loaderHtml = `<div class="shopengine-loader"><div class="spinner"></div></div>`;
-        jQuery(selector).append(loaderHtml);
+        $(selector).append(loaderHtml);
     }
 
-    function hideLoader(selector) {
-        jQuery(selector).find('.shopengine-loader').remove();
+    const hideLoader = (selector) => {
+        $(selector).find('.shopengine-loader').remove();
     }
 
     const loadShippingMethods = () => {
@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const selectedShippingMethod = document.querySelector('.woocommerce-shipping-methods.selected');
 
-        console.log(selectedShippingMethod);
         if (!selectedShippingMethod || !selectedShippingMethod.id) return;
 
         if (selectedShippingMethod.id === 'shipping-method-shipping') {
@@ -98,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const shippingInput = option.querySelector('input');
         localStorage.setItem('selectedShippingOption', shippingInput.value);
-
         // Trigger click on closest input radio
         shippingInput.click();
     }
@@ -157,12 +155,14 @@ document.addEventListener('DOMContentLoaded', function () {
             this.classList.add('selected');
             showBillingBtn.classList.remove('selected');
             billingFields.classList.remove('active');
+            toggleAddressFieldsRequired('billing', false)
         });
 
         showBillingBtn.addEventListener('click', function () {
             this.classList.add('selected');
             hideBillingBtn.classList.remove('selected');
             billingFields.classList.add('active');
+            toggleAddressFieldsRequired('billing', true);
         });
     }
 
@@ -222,8 +222,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const dayInputs = document.querySelectorAll('.drive-datepicker-day .day');
             const timeSlots = document.querySelectorAll('.drive-datepicker-time .slot');
-            const selectedDate = localStorage.getItem('driveDate');
-            const selectedTime = localStorage.getItem('driveTime');
+            const displayDatetimeElem = document.querySelector('.woocommerce-checkout-review-order-table .shipping-cost');
+            const selectedStoredDate = localStorage.getItem('driveDate');
+            const selectedStoredTime = localStorage.getItem('driveTime');
+
+            let selectedDate = selectedStoredDate;
+            let selectedTime = selectedStoredTime;
 
             const setActiveClass = (elements, activeElement) => {
                 elements.forEach((element) => {
@@ -232,13 +236,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 activeElement.classList.add('active');
             };
 
+            const setDriveTotalsInfo = () => {
+                if (!selectedDate && !selectedTime) return;
+                // change selectedDate  format to d/m/Y
+                const dateParts = selectedDate.split('-');
+                const formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+                displayDatetimeElem.innerHTML = 'le ' + formattedDate + ' à ' + selectedTime;
+            }
+
             const handleDayClick = (day) => {
                 setActiveClass(dayInputs, day);
                 const chosenDate = day.dataset.date;
                 const driveDate = dateTimePicker.querySelector('.drive_date');
                 driveDate.value = chosenDate;
+                selectedDate = chosenDate;
                 dateTimePicker.querySelector('#drive-date-wrapper').classList.add('woocommerce-validated');
                 localStorage.setItem('driveDate', chosenDate);
+                setDriveTotalsInfo();
             };
 
             const handleSlotClick = (slot) => {
@@ -246,8 +260,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const chosenTime = slot.dataset.time;
                 const driveTime = dateTimePicker.querySelector('.drive_time');
                 driveTime.value = chosenTime;
+                selectedTime = chosenTime;
                 dateTimePicker.querySelector('#drive-time-wrapper').classList.add('woocommerce-validated');
                 localStorage.setItem('driveTime', chosenTime);
+                setDriveTotalsInfo();
             };
 
             dayInputs.forEach((day) => {
@@ -262,9 +278,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
-            jQuery('form.checkout').on('checkout_place_order', function () {
-                var driveDate = jQuery('.drive_date').val();
-                var driveTime = jQuery('.drive_time').val();
+            $('form.checkout').on('checkout_place_order', function () {
+                var driveDate = $('.drive_date').val();
+                var driveTime = $('.drive_time').val();
 
                 // Validation pour drive_date
                 if (!driveDate) {
@@ -301,22 +317,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             const reapplySelectedDateTime = () => {
-                if (selectedDate) {
+                if (selectedStoredDate) {
 
-                    const selectedDay = dateTimePicker.querySelector('.drive-datepicker-day .day[data-date="' + selectedDate + '"]');
+                    const selectedDay = dateTimePicker.querySelector('.drive-datepicker-day .day[data-date="' + selectedStoredDate + '"]');
                     if (selectedDay) {
                         selectedDay.click();
                     }
                 }
 
-                if (selectedTime) {
-                    const selectedSlot = dateTimePicker.querySelector('.drive-datepicker-time .slot[data-time="' + selectedTime + '"]');
+                if (selectedStoredTime) {
+                    const selectedSlot = dateTimePicker.querySelector('.drive-datepicker-time .slot[data-time="' + selectedStoredTime + '"]');
                     if (selectedSlot) {
                         selectedSlot.click();
                     }
                 }
             }
             reapplySelectedDateTime();
+            setDriveTotalsInfo();
         });
     }
 
@@ -348,10 +365,63 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
             placeOrderButton.addEventListener('click', () => {
+                validateCustomFields();
                 stepPayment.click();
             });
         });
     }
+
+    const validateCustomFields = () => {
+        const checkoutErrorsContainer = $('#km-checkout-errors');
+        const multistepWrapper = $('.shopengine-steps-wrapper');
+        let isValid = true;
+        let errorMessages = {};
+    
+        // Reset error messages
+        checkoutErrorsContainer.empty();
+        $('.km-validation-info').remove();
+    
+        const updateErrorMessage = () => {
+            let errorMessageHtml = '<ul>';
+            Object.values(errorMessages).forEach(message => {
+                errorMessageHtml += `<li>${message}</li>`;
+            });
+            errorMessageHtml += '</ul>';
+            checkoutErrorsContainer.html(errorMessageHtml);
+    
+            if (Object.keys(errorMessages).length === 0) {
+                checkoutErrorsContainer.hide();
+            } else {
+                checkoutErrorsContainer.show();
+            }
+        };
+    
+        // Validate required fields
+        multistepWrapper.find('.validate-required').each(function () {
+            const fieldWrapper = $(this);
+            const inputField = fieldWrapper.find('input, select, textarea');
+            const fieldLabel = fieldWrapper.find('label').text().replace('*', '').trim();
+            const fieldKey = fieldWrapper.attr('id') || inputField.attr('name'); // Use ID or name as a key
+            const errorMessage = `Le champ "${fieldLabel}" n'est pas correctement rempli.`;
+    
+            if ((inputField.is(':checkbox') && !inputField.is(':checked')) || (inputField.val() === '')) {
+                isValid = false;
+                fieldWrapper.append('<span class="km-validation-info">Ce champ est requis</span>');
+                errorMessages[fieldKey] = errorMessage;
+    
+                // Event listener to remove specific error message
+                inputField.on('input change', function () {
+                    fieldWrapper.find('.km-validation-info').remove();
+                    delete errorMessages[fieldKey];
+                    updateErrorMessage();
+                });
+            }
+        });
+    
+        updateErrorMessage();
+        return isValid;
+    };
+    
 
     const handleEnterKeydown = () => {
         const checkoutForm = document.querySelector('form.checkout');

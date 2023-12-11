@@ -26,8 +26,8 @@ function km_front_scripts_enqueue() {
 
 	wp_enqueue_script( 'km-front-scripts', $js_uri . 'front.js', 'jquery', filemtime( $js_path . 'front.js' ), false, array() );
 
-	wp_register_style( 'km-postcode-form-style', $css_uri . 'postcode-form.css', array(), filemtime( $css_path . 'postcode-form.css' ), 'all' );
-	wp_register_script( 'km-postcode-form-script', $js_uri . 'postcode-form.js', array(), filemtime( $js_path . 'postcode-form.js' ), array( 'in_footer' => true ) );
+	wp_enqueue_style( 'km-postcode-form-style', $css_uri . 'postcode-form.css', array(), filemtime( $css_path . 'postcode-form.css' ), 'all' );
+	wp_enqueue_script( 'km-postcode-form-script', $js_uri . 'postcode-form.js', array(), filemtime( $js_path . 'postcode-form.js' ), array( 'in_footer' => true ) );
 
 	wp_register_style( 'km-tonnage-calculator-style', $css_uri . 'tonnage-calculator.css', array(), filemtime( $css_path . 'tonnage-calculator.css' ), 'all' );
 	wp_register_script( 'km-tonnage-calculator-script', $js_uri . 'tonnage-calculator.js', array( 'jquery' ), filemtime( $js_path . 'tonnage-calculator.js' ), false );

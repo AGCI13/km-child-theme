@@ -45,54 +45,16 @@ function km_override_checkout_init(): void {
 }
 add_action( 'woocommerce_checkout_init', 'km_override_checkout_init' );
 
-function km_display_shipping_info_in_footer() {
-	$km_shipping_zone = KM_Shipping_Zone::get_instance();
-	if ( ! is_checkout() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! $km_shipping_zone->is_in_thirteen() ) {
-		return;
-	}
-	// Vérifier si sur la page de paiement
-
-		// Noms des cookies que vous pourriez avoir définis
-		$shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
-
-		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
-		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
-		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
-	foreach ( $shipping_methods as $method ) {
-		$cookie_name = 'km_shipping_cost_' . $method;
-
-		if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
-			$shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
-
-			echo '<table>';
-			echo '<thead><tr><th colspan="2">Coûts de livraison pour ' . esc_html( $method ) . ':</th></tr></thead>';
-			echo '<tbody>';
-			foreach ( $shipping_info as $key => $value ) {
-				if ( strpos( $key, 'poids' ) !== false ) {
-					$value = esc_html( $value ) . ' Kg';
-				} elseif ( strpos( $key, 'placo' ) !== false ) {
-					$value = esc_html( $value );
-				} else {
-					$value = esc_html( $value ) . ' €';
-				}
-				echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
-			}
-			echo '</tbody>';
-			echo '</table>';
-		}
-	}
-
-	echo '</div></div>';
-}
-add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
-
-
 /**
  * Ajoute un champ de date et d'heure de retrait
  *
  * @return void
  */
 function validate_drive_date_time() {
+	if ( 'drive' !== WC()->session->get( 'chosen_shipping_methods' )[0] ) {
+		return;
+	}
+
 	if ( isset( $_POST['drive_date'] ) && empty( $_POST['drive_date'] ) ) {
 		wc_add_notice( __( 'Veuillez choisir une date dans le calendrier du King Drive.', 'kingmateriaux' ), 'error' );
 	}
@@ -103,35 +65,17 @@ function validate_drive_date_time() {
 }
 add_action( 'woocommerce_checkout_process', 'validate_drive_date_time' );
 
-
 /**
- * Ajouter le montant des frais de livraison dans le total du panier avec le hook woocommerce_review_order_before_shipping
+ * Relance la fonction km_get_drive_available_days() pour charger plus de jours.
  *
- * @return void
+ * @return string
  */
-function km_add_shipping_cost_to_cart_total() {
-
-	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-
-	if ( empty( $chosen_shipping_methods ) || in_array( 'drive', $chosen_shipping_methods, true ) ) {
-		return;
-	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) ) {
-		$shipping_cost = 'Inclus';
-	} else {
-		$shipping_cost = WC()->cart->get_cart_shipping_total();
-	}
-
-	?>
-	<tr class="shipping">
-		<th><?php esc_html_e( 'Frais de livraison', 'kingmateriaux' ); ?></th>
-		<td data-title="<?php esc_attr_e( 'Frais de livraison', 'kingmateriaux' ); ?>">
-			<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
-		</td>
-			<?php do_action( 'km_after_checkout_shipping' ); ?>
-	</tr>
-	<?php
+function km_get_more_drive_available_days() {
+	$days = km_get_drive_available_days();
+	wp_send_json_success( $days );
 }
-add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
+add_action( 'wp_ajax_get_drive_available_days', 'km_get_more_drive_available_days' );
+add_action( 'wp_ajax_nopriv_get_drive_available_days', 'km_get_more_drive_available_days' );
 
 /**
  * Génère la liste de jour disponible pour le drive en fonction des réglages dans Woocommerce > Expédition > King Drive.
@@ -172,29 +116,45 @@ function km_get_drive_available_days() {
 }
 
 /**
- * Relance la fonction km_get_drive_available_days() pour charger plus de jours.
+ * Ajouter le montant des frais de livraison dans le total du panier avec le hook woocommerce_review_order_before_shipping
  *
- * @return string
+ * @return void
  */
-function km_get_more_drive_available_days() {
-	$days = km_get_drive_available_days();
-	wp_send_json_success( $days );
-}
-add_action( 'wp_ajax_get_drive_available_days', 'km_get_more_drive_available_days' );
-add_action( 'wp_ajax_nopriv_get_drive_available_days', 'km_get_more_drive_available_days' );
+function km_add_shipping_cost_to_cart_total() {
 
+	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+	if ( ! $chosen_shipping_methods || empty( $chosen_shipping_methods ) ) {
+		return;
+	} elseif ( in_array( 'drive', $chosen_shipping_methods, true ) ) {
+		$shipping_label = __( 'À récupérer au King Drive', 'kingmateriaux' );
+	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) ) {
+		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
+		$shipping_cost  = __( 'Inclus', 'kingmateriaux' );
+		$shiping_date   = km_display_shipping_delays_after_shipping();
+	} else {
+		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
+		$shiping_date   = km_display_shipping_delays_after_shipping();
+	}
+	$shipping_cost = WC()->cart->get_cart_shipping_total();
+	?>
+	<tr class="shipping">
+		<th><?php echo esc_html( $shipping_label ); ?></th>
+		<td data-title="<?php echo esc_html( $shipping_label ); ?>">
+				<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
+		<?php echo $shiping_date; ?>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
 
 function km_display_shipping_delays_after_shipping() {
 
-	if ( WC()->cart->is_empty() ) {
-		return;
-	}
+	$html = '';
+
 	// Récupérer l'ID de la zone de livraison.
 	$shipping_zone_id = KM_Shipping_Zone::get_instance()->shipping_zone_id;
-
-	if ( WC()->session->chosen_method && 'drive' === WC()->session->chosen_method ) {
-		return;
-	}
 
 	$longest_min_delay = 0;
 	$longest_max_delay = 0;
@@ -237,7 +197,7 @@ function km_display_shipping_delays_after_shipping() {
 
 		if ( $longest_min_delay === $longest_max_delay ) {
 			// Construire le message avec le délai de livraison.
-			echo '<tr><td colspan="2" class="class="km-cart-longest-delay">Estimée entre le '. $formatted_min_date . '</td></tr>';
+			$html .= '<tr><td colspan="2" class="class="km-cart-longest-delay">Livraison prévue le ' . $formatted_min_date . '</td></tr>';
 			return;
 		}
 
@@ -247,7 +207,55 @@ function km_display_shipping_delays_after_shipping() {
 		$formatted_max_date = $max_delivery_date->format( 'd/m/Y' );
 
 		// Construire le message avec la plage de dates.
-		echo '<tr><td colspan="2" class="class="km-cart-longest-delay">Estimée entre le ' . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
+		$html .= '<tr><td colspan="2" class="class="km-cart-longest-delay">Livraison prévue entre le ' . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
+		return $html;
 	}
 }
-add_action( 'km_after_checkout_shipping', 'km_display_shipping_delays_after_shipping' );
+
+
+/** --------------  DEBUG CODE START ----------------- */
+
+function km_display_shipping_info_in_footer() {
+	$km_shipping_zone = KM_Shipping_Zone::get_instance();
+	if ( is_admin() || ! is_checkout() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! $km_shipping_zone->is_in_thirteen() ) {
+		return;
+	}
+	// Vérifier si sur la page de paiement
+
+		// Noms des cookies que vous pourriez avoir définis
+		$shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
+
+		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
+		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
+		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
+		echo '$chosen_shipping_methods :' . WC()->session->chosen_shipping_methods[0];
+
+	foreach ( $shipping_methods as $method ) {
+		$cookie_name = 'km_shipping_cost_' . $method;
+
+		if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
+			$shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
+
+			echo '<table>';
+			echo '<thead><tr><th colspan="2">Coûts de livraison pour ' . esc_html( $method ) . ':</th></tr></thead>';
+			echo '<tbody>';
+			foreach ( $shipping_info as $key => $value ) {
+				if ( strpos( $key, 'poids' ) !== false ) {
+					$value = esc_html( $value ) . ' Kg';
+				} elseif ( strpos( $key, 'placo' ) !== false ) {
+					$value = esc_html( $value );
+				} else {
+					$value = esc_html( $value ) . ' €';
+				}
+				echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
+			}
+			echo '</tbody>';
+			echo '</table>';
+		}
+	}
+
+	echo '</div></div>';
+}
+add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
+
+/** --------------  DEBUG CODE END ----------------- */
