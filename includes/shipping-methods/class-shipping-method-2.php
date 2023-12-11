@@ -22,8 +22,6 @@ class Shipping_method_2 extends WC_Shipping_Method {
 		$this->supports           = array(
 			'settings',
 			'shipping-zones',
-			'instance-settings',
-			'instance-settings-modal',
 		);
 		$this->init();
 	}
@@ -81,30 +79,6 @@ class Shipping_method_2 extends WC_Shipping_Method {
 				'type'        => 'textarea',
 				'description' => __( 'Entrez la condition de déchargement. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
 				'default'     => 'Ouverture et/ou portail de minimum de 3m de large, pas d\'angle droit/pente, ni câbles téléphoniques à moins de 3m.',
-			),
-			'delivery_days_min_high_season' => array(
-				'title'       => 'Délai de livraison minimum de Mars à Août',
-				'type'        => 'number',
-				'description' => __( 'Entrez le délai de livraison minimum en jours. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
-				'default'     => '7',
-			),
-			'delivery_days_max_high_season' => array(
-				'title'       => 'Délai de livraison maximum de Mars à Août',
-				'type'        => 'number',
-				'description' => __( 'Entrez le délai de livraison maximum en jours. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
-				'default'     => '10',
-			),
-			'delivery_days_min_low_season' => array(
-				'title'       => 'Délai de livraison minimum de Septembre à Février',
-				'type'        => 'number',
-				'description' => __( 'Entrez le délai de livraison minimum en jours. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
-				'default'     => '5',
-			),
-			'delivery_days_max_low_season' => array(
-				'title'       => 'Délai de livraison minimum de Septembre à Février',
-				'type'        => 'number',
-				'description' => __( 'Entrez le délai de livraison maximum en jours. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
-				'default'     => '7',
 			),
 		);
 	}

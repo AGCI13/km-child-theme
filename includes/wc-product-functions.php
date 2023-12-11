@@ -206,3 +206,46 @@ function km_debug_single_product() {
 }
 // Ajouter l'action au résumé du produit WooCommerce.
 add_action( 'woocommerce_after_single_product', 'km_debug_single_product' );
+
+function km_display_shipping_delays_on_product_page( $product_id ) {
+
+	global $product;
+
+	// Vérifier si le produit est achetable.
+	if ( ! $product || ! $product->is_purchasable() ) {
+		return; // Si le produit n'est pas achetable, ne rien afficher.
+	}
+	$product_id = $product->get_id();
+
+	// Récupérer l'ID de la zone de livraison.
+	$shipping_zone_id = KM_Shipping_Zone::get_instance()->shipping_zone_id;
+
+	// Vérifier si des délais de livraison personnalisés sont définis via ACF.
+	$custom_delays_hs = get_field( 'product_shipping_delays_product_shipping_delays_hs', $product_id );
+	$custom_delays_ls = get_field( 'product_shipping_delays_product_shipping_delays_ls', $product_id );
+
+	// Déterminer la saison actuelle.
+	$current_month  = date( 'n' );
+	$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
+
+	// Récupérer les délais de livraison en fonction de la saison et des données personnalisées.
+	$min_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['min_shipping_days_hs'] ) ?? get_option( 'min_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['min_shipping_days_ls'] ) ? get_option( 'min_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['min_shipping_days_ls'] );
+	$max_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['max_shipping_days_hs'] ) ?? get_option( 'max_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['max_shipping_days_ls'] ) ? get_option( 'max_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['max_shipping_days_ls'] );
+
+	// Vérifier si les informations sont disponibles.
+	if ( empty( $min_shipping_days ) && empty( $max_shipping_days ) ) {
+		return; // Si les deux sont manquants, ne rien afficher.
+	}
+
+	// Construire le message à afficher.
+	$delivery_message = 'Délais de livraison de ';
+	if ( ! empty( $min_shipping_days ) && ! empty( $max_shipping_days ) ) {
+		$delivery_message .= $min_shipping_days . ' à ' . $max_shipping_days . ' jours.';
+	} elseif ( ! empty( $min_shipping_days ) ) {
+		$delivery_message .= $min_shipping_days . ' jours minimum.';
+	} elseif ( ! empty( $max_shipping_days ) ) {
+		$delivery_message .= $max_shipping_days . ' jours maximum.';
+	}
+
+	echo '<div class="km-product-delivery-delay">' . esc_html( $delivery_message ) . '</div>';
+}

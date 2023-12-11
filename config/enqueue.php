@@ -67,9 +67,13 @@ function km_admin_scripts_enqueue( $hook ) {
 
 	wp_enqueue_style( 'km-admin-style', $css_uri . 'admin-style.css', array(), filemtime( $css_path . 'admin-style.css' ), 'all' );
 
-	if ( 'woocommerce_page_wc-settings' === $hook ) {
+	if ( 'woocommerce_page_wc-settings' === $hook && 'drive' === $_GET['section'] ) {
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'km-admin-script', $js_uri . 'admin-script.js', array( 'jquery' ), filemtime( $js_path . 'admin-script.js' ), false );
 	}
+
+	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );
+	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+	wp_enqueue_script( 'km-ajax-script' );
 }
 add_action( 'admin_enqueue_scripts', 'km_admin_scripts_enqueue' );

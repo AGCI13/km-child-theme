@@ -67,6 +67,8 @@ class KM_Shipping_Zone {
 	public function register() {
 		add_action( 'wp_ajax_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
 		add_action( 'wp_ajax_nopriv_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
+		add_action( 'wp_ajax_save_custom_shipping_delays', array( $this, 'save_shipping_delays_handler' ) );
+		add_action( 'admin_footer', array( $this, 'add_custom_shipping_zone_fields' ) );
 	}
 
 	/**
@@ -194,7 +196,6 @@ class KM_Shipping_Zone {
 	public function get_related_shipping_product( $product ) {
 
 		if ( ! $product || ! $product instanceof WC_Product ) {
-			error_log( 'KM_Shipping_Zone::get_related_shipping_product() : $product n\'est pas une instance de WC_Product.' );
 			return;
 		}
 
@@ -352,5 +353,144 @@ class KM_Shipping_Zone {
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => 'Une erreur est survenue : ' . $e->getMessage() ) );
 		}
+	}
+
+	/**
+	 * Add custom fields to shipping zones.
+	 *
+	 * @param WC_Shipping_Zone $zone The shipping zone object.
+	 */
+	public function add_custom_shipping_zone_fields( $zone ) {
+		$screen  = get_current_screen();
+		$zone_id = $_GET['zone_id'];
+
+
+		if ( 'woocommerce_page_wc-settings' !== $screen->id || ! isset( $zone_id ) ) {
+			return;
+		}
+		// Récupère les paramètres si déjà enregistrés
+		$min_shipping_days_hs = get_option( 'min_shipping_days_hs_' . $zone_id );
+		$max_shipping_days_hs = get_option( 'max_shipping_days_hs_' . $zone_id );
+		$min_shipping_days_ls = get_option( 'min_shipping_days_ls_' . $zone_id );
+		$max_shipping_days_ls = get_option( 'max_shipping_days_ls_' . $zone_id );
+
+		//TODO: Reorganize this code in a template file maybe
+		?>
+		<div id="km-shipping-delay-wrapper" class="wrap woocommerce">
+			<h3><?php esc_html_e( 'Délais de livraison', 'kingmateriaux' ); ?></h3>
+			<p><?php esc_html_e( 'Laissez vide un des deux champs pour n\'affichez qun\'un seul nombre de jour.', 'kingmateriaux' ); ?></p>
+			<table class="form-table wc-shipping-zone-settings">
+				<tbody>
+				<tr valign="top">
+					<th scope="row" class="titledesc"><?php esc_html_e( 'De Mars à Août', 'kingmateriaux' ); ?></th>
+				</tr>
+				<tr valign="top">
+					<th scope="row" class="titledesc"><?php esc_html_e( 'Délais de livraison min', 'kingmateriaux' ); ?> :</th>
+					<td class="forminp">
+						<input type="text" data-attribute="min_shipping_days_hs" id="min_shipping_days_hs" name="min_shipping_days_hs" value="<?php echo esc_attr( $min_shipping_days_hs ); ?>" />
+					</td>
+				</tr>
+				<tr valign="top">
+					<th scope="row" class="titledesc"><?php esc_html_e( 'Délais de livraison max', 'kingmateriaux' ); ?> :</th>
+					<td class="forminp">
+						<input type="text" data-attribute="max_shipping_days_hs" id="max_shipping_days_hs" name="max_shipping_days_hs" value="<?php echo esc_attr( $max_shipping_days_hs ); ?>" />
+					</td>
+				</tr>
+				</table>
+				<table class="form-table wc-shipping-zone-settings">
+				<tr valign="top">
+					<th scope="row" class="titledesc"><?php esc_html_e( 'De Septembre à Février', 'kingmateriaux' ); ?></th>
+				</tr>
+				<tr valign="top">
+					<th scope="row" class="titledesc">
+						<?php esc_html_e( 'Délais de livraison min', 'kingmateriaux' ); ?> :
+					</th>
+					<td class="forminp">
+						<input type="text" data-attribute="min_shipping_days_ls" id="min_shipping_days_ls" name="min_shipping_days_ls" value="<?php echo esc_attr( $min_shipping_days_ls ); ?>" />
+					</td>
+				</tr>
+				<tr valign="top">
+					<th scope="row" class="titledesc"><?php esc_html_e( 'Délais de livraison max', 'kingmateriaux' ); ?> :</th>
+					<td class="forminp">
+						<input type="text" data-attribute="max_shipping_days_ls" id="max_shipping_days_ls" name="max_shipping_days_ls" value="<?php echo esc_attr( $max_shipping_days_ls ); ?>" />
+					</td>
+				</tr>
+				</tbody>
+			</table>
+			<div class="km-shipping-delay-actions">
+				<button type="button" class="button button-primary" id="km-save-shipping-delay"><?php esc_html_e( 'Enregistrer les délais de livraison', 'kingmateriaux' ); ?>	
+				</button>
+				<div class="spinner"></div>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+		jQuery(document).ready(function($) {
+
+		$('#km-save-shipping-delay').on('click', function() {
+			$that = $(this);
+			$that.attr('disabled', true);
+			$that.siblings('.spinner').css("visibility", "visible");
+			$that.siblings('.km-success-message', '.km-error-message').css("display", "none");
+
+			$('.km-success-message, .km-error-message').remove();
+				const data = {
+					'zone_id': '<?php echo esc_js( $zone_id ); ?>',
+					'min_shipping_days_hs': $('#min_shipping_days_hs').val(),
+					'max_shipping_days_hs': $('#max_shipping_days_hs').val(),
+					'min_shipping_days_ls': $('#min_shipping_days_ls').val(),
+					'max_shipping_days_ls': $('#max_shipping_days_ls').val(),
+					'security': '<?php echo wp_create_nonce( 'save_custom_shipping_delays_nonce' ); ?>'
+				};
+
+				kmAjaxCall('save_custom_shipping_delays', data)
+					.then(response => {
+						if (response.success) {
+							$that.after('<p class="km-success-message">' + response.data.message + '</p>')
+						}
+						$that.attr('disabled', false);
+						$that.siblings('.spinner').css("visibility", 'hidden')
+						$that.siblings('.km-success-message', '.km-error-message').css("display", "block");
+						setTimeout(function() {
+							$('.km-success-message, .km-error-message').fadeOut('slow');
+						}, 3000);
+					})
+					.catch(error => {
+						$that.after('<p class="km-error-message">Une erreur est survenue:' + error + '</p>');
+					});
+			});
+		});
+			</script>
+		<?php
+	}
+
+	/**
+	 * Ajax callback to save the shipping delays.
+	 *
+	 * @return void | json
+	 */
+	public function save_shipping_delays_handler() {
+		check_ajax_referer( 'save_custom_shipping_delays_nonce', 'security' );
+
+		$zone_id = isset( $_POST['zone_id'] ) ? intval( $_POST['zone_id'] ) : '';
+		error_log( $zone_id );
+
+		if ( isset( $_POST['min_shipping_days_hs'] ) ) {
+			update_option( 'min_shipping_days_hs_' . $zone_id, wp_unslash( sanitize_text_field( $_POST['min_shipping_days_hs'] ) ) );
+		}
+
+		if ( isset( $_POST['max_shipping_days_hs'] ) ) {
+			update_option( 'max_shipping_days_hs_' . $zone_id, wp_unslash( sanitize_text_field( $_POST['max_shipping_days_hs'] ) ) );
+		}
+
+		if ( isset( $_POST['min_shipping_days_ls'] ) ) {
+			update_option( 'min_shipping_days_ls_' . $zone_id, wp_unslash( sanitize_text_field( $_POST['min_shipping_days_ls'] ) ) );
+		}
+
+		if ( isset( $_POST['max_shipping_days_ls'] ) ) {
+			update_option( 'max_shipping_days_ls_' . $zone_id, wp_unslash( sanitize_text_field( $_POST['max_shipping_days_ls'] ) ) );
+		}
+
+		wp_send_json_success( array( 'message' => 'Délais de livraison sauvegardés' ) );
 	}
 }

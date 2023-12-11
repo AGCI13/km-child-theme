@@ -55,25 +55,25 @@
 /* Order statuses */
 
 .order-status.status-completed:first-child {
-  border-top-right-radius:0!important;
-  border-bottom-right-radius:0!important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .order-status.status-completed:last-child {
-  border-top-left-radius:0!important;
-  border-bottom-left-radius:0!important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
 }
 
-.order-status.status-completed:first-child > span{
-  margin-right:2px;
+.order-status.status-completed:first-child>span {
+  margin-right: 2px;
 }
 
-.order-status.status-completed:last-child > span{
-  margin-left:2px;
+.order-status.status-completed:last-child>span {
+  margin-left: 2px;
 }
 
-.order-status.status-completed:only-child{
-  border-radius:4px!important;
+.order-status.status-completed:only-child {
+  border-radius: 4px !important;
 }
 
 .order-status.status-completed {
@@ -90,6 +90,7 @@
   color: #420c0a !important;
   background-color: #dc5f51 !important;
 }
+
 .order-status.status-scheduled {
   color: #89591e !important;
   background-color: #f0deb3 !important;
@@ -97,45 +98,80 @@
 
 /* Product list */
 
-.wp-admin td.product_tag.column-product_tag, .wp-admin th#product_tag {
-  width: 5%!important;
+.wp-admin td.product_tag.column-product_tag,
+.wp-admin th#product_tag {
+  width: 5% !important;
 }
 
-.wp-admin td.product_cat.column-product_cat,.wp-admin th#product_cat {
-  width: 7%!important;
+.wp-admin td.product_cat.column-product_cat,
+.wp-admin th#product_cat {
+  width: 7% !important;
 }
 
-.fixed td.stats.column-stats,th#stats {
-  width: 3%!important;
+.fixed td.stats.column-stats,
+th#stats {
+  width: 3% !important;
 }
 
-td.date.column-date, th#date{
-  width: 7%!important;
+td.date.column-date,
+th#date {
+  width: 7% !important;
 }
 
-.woocommerce-admin-page td.name.column-name.has-row-actions.column-primary , .woocommerce-admin-page table.wp-list-table .column-name {
-  width: 17%!important;
+.woocommerce-admin-page td.name.column-name.has-row-actions.column-primary,
+.woocommerce-admin-page table.wp-list-table .column-name {
+  width: 17% !important;
 }
 
 #datepicker-container .ui-datepicker {
   width: 680px !important;
 }
 
-#datepicker-container  .ui-state-active,
-#datepicker-container  .ui-widget-content .ui-state-active,
- #datepicker-container  .ui-widget-header .ui-state-active,
- #datepicker-container .ui-state-highlight,  
- #datepicker-container.ui-widget-content .ui-state-highlight, 
-  #datepicker-container .ui-widget-header .ui-state-highlight{
+#datepicker-container .ui-state-active,
+#datepicker-container .ui-widget-content .ui-state-active,
+#datepicker-container .ui-widget-header .ui-state-active,
+#datepicker-container .ui-state-highlight,
+#datepicker-container.ui-widget-content .ui-state-highlight,
+#datepicker-container .ui-widget-header .ui-state-highlight {
   background: #ffc880 !important;
 }
 
-#datepicker-container .ui-state-default,  
- #datepicker-container .ui-widget-content .ui-state-default,  
- #datepicker-container .ui-widget-header .ui-state-default{
+#datepicker-container .ui-state-default,
+#datepicker-container .ui-widget-content .ui-state-default,
+#datepicker-container .ui-widget-header .ui-state-default {
   background: transparent !important;
- }
+}
 
 #day-picker-container input {
-    margin-left: 15px;
+  margin-left: 15px;
+}
+
+#km-shipping-delay-wrapper {
+  width: 100%;
+  margin-left: 170px;
+  top: -100px;
+  position: relative;
+}
+
+#km-shipping-delay-wrapper .km-success-message {
+  color: #3c6c2b;
+}
+
+#km-shipping-delay-wrapper .km-error-message {
+  color: #d72f1c;
+}
+
+/* Style de base du loader - vous pouvez personnaliser ceci */
+#km-shipping-delay-wrapper .km-loader {
+  display: none;
+}
+
+#km-shipping-delay-wrapper .km-loader.active {
+  display: flex;
+}
+
+.km-shipping-delay-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }

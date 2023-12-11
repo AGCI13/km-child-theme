@@ -215,10 +215,11 @@ function display_shipping_info_text() {
 			<th><?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?></th>
 			<td data-title="<?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?>">
 				<?php echo esc_html( $value ); ?>
-				<?php echo do_shortcode( '[estimate_delivery_date]' ); ?>
 			</td>
 		</tr>
-	<?php
+
+		<?php
+		do_action( 'km_after_checkout_shipping' );
 }
 add_filter( 'woocommerce_cart_totals_before_order_total', 'display_shipping_info_text', 10 );
 

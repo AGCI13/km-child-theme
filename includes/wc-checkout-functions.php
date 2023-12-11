@@ -124,11 +124,14 @@ function km_add_shipping_cost_to_cart_total() {
 	?>
 	<tr class="shipping">
 		<th><?php esc_html_e( 'Frais de livraison', 'kingmateriaux' ); ?></th>
-		<td data-title="<?php esc_attr_e( 'Frais de livraison', 'kingmateriaux' ); ?>"><span class="shipping-cost"><?php echo $shipping_cost; ?></td>
+		<td data-title="<?php esc_attr_e( 'Frais de livraison', 'kingmateriaux' ); ?>">
+			<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
+		</td>
+			<?php do_action( 'km_after_checkout_shipping' ); ?>
 	</tr>
 	<?php
 }
-add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', );
+add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
 
 /**
  * Génère la liste de jour disponible pour le drive en fonction des réglages dans Woocommerce > Expédition > King Drive.
@@ -179,3 +182,72 @@ function km_get_more_drive_available_days() {
 }
 add_action( 'wp_ajax_get_drive_available_days', 'km_get_more_drive_available_days' );
 add_action( 'wp_ajax_nopriv_get_drive_available_days', 'km_get_more_drive_available_days' );
+
+
+function km_display_shipping_delays_after_shipping() {
+
+	if ( WC()->cart->is_empty() ) {
+		return;
+	}
+	// Récupérer l'ID de la zone de livraison.
+	$shipping_zone_id = KM_Shipping_Zone::get_instance()->shipping_zone_id;
+
+	if ( WC()->session->chosen_method && 'drive' === WC()->session->chosen_method ) {
+		return;
+	}
+
+	$longest_min_delay = 0;
+	$longest_max_delay = 0;
+
+	foreach ( WC()->cart->get_cart() as $cart_item ) {
+		$product_id = $cart_item['product_id'];
+
+		// Vérifier si des délais de livraison personnalisés sont définis via ACF.
+		$custom_delays_hs = get_field( 'product_shipping_delays_product_shipping_delays_hs', $product_id );
+		$custom_delays_ls = get_field( 'product_shipping_delays_product_shipping_delays_ls', $product_id );
+
+		// Déterminer la saison actuelle.
+		$current_month  = date( 'n' );
+		$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
+
+		// Récupérer les délais de livraison en fonction de la saison et des données personnalisées.
+		$min_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['min_shipping_days_hs'] ) ?? get_option( 'min_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['min_shipping_days_ls'] ) ? get_option( 'min_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['min_shipping_days_ls'] );
+		$max_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['max_shipping_days_hs'] ) ?? get_option( 'max_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['max_shipping_days_ls'] ) ? get_option( 'max_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['max_shipping_days_ls'] );
+
+		// Vérifier si les informations sont disponibles.
+		if ( empty( $min_shipping_days ) && empty( $max_shipping_days ) ) {
+			return; // Si les deux sont manquants, ne rien afficher.
+		}
+
+		if ( $min_shipping_days > $longest_min_delay ) {
+			$longest_min_delay = $min_shipping_days;
+		}
+		if ( $max_shipping_days > $longest_max_delay ) {
+			$longest_max_delay = $max_shipping_days;
+		}
+	}
+
+	if ( $longest_min_delay > 0 || $longest_max_delay > 0 ) {
+		$current_date = new DateTime(); // Date actuelle.
+
+		// Calculer la date de livraison minimum.
+		$min_delivery_date = clone $current_date;
+		$min_delivery_date->add( new DateInterval( 'P' . $longest_min_delay . 'D' ) );
+		$formatted_min_date = $min_delivery_date->format( 'd/m/Y' );
+
+		if ( $longest_min_delay === $longest_max_delay ) {
+			// Construire le message avec le délai de livraison.
+			echo '<tr><td colspan="2" class="class="km-cart-longest-delay">Estimée entre le '. $formatted_min_date . '</td></tr>';
+			return;
+		}
+
+		// Calculer la date de livraison maximum.
+		$max_delivery_date = clone $current_date;
+		$max_delivery_date->add( new DateInterval( 'P' . $longest_max_delay . 'D' ) );
+		$formatted_max_date = $max_delivery_date->format( 'd/m/Y' );
+
+		// Construire le message avec la plage de dates.
+		echo '<tr><td colspan="2" class="class="km-cart-longest-delay">Estimée entre le ' . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
+	}
+}
+add_action( 'km_after_checkout_shipping', 'km_display_shipping_delays_after_shipping' );
