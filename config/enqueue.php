@@ -67,9 +67,16 @@ function km_admin_scripts_enqueue( $hook ) {
 
 	wp_enqueue_style( 'km-admin-style', $css_uri . 'admin-style.css', array(), filemtime( $css_path . 'admin-style.css' ), 'all' );
 
-	if ( 'woocommerce_page_wc-settings' === $hook && 'drive' === $_GET['section'] ) {
+	if ( 'woocommerce_page_wc-settings' === $hook && isset( $_GET['section'] ) && 'drive' === $_GET['section'] ) {
 		wp_enqueue_script( 'jquery-ui-datepicker' );
 		wp_enqueue_script( 'km-admin-script', $js_uri . 'admin-script.js', array( 'jquery' ), filemtime( $js_path . 'admin-script.js' ), false );
+	}
+
+	$screen  = get_current_screen();
+	$zone_id = isset( $_GET['zone_id'] ) && ! empty( $_GET['zone_id'] ) ? $_GET['zone_id'] : '';
+
+	if ( 'woocommerce_page_wc-settings' === $screen->id && isset( $zone_id ) ) {
+		wp_enqueue_script( 'km-shipping-zone-script', $js_uri . 'shipping-zone.js', array( 'jquery' ), filemtime( $js_path . 'shipping-zone.js' ), false );
 	}
 
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );

@@ -397,9 +397,9 @@ jQuery(document).ready(function ($) {
         };
     
         // Validate required fields
-        multistepWrapper.find('.validate-required').each(function () {
+        multistepWrapper.find('.validate-required, .validate-phone, .validate-email').each(function () {
             const fieldWrapper = $(this);
-            const inputField = fieldWrapper.find('input, select, textarea');
+            const inputField = fieldWrapper.find('input');
             const fieldLabel = fieldWrapper.find('label').text().replace('*', '').trim();
             const fieldKey = fieldWrapper.attr('id') || inputField.attr('name'); // Use ID or name as a key
             const errorMessage = `Le champ "${fieldLabel}" n'est pas correctement rempli.`;

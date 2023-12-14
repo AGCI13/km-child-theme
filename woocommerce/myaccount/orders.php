@@ -71,60 +71,7 @@ do_action('woocommerce_before_account_orders', $has_orders); ?>
 						</div>
 					<?php endforeach; ?>
 				</div>
-				<div class="invisible-on-desktop">
-					<span class="total-commande-mobile">Total </span><br>
-					<hr />
-					<?php
-					/* translators: 1: formatted order total 2: total order items */
-					echo wp_kses_post(sprintf(_n('%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce'), $order->get_formatted_order_total(), $item_count));
-					?>
-				</div>
-<?php /*
-				<div style="margin-bottom:5%;">
-					<a class="accordion">Détails de la commandes</a>
-					<div class="panel">
-						<div class="bloc-commande-detail">
-							<div class="col-1"><span class="intitule">Produit : </span><span class="info-commande"><?php  ?></span></div>
-							<div class="col-2"><span class="detail-commande">Texte: </span></div>
-						</div>
-						<div class="bloc-commande-detail">
-							<div class="col-1"><span class="intitule">Expédition : </span><span class="info-commande"><?php echo $order->get_formatted_shipping_address(); ?></span></div>
-							<div class="col-2"><span class="detail-commande">Texte: </span></div>
-						</div>
-						<div class="bloc-commande-detail">
-							<div class="col-1"><span class="intitule">Moyen de paiement : </span><span class="info-commande"><?php echo $order->get_payment_method_title(); ?></span></div>
-							<div class="col-2"><span class="detail-commande"> </span></div>
-						</div>
-						<div class="bloc-commande-detail">
-							<div class="col-1"><span class="intitule">Total du remboursement : </span><span class="info-commande"></span></div>
-							<div class="col-2"><span class="detail-commande"><?php echo $order->get_total_refunded();  ?> €</span></div>
-						</div>
-						<div class="bloc-commande-detail">
-							<div class="col-1"><span class="intitule">Total de la commande : </span></div>
-							<div class="col-2"><span class="total-commande"><?php echo $order->get_total();  ?> €</span></div>
-						</div>
-
-					</div>
-					<p>
-						<?php
-						$actions = wc_get_account_orders_actions($order);
-
-						if (!empty($actions)) {
-							foreach ($actions as $key => $action) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-								echo '<a href="' . esc_url($action['url']) . '" class="invisible-on-desktop woocommerce-button' . esc_attr($wp_button_class) . ' button ' . sanitize_html_class($key) . '">' . esc_html($action['name']) . '</a>';
-							}
-						}
-						?>
-					</p>
-				</div>
-*/ ?>
-			
-
 			</div> <!-- Fin .encart-commande -->
-
-
-
-
 			<?php
 			}
 			?>

@@ -174,7 +174,7 @@ class KM_Shipping_Methods {
 	 * @return float Le prix de la livraison.
 	 */
 	private function calculate_shipping_for_product( $weight, $shipping_method_name ) {
-		$remaining_weight = ceil( $weight / 1000 ); // Convertir en tonnes.
+		$remaining_weight = $weight / 1000; // Convertir en tonnes.
 
 		// Utiliser les mêmes classes de poids que dans calculate_shipping_cost_based_on_weight.
 		$weight_classes = array(

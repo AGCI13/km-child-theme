@@ -278,3 +278,8 @@ span#reset_tonnage_calculator {
 #submit_tonnage_calculator{
     margin-top:30px;
 }
+
+@media (max-width: 768px) {
+    .tonnage-calculator-wrapper {padding: 60px 20px 60px 20px !important;}
+    .form_tonnage_calculator, .result_tonnage_calculator{padding: 30px 20px;}
+}

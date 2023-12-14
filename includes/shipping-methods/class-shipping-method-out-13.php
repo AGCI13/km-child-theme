@@ -13,7 +13,6 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 	 *  Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		parent::__construct( $instance_id );
 		$this->id                 = 'out13';
 		$this->method_title       = 'Hors 13';
 		$this->method_description = 'Livraison hors 13';

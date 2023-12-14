@@ -18,10 +18,45 @@ class Tonnage_Calculator_Widget extends \Elementor\Widget_Base {
 	}
 
 	protected function render() {
-		global $product;
+
+		// Si c'est un produit et qu'il n'y a pas l'option "Afficher le calculateur de tonnage" de coché, on ne l'affiche pas.
+		if ( is_product() ) {
+			global $product;
+
+			// Obtenir les catégories de produits.
+			$categories      = wp_get_post_terms( $product->get_id(), 'product_cat' );
+			$parent_category = null;
+			$child_category  = null;
+
+			foreach ( $categories as $category ) {
+				if ( $category->parent == 0 ) {
+					// C'est une catégorie parente.
+					$parent_category = $category;
+				} else {
+					// C'est une catégorie enfant.
+					$child_category = $category;
+				}
+			}
+
+			// Vous pouvez décider d'utiliser la catégorie parente ou enfant ici.
+			$target_category = $child_category ? $child_category : $parent_category;
+
+			if ( $target_category ) {
+				// Récupérer la valeur du champ ACF pour cette catégorie
+				$acf_value = get_field( 'show_tonnage_calculator', 'product_cat_' . $target_category->term_id );
+
+				if ( ! $acf_value ) {
+					return;
+				}
+			}
+		}
+
+		// if product first parent categroy is agrega
 		wp_enqueue_style( 'km-tonnage-calculator-style' );
 		wp_enqueue_script( 'km-tonnage-calculator-script' );
-		?>
+
+		?>		
+	<div class="tonnage-calculator-wrapper">
 		<div class="tonnage_calculator">
 			<div class="form_tonnage_calculator h2_grey_back">
 				<h2 class="elementor-heading-title"><?php esc_html_e( 'Calcul de tonnage', 'kingmateriaux' ); ?></h2>
@@ -97,17 +132,20 @@ class Tonnage_Calculator_Widget extends \Elementor\Widget_Base {
 				<div class="density_body_result"><b><?php esc_html_e( 'Densité :', 'kingmateriaux' ); ?> </b><span id ='densite_value'> </span > </div >
 				<span id ='reset_tonnage_calculator'> <?php esc_html_e( 'Calculer un nouveau tonnage', 'kingmateriaux' ); ?></span>
 			</div>
-			<?php /*
+			<?php
+			/*
 			<div class="img_tonnage_calculator_form">
 				<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/femme-calcul-tonnage.png' ); ?>"
 					alt="image de calcul de tonnage" />
 			</div>
-			*/ ?>
+			*/
+			?>
 			<div class="img_tonnage_calculator_result">
 				<img src="<?php echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'full' ) ); ?>"
 					alt="image de calcul de tonnage"/>
 			</div>
 		</div>
-		<?php
+	</div>
+	<?php
 	}
 }

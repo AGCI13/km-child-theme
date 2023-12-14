@@ -16,7 +16,6 @@ class Shipping_method_1 extends WC_Shipping_Method {
 	 *  Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		parent::__construct( $instance_id );
 		$this->id                 = 'option1';
 		$this->method_title       = 'Option 1';
 		$this->method_description = 'Livraison option 1 ';

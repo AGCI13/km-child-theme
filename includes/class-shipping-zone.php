@@ -305,27 +305,14 @@ class KM_Shipping_Zone {
 			// Obtenir l'instance du client actuel.
 			$customer = WC()->customer;
 
-			if ( ! empty( $customer ) ) {
-				// Définir les nouvelles informations d'adresse de livraison.
-				$customer->set_shipping_country( $country );
-				$customer->set_shipping_state( substr( $zip_code, 0, 2 ) );
-				$customer->set_shipping_postcode( $zip_code );
+			// Définir les nouvelles informations d'adresse de livraison.
+			$customer->set_shipping_country( $country );
+			$customer->set_shipping_state( substr( $zip_code, 0, 2 ) );
+			$customer->set_shipping_postcode( $zip_code );
 
-				// Enregistrer les modifications.
-				$customer->save();
-			}
+			// Enregistrer les modifications.
+			$customer->save();
 		}
-
-		if ( is_user_logged_in() ) {
-			$user_id = get_current_user_id();
-			update_user_meta( $user_id, 'shipping_country', $country );
-			update_user_meta( $user_id, 'shipping_state', substr( $zip_code, 0, 2 ) );
-			update_user_meta( $user_id, 'shipping_postcode', $zip_code );
-		}
-
-		WC()->session->set( 'shipping_country', $country );
-		WC()->session->set( 'shipping_state', substr( $zip_code, 0, 2 ) );
-		WC()->session->set( 'shipping_postcode', $zip_code );
 
 		return array(
 			'zip_code' => $zip_code,
@@ -377,6 +364,7 @@ class KM_Shipping_Zone {
 		$screen  = get_current_screen();
 		$zone_id = $_GET['zone_id'];
 
+
 		if ( 'woocommerce_page_wc-settings' !== $screen->id || ! isset( $zone_id ) ) {
 			return;
 		}
@@ -386,7 +374,7 @@ class KM_Shipping_Zone {
 		$min_shipping_days_ls = get_option( 'min_shipping_days_ls_' . $zone_id );
 		$max_shipping_days_ls = get_option( 'max_shipping_days_ls_' . $zone_id );
 
-		// TODO: Reorganize this code in a template file maybe
+		//TODO: Reorganize this code in a template file maybe
 		?>
 		<div id="km-shipping-delay-wrapper" class="wrap woocommerce">
 			<h3><?php esc_html_e( 'Délais de livraison', 'kingmateriaux' ); ?></h3>

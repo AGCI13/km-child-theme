@@ -136,7 +136,7 @@ function km_add_shipping_cost_to_cart_total() {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
 		$shiping_date   = km_display_shipping_delays_after_shipping();
 	}
-	$shipping_cost = WC()->cart->get_cart_shipping_total();
+	$shipping_cost  = WC()->cart->get_cart_shipping_total();
 	?>
 	<tr class="shipping">
 		<th><?php echo esc_html( $shipping_label ); ?></th>

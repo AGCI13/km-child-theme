@@ -8,6 +8,15 @@
 .woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper .uael-google-text{background-color: transparent;color: black;font-weight: 600;font-size: 18px;padding: 10px 22px 10px 5px;}
 .woocommerce-checkout .uael-form.uael-login-form input[type="text"]:focus,
 .woocommerce-checkout .uael-form.uael-login-form input[type="password"]:focus{border: 1px solid black;}
+
+
+
+.woocommerce-checkout .elementor-widget-km_checkout_billing_adress .shipping_address{margin-top:40px;}
+.woocommerce-checkout .elementor-widget-km_checkout_billing_adress .woocommerce-billing-fields__field-wrapper{margin-top:40px;}
+
+
+
+
 .woocommerce-checkout .elementor-widget-km_delivery_conditions h4{font-size: 18px;font-family: "Arca Majora 3", Sans-serif;}
 .woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required{}
 .woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]{}
@@ -26,7 +35,6 @@
 .woocommerce-checkout .step-payment:hover .elementor-widget-heading:nth-child(2) .elementor-heading-title{color:#262626 !important;}
 .woocommerce-checkout .step-payment.active .elementor-widget-heading:nth-child(2) .elementor-heading-title{color:#262626 !important;}
 
-
 .recapitulatif{display: block !important;}
 .recapitulatif .elementor-element-populated{box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.5);width: 320px;padding: 24px 30px !important;border-radius:3px;height: auto;display:block;}
 .recapitulatif .woocommerce-checkout-review-order tr th{color:#262626 !important;}
@@ -35,10 +43,8 @@
 .recapitulatif #custom_paiement_btn:hover{background-color:#BE9E67;} 
 .recapitulatif #place_order:hover{background-color:#BE9E67;} 
 
-
 table.shopengine_woocommerce_shipping_methods {table-layout: fixed;}
 table.shopengine_woocommerce_shipping_methods td {width: 100%;}
-
 
 table.shopengine_woocommerce_shipping_methods {
     table-layout: fixed;
@@ -285,10 +291,10 @@ label[for="shipping_method_0_drive"],
 
 .shopengine-loader .spinner {
     border: 4px solid rgba(0,0,0,.1);
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border-top: 2px solid #000;
+    border-top: 4px solid #000;
     animation: spin 2s linear infinite;
 }
 
@@ -300,4 +306,39 @@ label[for="shipping_method_0_drive"],
 
 #km-checkout-errors, .km-validation-info{
     color:red;
+    font-weight: 500;
+    font-family: 'Lato';
+}
+
+
+/* Moyen de paiement */
+/*
+4* : /wp-content/uploads/2023/12/rassurance-paiement-4-fois.jpg
+CB : /wp-content/uploads/2023/12/rassurance-paiment-carte-bancaire.jpg
+Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
+*/
+
+
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs{position:relative;min-height: 80px;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs:after{content:"";background:url('/wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg');position: absolute;background-size:160px 31px;width: 160px;height: 31px;top: 35px;left: 0px;border-radius: 4px;border: 1px solid black;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs div.payment_method_bacs p{margin-top: 30px;}
+
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma{position:relative;min-height: 80px;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma:after{content:"";background:url('/wp-content/uploads/2023/12/rassurance-paiement-4-fois.jpg');position: absolute;background-size:160px 31px;width: 160px;height: 31px;top: 35px;left: 0px;border-radius: 4px;border: 1px solid black;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma div.payment_method_alma > div{margin-top: 30px;}
+
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1{position:relative;min-height: 80px;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1:after{content:"";background:url('/wp-content/uploads/2023/12/rassurance-paiment-carte-bancaire.jpg');position: absolute;background-size:160px 31px;width: 160px;height: 31px;top: 35px;left: 0px;border-radius: 4px;border: 1px solid black;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 img{display:none;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 div.payment_method_etransactions_std_card_1 p{margin-top: 30px;}
+
+
+
+
+@media (max-width: 768px) {
+    /* Checkout */
+    .recapitulatif .elementor-widget-wrap{width: 100% !important;}
 }

@@ -24,15 +24,15 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 		$billing_fields  = $checkout->get_checkout_fields( 'billing' );
 		do_action( 'woocommerce_before_checkout_billing_form', $checkout ); ?>
 
-		<div class="mandatory-fields">
-				<?php
-				foreach ( $billing_fields as $key => $field ) {
-					if ( 'billing_phone' === $key || 'billing_email' === $key ) {
-						woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
-					}
-				}
-				?>
-		</div>
+	
+		<?php
+		foreach ( $billing_fields as $key => $field ) {
+			if ( 'billing_phone' === $key || 'billing_email' === $key ) {
+				woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+			}
+		}
+		?>
+
 
 		<!-- Start Shipping adress -->
 		<div class="shipping_address">
