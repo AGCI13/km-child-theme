@@ -71,6 +71,49 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    const copyShippingAddressToBillingAdress = () => {
+        const shippingFirstName = document.querySelector('#shipping_first_name');
+        const billingFirstName = document.querySelector('#billing_first_name');
+        const shippingLastName = document.querySelector('#shipping_last_name');
+        const billingLastName = document.querySelector('#billing_last_name');
+        const shippingAddress = document.querySelector('#shipping_address_1');
+        const billingAddress = document.querySelector('#billing_address_1');
+        const shippingAddress2 = document.querySelector('#shipping_address_2');
+        const billingAddress2 = document.querySelector('#billing_address_2');
+        const shippingCity = document.querySelector('#shipping_city');
+        const billingCity = document.querySelector('#billing_city');
+        const shippingPostcode = document.querySelector('#shipping_postcode');
+        const billingPostcode = document.querySelector('#billing_postcode');
+        const shippingCountry = document.querySelector('#shipping_country');
+        const billingCountry = document.querySelector('#billing_country');
+
+        if (shippingFirstName && billingFirstName && billingFirstName.value === '') {
+            billingFirstName.value = shippingFirstName.value;
+        }
+
+        if (shippingLastName && billingLastName && billingLastName.value === '') {
+            billingLastName.value = shippingLastName.value;
+        }
+
+        if (shippingAddress && billingAddress && billingAddress.value === '') {
+            billingAddress.value = shippingAddress.value;
+        }
+        if (shippingAddress2 && billingAddress2 && billingAddress2.value === '') {
+            billingAddress2.value = shippingAddress2.value;
+        }
+        if (shippingCity && billingCity && billingCity.value === '') {
+            billingCity.value = shippingCity.value;
+        }
+        if (shippingPostcode && billingPostcode && billingPostcode.value === '') {
+            billingPostcode.value = shippingPostcode.value;
+        }
+        if (shippingCountry && billingCountry && billingCountry.value === '') {
+            billingCountry.value = shippingCountry.value;
+        }   
+    }
+        
+
+
     const handleShippingMethodClick = (shippingMethod, shippingOptions, shippingInputs, billingActions, billingFields, shippingSection) => {
         if (shippingMethod.classList.contains('selected')) return;
 
@@ -366,9 +409,18 @@ jQuery(document).ready(function ($) {
             });
             placeOrderButton.addEventListener('click', () => {
                 validateCustomFields();
+                copyShippingAddressToBillingAdress();
+                deleteLocalStorage();
                 stepPayment.click();
             });
         });
+    }
+
+    const deleteLocalStorage = () => {
+        localStorage.removeItem('driveDate');
+        localStorage.removeItem('driveTime');
+        localStorage.removeItem('selectedShipping');
+        localStorage.removeItem('selectedShippingOption');
     }
 
     const validateCustomFields = () => {

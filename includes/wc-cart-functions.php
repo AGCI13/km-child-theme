@@ -42,7 +42,7 @@ add_action( 'woocommerce_before_cart_table', 'add_clear_cart_button', 1, 0 );
  * @return array
  */
 function clear_cart_url() {
-	if ( isset( $_GET['clear-cart'] ) && 'yes' === $_GET['clear-cart'] ) {
+	if ( ! is_admin() && isset( $_GET['clear-cart'] ) && 'yes' === $_GET['clear-cart'] ) {
 		WC()->cart->empty_cart();
 		wp_redirect( wc_get_cart_url() );
 		exit;
@@ -89,7 +89,7 @@ add_action( 'woocommerce_after_cart_table', 'after_cart_coupon_content' );
  * @return string
  */
 function km_display_ecotaxe_with_unit_price( $price_html, $cart_item, $cart_item_key ) {
-	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+	if ( is_admin() || ! defined( 'DOING_AJAX' ) ) {
 		return;
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
@@ -195,16 +195,18 @@ add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_tot
  * --------------- START RECAP ----------------------
  */
 
-/**
- * Ajoute le récapitulatif de la commande sous le panier
- *
- * @return void
- */
-
 function display_shipping_info_text() {
+
+	// Vérifiez si WC_Cart est initialisé
+	if ( is_admin() || ! is_a( WC()->cart, 'WC_Cart' ) ) {
+		return;
+	}
+
 	$km_shpping_zone = KM_Shipping_Zone::get_instance();
+
 	if ( $km_shpping_zone->is_in_thirteen() ) {
-		$value = __( 'Choix à l\'étape suivante', 'kingmateriaux' );
+		$shipping_cost = (int) WC()->session->get( 'option1_shipping_cost' );
+		$value         = empty( $shipping_cost ) || 0 === $shipping_cost ? __( 'Calcul à l\'étape suivante', 'kingmateriaux' ) : __( 'À partir de ' . wc_price( $shipping_cost ), 'kingmateriaux' );
 	} elseif ( $km_shpping_zone->zip_code && $km_shpping_zone->shipping_zone_id ) {
 		$value = __( 'Incluse', 'kingmateriaux' );
 	} else {
@@ -214,7 +216,7 @@ function display_shipping_info_text() {
 		<tr class="shipping-info">
 			<th><?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?></th>
 			<td data-title="<?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?>">
-				<?php echo esc_html( $value ); ?>
+				<?php echo $value; ?>
 			</td>
 		</tr>
 
@@ -229,6 +231,11 @@ add_filter( 'woocommerce_cart_totals_before_order_total', 'display_shipping_info
  * @return void
  */
 function km_add_cart_totals_after_order_total() {
+
+	if ( is_admin() ) {
+		return;
+	}
+
 	$coupon  = isset( $_GET['coupon'] ) ? esc_attr( $_GET['coupon'] ) : false;
 	$applied = false;
 	$message = '';

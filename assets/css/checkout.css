@@ -310,6 +310,10 @@ label[for="shipping_method_0_drive"],
     font-family: 'Lato';
 }
 
+#drive-date-wrapper, #drive-time-wrapper{
+    display: none;
+}
+
 
 /* Moyen de paiement */
 /*

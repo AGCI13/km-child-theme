@@ -135,13 +135,13 @@ function km_add_shipping_cost_to_cart_total() {
 	} else {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
 		$shiping_date   = km_display_shipping_delays_after_shipping();
+		$shipping_cost  = WC()->cart->get_cart_shipping_total();
 	}
-	$shipping_cost  = WC()->cart->get_cart_shipping_total();
 	?>
 	<tr class="shipping">
 		<th><?php echo esc_html( $shipping_label ); ?></th>
 		<td data-title="<?php echo esc_html( $shipping_label ); ?>">
-				<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
+		<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
 		<?php echo $shiping_date; ?>
 		</td>
 	</tr>
@@ -182,36 +182,38 @@ function km_display_shipping_delays_after_shipping() {
 		if ( $min_shipping_days > $longest_min_delay ) {
 			$longest_min_delay = $min_shipping_days;
 		}
+
 		if ( $max_shipping_days > $longest_max_delay ) {
 			$longest_max_delay = $max_shipping_days;
 		}
 	}
 
-	if ( $longest_min_delay > 0 || $longest_max_delay > 0 ) {
-		$current_date = new DateTime(); // Date actuelle.
+	if ( 0 === $longest_min_delay && 0 === $longest_max_delay ) {
+		return; // Si les deux sont manquants, ne rien afficher.
+	}
+		$current_date  = new DateTime(); // Date actuelle.
+		$delivery_date = clone $current_date;
 
-		// Calculer la date de livraison minimum.
-		$min_delivery_date = clone $current_date;
+		// Si les délais minimum et maximum sont identiques, affichez une seule date.
+	if ( 0 === $longest_min_delay || 0 === $longest_max_delay || $longest_min_delay === $longest_max_delay ) {
+		$delivery_date->add( new DateInterval( 'P' . $longest_min_delay . 'D' ) );
+		$formatted_date = $delivery_date->format( 'd/m/Y' );
+		$html          .= '<tr><td colspan="2" class="km-cart-longest-delay">Livraison prévue le ' . $formatted_date . '</td></tr>';
+	} else {
+		// Calculer et afficher une plage de dates si les délais sont différents.
+		$min_delivery_date = clone $delivery_date;
 		$min_delivery_date->add( new DateInterval( 'P' . $longest_min_delay . 'D' ) );
 		$formatted_min_date = $min_delivery_date->format( 'd/m/Y' );
 
-		if ( $longest_min_delay === $longest_max_delay ) {
-			// Construire le message avec le délai de livraison.
-			$html .= '<tr><td colspan="2" class="class="km-cart-longest-delay">Livraison prévue le ' . $formatted_min_date . '</td></tr>';
-			return;
-		}
-
-		// Calculer la date de livraison maximum.
-		$max_delivery_date = clone $current_date;
+		$max_delivery_date = clone $delivery_date;
 		$max_delivery_date->add( new DateInterval( 'P' . $longest_max_delay . 'D' ) );
 		$formatted_max_date = $max_delivery_date->format( 'd/m/Y' );
 
-		// Construire le message avec la plage de dates.
-		$html .= '<tr><td colspan="2" class="class="km-cart-longest-delay">Livraison prévue entre le ' . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
-		return $html;
+		$html .= '<tr><td colspan="2" class="km-cart-longest-delay">Livraison prévue entre le ' . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
 	}
-}
 
+	return $html;
+}
 
 /** --------------  DEBUG CODE START ----------------- */
 
@@ -229,6 +231,14 @@ function km_display_shipping_info_in_footer() {
 		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
 		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
 		echo '$chosen_shipping_methods :' . WC()->session->chosen_shipping_methods[0];
+
+		// echo '<table>';
+		// echo '<thead><tr><th colspan="2"> Infos panier ' . esc_html( $method ) . ':</th></tr></thead>';
+		// echo '<tbody>';
+		// echo '<tr><td>Montant total du panier</td><td>' . WC()->cart->get_cart_contents_total() . ' €</td></tr>';
+
+		// echo '</tbody>';
+		// echo '</table>';
 
 	foreach ( $shipping_methods as $method ) {
 		$cookie_name = 'km_shipping_cost_' . $method;

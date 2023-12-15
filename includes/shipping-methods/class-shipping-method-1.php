@@ -50,35 +50,41 @@ class Shipping_method_1 extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled'          => array(
+			'enabled'           => array(
 				'title'   => __( 'Activer', 'kingmateriaux' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Activer cette méthode d\'expédition', 'kingmateriaux' ),
 				'default' => 'yes',
 			),
-			'title'            => array(
+			'title'             => array(
 				'title'       => 'Nom affiché',
 				'type'        => 'text',
 				'description' => __( 'Entrez le nom affiché pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => $this->method_title,
 			),
-			'description'      => array(
+			'description'       => array(
 				'title'       => 'Description',
 				'type'        => 'textarea',
 				'description' => __( 'Entrez la description pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => 'Description de ' . $this->method_title,
 			),
-			'access_condition' => array(
+			'access_condition'  => array(
 				'title'       => 'Condition d\'accès au chantier',
 				'type'        => 'textarea',
 				'description' => __( 'Entrez la condition d\'accès. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
 				'default'     => 'Accessible aux poids lourds.',
 			),
-			'unload_condition' => array(
+			'unload_condition'  => array(
 				'title'       => 'Condition de déchargement',
 				'type'        => 'textarea',
 				'description' => __( 'Entrez la condition de déchargement. Laissez vide pour ne pas afficher.', 'kingmateriaux' ),
 				'default'     => 'Ouverture et/ou portail de minimum de 3m de large, pas d\'angle droit/pente, ni câbles téléphoniques à moins de 3m.',
+			),
+			'interval_selector' => array(
+				'title'       => __( 'Sélecteur d\'Intervalle', 'kingmateriaux' ),
+				'type'        => 'interval_selector', // Type personnalisé.
+				'description' => __( 'Définissez les intervalles de livraison.', 'kingmateriaux' ),
+				'default'     => '',
 			),
 		);
 	}

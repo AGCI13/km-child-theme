@@ -8,14 +8,16 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div class="error"><p><strong>Attention</strong>: WooCommerce est requis pour que ce <strong>thème personnalisé fonctionne.</strong> Veuillez l\'activer.</p></div>';
+			echo '<div class="error">'
+			. '<p><strong>Attention</strong>:'
+			. ' WooCommerce est requis pour que ce <strong>thÃ¨me personnalisÃ© fonctionne.</strong> Veuillez l\'activer.
+			.</p></div>';
 		}
 	);
 	return;
 }
 
-
-// Importation des fichiers
+// Importation des fichiers.
 require_once 'config/enqueue.php';
 
 require_once 'widgets/register-widgets.php';
@@ -25,6 +27,7 @@ require_once 'includes/marketing-ops-functions.php';
 require_once 'includes/taxonomies/product-taxo-colors.php';
 require_once 'includes/taxonomies/product-taxo-uses.php';
 
+require_once 'includes/wc-common-functions.php';
 require_once 'includes/wc-cart-functions.php';
 require_once 'includes/wc-order-functions.php';
 require_once 'includes/wc-product-functions.php';
@@ -47,7 +50,7 @@ require_once 'includes/shipping-methods/class-shipping-method-2-express.php';
 require_once 'includes/shipping-methods/class-shipping-method-drive.php';
 require_once 'includes/shipping-methods/class-shipping-method-out-13.php';
 
-// Initialisation des classes
+// Initialisation des classes.
 KM_Shipping_Zone::get_instance();
 KM_Dynamic_Pricing::get_instance();
 KM_Shipping_Methods::get_instance();

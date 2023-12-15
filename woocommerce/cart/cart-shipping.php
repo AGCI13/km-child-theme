@@ -35,14 +35,19 @@ if ( $available_methods ) {
 $km_shipping_zone   = KM_Shipping_zone::get_instance();
 $checkout           = WC()->checkout();
 $chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' );
+$shipping_selected  = 'selected';
+if ( 'drive' === $chosen_method ) {
+	$drive_selected    = 'selected';
+	$shipping_selected = '';
+}
 ?>
 <tr class="woocommerce-shipping-totals shipping" style="display:table-row">
 	<td>
 	<?php if ( $available_methods ) : ?>	
 		<?php if ( $shipping_methods ) : ?>
-			<div id="shipping-method-shipping" class="woocommerce-shipping-methods">
+			<div id="shipping-method-shipping" class="woocommerce-shipping-methods <?php echo esc_html( $shipping_selected ); ?>">	
 				<div class="km-shipping-header">
-					<span class="select-shipping" data-shipping="shipping"></span>
+					<span class="select-shipping <?php echo esc_html( $shipping_selected ); ?>" data-shipping="shipping"></span>
 					<h3><?php esc_html_e( 'Livraison à Domicile ou sur Chantier', 'kingmateriaux' ); ?></h3>
 					<?php if ( $km_shipping_zone->is_in_thirteen() ) : ?>
 						<span class="shipping-cost"><?php esc_html_e( 'Sélectionnez une option', 'kingmateriaux' ); ?></span>
@@ -53,7 +58,8 @@ $chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' 
 				<?php if ( preg_match( "/\b{'option'}\b/i", $chosen_method ) !== false ) : ?>
 					<div class="km-shipping-options">
 						<?php foreach ( $shipping_methods as $method ) : ?>
-							<div class="km-shipping-option  <?php echo $chosen_method === $method->id || count( $shipping_methods ) === 1 ? 'selected' : ''; ?>">
+
+							<div class="km-shipping-option  <?php echo $chosen_method === $method->id ? 'selected' : ''; ?>">
 									<span class="select-shipping-option" data-shipping="shipping-option"></span>
 									<div class="km-shipping-option-content">
 										<?php
@@ -99,7 +105,7 @@ $chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' 
 		<?php endif; ?>	
 
 			<?php if ( $drive_methods ) : ?>
-				<div id="shipping-method-drive" class="woocommerce-shipping-methods">
+				<div id="shipping-method-drive" class="woocommerce-shipping-methods <?php echo esc_html( $drive_selected ); ?>">
 				<?php foreach ( $drive_methods as $method ) : ?>
 					<?php $drive_method_settings = get_option( 'woocommerce_' . esc_attr( sanitize_title( $method->id ) ) . '_settings' ); ?>
 						<div class="km-shipping-header" data-shipping="drive">
@@ -127,8 +133,13 @@ $chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' 
 										<span class="btn-confirm-loader"></span>
 									</button>
 								</div>
+								<p id="drive-date-wrapper" class="form-row must-validate validate-required">
+								<span class="woocommerce-input-wrapper">
+								<label for="drive-date"><?php esc_html_e( 'Date d\'enlèvement au Drive', 'kingmateriaux' ); ?></label>	
+								<input type="hidden" name="drive_date" class="input-text drive_date" value="">
+								</span>
+							</p>
 							</div>
-
 							<h3><?php esc_html_e( 'Sélectionnez un créneau horaire*', 'kingmateriaux' ); ?></h3>
 							<div class="drive-datepicker-time shopengine_woocommerce_shipping_methods">
 							<!-- Morning Slots -->
@@ -164,31 +175,28 @@ $chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' 
 								</div>
 								</div>
 
-							<!-- Evening Slot -->
-							<div class="time-slot evening">
+								<!-- Evening Slot -->
+								<div class="time-slot evening">
 									<h4>Soir</h4>
 									<div class="slots">
 										<div class="slot">18h00</div>
 									</div>
 								</div>
+								<p id="drive-time-wrapper"  class="form-row must-validate validate-required">
+									<label for="drive-time"><?php esc_html_e( 'Heure d\'enlèvement Drive', 'kingmateriaux' ); ?></label>
+									<span class="woocommerce-input-wrapper">
+										<input type="hidden" name="drive_time" class="input-text drive_time" value="">
+									</span>
+								</p>
 							</div>
-							
+
+
 							<?php if ( $drive_method_settings['location'] ) : ?>
 							<div class="drive-location-adress">
 								<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/location-pin.svg' ); ?>" alt="King Drive pin">
 								<?php echo wp_kses_post( wpautop( $drive_method_settings['location'] ) ); ?>
 							</div>
 							<?php endif; ?>
-							<p id="drive-date-wrapper" class="form-row must-validate validate-required">
-								<span class="woocommerce-input-wrapper">
-									<input type="hidden" name="drive_date" class="input-text drive_date" value="">
-								</span>
-							</p>
-							<p id="drive-time-wrapper"  class="form-row must-validate validate-required">
-								<span class="woocommerce-input-wrapper">
-									<input type="hidden" name="drive_time" class="input-text drive_time" value="">
-								</span>
-							</p>
 						</div>
 					</div>
 			<?php endif; ?>

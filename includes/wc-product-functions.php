@@ -140,6 +140,9 @@ add_filter( 'body_class', 'add_custom_body_class_for_unpurchasable_products' );
  * @return void
  */
 function km_debug_single_product() {
+	if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! is_product() ) {
+		return;
+	}
 	global $product;
 
 	// Obtenir l'ID du produit.
@@ -192,11 +195,15 @@ function km_debug_single_product() {
 		$product_info .= '<tr><td>Classe de livraison</td><td>' . esc_html( $shipping_class_name ) . '</td></tr>';
 	}
 
+	// Check if product is purchasable.
+	$is_purchasable = $product->is_purchasable() ? 'Oui' : 'Non';
+
 	// Afficher les métadonnées sur la page produit.
 	echo '<div id="km-shipping-info-debug" class="km-debug-bar">'
 	. '<h4>DEBUG INFOS</h4>'
 	. '<img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>'
 	. '<div class="debug-content"><table>'
+	. '<tr><th colspan="2">Est achetable ?</th></tr><tr><td colspan="2">' . $is_purchasable . '</td></tr>'
 	. '<tr><th colspan="2">Palettisation</th></tr>'
 	. '<tr><td>Quantité par palette</td><td>' . esc_html( $quantite_par_palette ) . '</td></tr>'
 	. '<tr><td>Palette à partir de</td><td>' . esc_html( $palette_a_partir_de ) . '</td></tr>'

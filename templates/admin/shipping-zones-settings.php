@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="hidden"  id="km-zone-id" name="zone_id" value="<?php echo esc_attr( $zone_id ); ?>" />
 
 			<?php wp_nonce_field( 'save_shipping_delays_handler', 'km_save_shipping_delay_nonce' ); ?>
-            
+			
 			<div class="km-shipping-delay-actions">
 				<button type="submit" class="button button-primary"><?php esc_html_e( 'Enregistrer les délais de livraison', 'kingmateriaux' ); ?>	
 				</button>

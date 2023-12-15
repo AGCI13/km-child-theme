@@ -16,9 +16,7 @@ function km_front_scripts_enqueue() {
 
 	wp_enqueue_style( 'km-child-style', $stylesheet_uri . '/style.css', array(), filemtime( $stylesheet_path . '/style.css' ), 'all' );
 
-	if ( wp_style_is( 'elementor-frontend-css', 'enqueued' ) ) {
-		wp_enqueue_style( 'custom-woocommerce-style-css', plugins_url( '/assets/css/widget-woocommerce.min.css', WP_PLUGIN_DIR . '/elementor-pro/init.php' ), array(), '1.0.0' );
-	}
+	wp_enqueue_style( 'custom-woocommerce-style-css', get_site_url() . '/wp-content/plugins/elementor-pro/assets/css/widget-woocommerce.min.css', array(), '1.0.0' );
 
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );
 	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
@@ -67,16 +65,20 @@ function km_admin_scripts_enqueue( $hook ) {
 
 	wp_enqueue_style( 'km-admin-style', $css_uri . 'admin-style.css', array(), filemtime( $css_path . 'admin-style.css' ), 'all' );
 
-	if ( 'woocommerce_page_wc-settings' === $hook && isset( $_GET['section'] ) && 'drive' === $_GET['section'] ) {
-		wp_enqueue_script( 'jquery-ui-datepicker' );
-		wp_enqueue_script( 'km-admin-script', $js_uri . 'admin-script.js', array( 'jquery' ), filemtime( $js_path . 'admin-script.js' ), false );
-	}
+	if ( 'woocommerce_page_wc-settings' === $hook ) {
 
-	$screen  = get_current_screen();
-	$zone_id = isset( $_GET['zone_id'] ) && ! empty( $_GET['zone_id'] ) ? $_GET['zone_id'] : '';
+		if ( isset( $_GET['section'] ) && 'drive' === $_GET['section'] ) {
+			wp_enqueue_script( 'jquery-ui-datepicker' );
+			wp_enqueue_script( 'km-drive-calendar-script', $js_uri . 'drive-calendar.js', array( 'jquery' ), filemtime( $js_path . 'drive-calendar.js' ), false );
+		}
 
-	if ( 'woocommerce_page_wc-settings' === $screen->id && isset( $zone_id ) ) {
-		wp_enqueue_script( 'km-shipping-zone-script', $js_uri . 'shipping-zone.js', array( 'jquery' ), filemtime( $js_path . 'shipping-zone.js' ), false );
+		if ( isset( $_GET['zone_id'] ) && ! empty( $_GET['zone_id'] ) ) {
+			wp_enqueue_script( 'km-shipping-zone-script', $js_uri . 'shipping-zone.js', array( 'jquery' ), filemtime( $js_path . 'shipping-zone.js' ), false );
+		}
+
+		if ( isset( $_GET['tab'] ) && 'shipping' === $_GET['tab'] && isset( $_GET['section'] ) && 'drive' !== $_GET['section'] ) {
+		}
+		wp_enqueue_script( 'km-shipping-shipping-methods-script', $js_uri . 'shipping-methods.js', array( 'jquery' ), filemtime( $js_path . 'shipping-methods.js' ), false );
 	}
 
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );

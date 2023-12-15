@@ -81,8 +81,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     //Traiement de la réponse
                     setCookie('zip_code', zip_modal + '-' + country_modal, 1);
                     setCookie('shipping_zone', response.data, 1);
-                    modal_postcode.style.display = 'none';
-                    location.reload();
+                    setTimeout(() => {
+                        modal_postcode.style.display = 'none';
+                        location.reload();
+                    }, 500);
                 } else {
                     // Gestion des erreurs
                     if (response.data && typeof response.data.message === 'string') {

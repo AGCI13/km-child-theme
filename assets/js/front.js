@@ -56,6 +56,10 @@ const setDebugClosable = () => {
 
 
 jQuery(document).ready(function ($) {
+    $(window).on('load', function() {
+        // modal sous body, évite les problèmes de responsive avec le fait que le modal se trouve dans un header qui est caché en version mobile
+        $('.km-modal').appendTo('body');
+    });
 	/* catégorie cliquable en entier */
 	$('.clickable-column').on('click', function () {
 		var link = $(this).find('a').first().attr('href');

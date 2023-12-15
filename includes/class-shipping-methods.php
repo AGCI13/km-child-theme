@@ -32,6 +32,7 @@ class KM_Shipping_Methods {
 	 */
 	public function register() {
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'add_shipping_methods' ), 10, 1 );
+		add_filter( 'woocommerce_package_rates', array( $this, 'save_option1_shipping_cost' ), 10, 2 );
 	}
 
 	/**
@@ -190,14 +191,23 @@ class KM_Shipping_Methods {
 		$total_price = 0;
 
 		foreach ( $weight_classes as $weight_class => $range ) {
+
 			if ( $remaining_weight > $range[1] ) {
 				$times                     = ceil( $remaining_weight / $range[1] );
 				$delivery_option_full_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_method_name . ' - ' . $weight_class;
-				$total_price              += $times * $this->get_shipping_price( $delivery_option_full_name );
+				$shipping_price            = $this->get_shipping_price( $delivery_option_full_name );
+				$total_price              += $times * $shipping_price;
 				$remaining_weight         %= $range[1];
-			} elseif ( $remaining_weight >= $range[0] && $remaining_weight <= $range[1] ) {
+
+				// error_log( "Weight is greater than {$range[1]}. Adding {$times} packages. Each package costs {$shipping_price}. New total is {$total_price}. Remaining weight is {$remaining_weight}." );
+
+			} elseif ( $remaining_weight > $range[0] && $remaining_weight <= $range[1] ) {
 				$delivery_option_full_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_method_name . ' - ' . $weight_class;
-				$total_price              += $this->get_shipping_price( $delivery_option_full_name );
+				$shipping_price            = $this->get_shipping_price( $delivery_option_full_name );
+				$total_price              += $shipping_price;
+
+				// error_log( "Weight is between {$range[0]} and {$range[1]}. Adding {$shipping_price}." );
+
 				break;
 			}
 		}
@@ -231,5 +241,18 @@ class KM_Shipping_Methods {
 			}
 		}
 		return false;
+	}
+
+	public function save_option1_shipping_cost( $rates, $package ) {
+		$specific_method_id = 'option1';
+
+		foreach ( $rates as $rate_id => $rate ) {
+			if ( strpos( $rate_id, $specific_method_id ) !== false ) {
+				// Stocker le coût dans la session de WooCommerce
+				WC()->session->set( 'option1_shipping_cost', $rate->get_cost() );
+				break;
+			}
+		}
+		return $rates;
 	}
 }
