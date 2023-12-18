@@ -19,6 +19,12 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 
 	protected function render() {
 
+		static $debounce = false;
+
+		if ( $debounce === true ) {
+			return;
+		}
+
 		$shipping_zone = KM_Shipping_Zone::get_instance();
 
 		$zip_code = $shipping_zone->zip_code ? $shipping_zone->zip_code : '';
@@ -29,6 +35,8 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 		if ( ( is_home() || is_front_page() || is_product() || is_product_category() ) && empty( $shipping_zone_id ) ) {
 			$show_popup = 'active';
 		}
+
+		ob_start();
 
 		?>
 		<div class="header_postcode">
@@ -73,5 +81,8 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 
 
 		<?php
+
+		echo ob_get_clean();
+		$debounce = true;
 	}
 }

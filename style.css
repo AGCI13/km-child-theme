@@ -186,6 +186,7 @@ input[type="email"]:active,input[type="tel"]:active,input[type="text"]:active {b
 /* Messages Woocommerce page produit, catégorie et panier */
 .woocommerce-notices-wrapper{margin: 0px;}
 .woocommerce-notices-wrapper .woocommerce-message{border-top-color: #BE9D68;margin: 40px 0px 0px 0px;}
+.single-product .woocommerce-notices-wrapper .woocommerce-message{margin: 80px 0px 0px 0px;}
 .woocommerce-notices-wrapper .woocommerce-message::before{color: #BE9D68;}
 .woocommerce-notices-wrapper .woocommerce-message a.button{background-color:#BE9D68;color: white;font-weight:400;}
 .woocommerce-notices-wrapper .woocommerce-error{border-top-color: #BE9D68;}
@@ -566,6 +567,8 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
   .page-id-50 .elementor-widget-woocommerce-my-account .e-my-account-tab .woocommerce-MyAccount-content{width:100% !important;}
 }
 @media (max-width: 768px) {
+  /* Header */
+  ul.sub-menu li.menu-item a{font-size: 12px;}
   /* Accueil */
   .home .grille-produit .elementor-widget-container{display: flex;overflow-x: auto;scroll-snap-type: x mandatory;scrollbar-color: #BE9D68 #BE9D68;max-width: inherit !important;}
   .home .grille-produit .elementor-widget-container::-webkit-scrollbar {height: 6px;}
@@ -576,6 +579,7 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
   .home .grille-produit .uael-woo-products-thumbnail-wrap {max-height: 150px;overflow: hidden;}
   .home .grille-produit .uael-woo-products-summary-wrap {max-height: 150px;}
   .home .grille-produit .uael-woo-products-thumbnail-wrap img {max-height: 100%;object-fit: cover;}
+  .home .elementor-image-gallery .gallery-item img{max-height:35px !important;}
   /* Catégorie */
   .archive .grille-categorie ul.products{grid-template-columns: repeat(2, 1fr) !important;}
   /* page produit */
@@ -630,7 +634,6 @@ body.modal-open{overflow: hidden!important;}
 }
 .affiche-produit .uael-woocommerce .uael-loop-product__link{position:relative;z-index:99}
 .affiche-produit .woocommerce-loop-product__title{text-align:center}
-.elementor-6 .elementor-element.elementor-element-c488d8e .uael-woo-product-wrapper{background:#f5f5f5}
 .affiche-produit .uael-woocommerce ul.products li.product .woocommerce-loop-product__link img{border-radius:5px;filter:drop-shadow(0 4px 8px rgba(0, 0, 0, .25))}
 .affiche-produit .uael-woo-skin-grid-franko .uael-product-actions .uael-action-item-wrap{background:linear-gradient(180deg,#be9e67 0,#a98951 100%)}
 .affiche-produit .uael-woo-skin-grid-franko .uael-product-actions .uael-action-item{color:#ffff}.menu-desktop .sub-menu{border-radius:5px!important}

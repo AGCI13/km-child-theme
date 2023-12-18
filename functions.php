@@ -40,7 +40,7 @@ require_once 'includes/class-dynamic-pricing.php';
 require_once 'includes/class-shipping-zone.php';
 require_once 'includes/class-order-processing.php';
 require_once 'includes/class-palletization-manager.php';
-require_once 'includes/class-big-bag-manager.php';
+// require_once 'includes/class-big-bag-manager.php';
 
 require_once 'includes/class-shipping-methods.php';
 require_once 'includes/shipping-methods/class-shipping-method-1.php';
