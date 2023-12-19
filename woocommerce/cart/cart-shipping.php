@@ -72,7 +72,11 @@ if ( 'drive' === $chosen_method ) {
 										?>
 										<br>
 										<?php
-										echo esc_html( get_option( 'woocommerce_' . esc_attr( sanitize_title( $method->id ) ) . '_settings' )['description'] );
+										if ( ! in_array( $method->id, array( 'option1', 'option1express' ), true ) ) {
+											echo esc_html( get_option( 'woocommerce_' . esc_attr( sanitize_title( $method->id ) ) . '_settings' )['description'] );
+										} else {
+											echo esc_html( $method->get_meta_data()['description'] );
+										}
 										do_action( 'woocommerce_after_shipping_rate', $method, $index );
 										?>
 								</div>

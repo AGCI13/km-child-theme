@@ -259,7 +259,7 @@ class KM_Shipping_Zone {
 		$nonce_value = sanitize_text_field( $nonce_value );
 
 		if ( ! wp_verify_nonce( $nonce_value, 'postcode_submission_handler' ) ) {
-			wp_send_json_error( array( 'message' => __( 'La vérification du nonce a échoué.' )  . $nonce_value ) );
+			wp_send_json_error( array( 'message' => __( 'La vérification du nonce a échoué.' ) ) );
 		}
 
 		$form_data = $this->validate_postcode_form_data( $_POST );

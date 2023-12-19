@@ -6,6 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const toInput = document.querySelector('#toInput');
     const fromDisplay = document.querySelector('#fromDisplay');
     const toDisplay = document.querySelector('#toDisplay');
+    const closeButton = document.querySelector('.km-product-filters_close');
+
+    closeButton.addEventListener('click', () => {
+        const filterBar = document.querySelector('.km-product-filters_sliding-bar');
+        document.body.classList.remove('modal-open');
+        filterBar.classList.remove('open');
+    });
 
     filterSlidingBars.forEach((filterBar, barIndex) => {
         const filterForm = filterBar.querySelector('.km-product-filters__form');

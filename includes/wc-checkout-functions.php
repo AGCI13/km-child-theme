@@ -232,14 +232,6 @@ function km_display_shipping_info_in_footer() {
 		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
 		echo '$chosen_shipping_methods :' . WC()->session->chosen_shipping_methods[0];
 
-		// echo '<table>';
-		// echo '<thead><tr><th colspan="2"> Infos panier ' . esc_html( $method ) . ':</th></tr></thead>';
-		// echo '<tbody>';
-		// echo '<tr><td>Montant total du panier</td><td>' . WC()->cart->get_cart_contents_total() . ' €</td></tr>';
-
-		// echo '</tbody>';
-		// echo '</table>';
-
 	foreach ( $shipping_methods as $method ) {
 		$cookie_name = 'km_shipping_cost_' . $method;
 
@@ -254,8 +246,10 @@ function km_display_shipping_info_in_footer() {
 					$value = esc_html( $value ) . ' Kg';
 				} elseif ( strpos( $key, 'placo' ) !== false ) {
 					$value = esc_html( $value );
-				} else {
+				} elseif ( strpos( $key, 'prix' ) !== false ) {
 					$value = esc_html( $value ) . ' €';
+				} else {
+					$value = esc_html( $value );
 				}
 				echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
 			}

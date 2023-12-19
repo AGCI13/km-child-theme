@@ -36,6 +36,22 @@ class KM_Shipping_Methods {
 	}
 
 	/**
+	 * Weight classes.
+	 *
+	 * @var array
+	 */
+	public $weight_classes = array(
+		'45 A 60 T' => array( 45, 60 ),
+		'38 A 45 T' => array( 38, 45 ),
+		'32 A 38 T' => array( 32, 38 ),
+		'15 A 30 T' => array( 15, 30 ),
+		'8 A 15 T'  => array( 8, 15 ),
+		'2 A 8 T'   => array( 2, 8 ),
+		'0 A 2 T'   => array( 0, 2 ),
+	);
+
+
+	/**
 	 * Ajoute les options de livraison
 	 *
 	 * @param array $methods
@@ -101,23 +117,39 @@ class KM_Shipping_Methods {
 	 * @param string $shipping_method_name The name of the shipping method.
 	 * @return float Total shipping cost.
 	 */
-	public function calculate_shipping_method_price( $shipping_method_name ) {
-		$cart_items            = WC()->cart->get_cart();
-		$total_shipping_cost   = 0.0;
-		$vrac_weight           = 0.0;
-		$isolation_weight      = 0.0;
-		$other_products_weight = 0.0;
+	public function calculate_shipping_method_price( $shipping_method_id, $shipping_method_name ) {
+		$cart_items = WC()->cart->get_cart();
 
 		if ( ! $cart_items ) {
 			return 0;
 		}
 
+		$total_shipping_cost   = 0;
+		$vrac_weight           = 0.0;
+		$isolation_weight      = 0.0;
+		$other_products_weight = 0.0;
+		$total_trucks          = 0;
+		$total_weight          = 0;
+
+		$calculated_vrac_shipping      = array(
+			'cost'    => 0,
+			'package' => 0,
+		);
+		$calculated_isolation_shipping = array(
+			'cost'    => 0,
+			'package' => 0,
+		);
+		$calculated_other_shipping     = array(
+			'cost'    => 0,
+			'package' => 0,
+		);
+
 		$cart_has_plasterboard = $this->cart_has_plasterboard( $cart_items );
 
 		foreach ( $cart_items as $cart_item ) {
 			$product        = $cart_item['data'];
-			$product_weight = $product->get_weight() * $cart_item['quantity'];
-
+			$product_weight = (int) $product->get_weight() * $cart_item['quantity'];
+			$total_weight  += (int) $product_weight;
 			if ( strpos( $product->get_name(), 'VRAC A LA TONNE' ) !== false ) {
 				$vrac_weight += $product_weight;
 			} elseif ( $cart_has_plasterboard && $this->is_isolation_product( $product ) ) {
@@ -128,33 +160,41 @@ class KM_Shipping_Methods {
 		}
 
 		if ( $vrac_weight > 0 ) {
-			$vrac_shipping_cost   = $this->calculate_shipping_for_product( $vrac_weight, $shipping_method_name );
-			$total_shipping_cost += $vrac_shipping_cost;
+			$calculated_vrac_shipping = $this->calculate_shipping_info( $vrac_weight, $shipping_method_name );
+			$total_trucks            += $calculated_vrac_shipping['package'];
+			$total_shipping_cost     += $calculated_vrac_shipping['cost'];
 		}
 
 		if ( $isolation_weight > 0 ) {
-			$isolation_shipping_cost = $this->calculate_shipping_for_product( $isolation_weight, $shipping_method_name );
-			$total_shipping_cost    += $isolation_shipping_cost;
+			$calculated_isolation_shipping = $this->calculate_shipping_info( $isolation_weight, $shipping_method_name );
+			$total_trucks                 += $calculated_isolation_shipping['package'];
+			$total_shipping_cost          += $calculated_isolation_shipping['cost'];
 		}
 
 		if ( $other_products_weight > 0 ) {
-			$other_products_shipping_cost = $this->calculate_shipping_for_product( $other_products_weight, $shipping_method_name );
-			$total_shipping_cost         += $other_products_shipping_cost;
+			$calculated_other_shipping = $this->calculate_shipping_info( $other_products_weight, $shipping_method_name );
+			$total_trucks             += $calculated_other_shipping['package'];
+			$total_shipping_cost      += $calculated_other_shipping['cost'];
 		}
 
+		error_log( '------------------------------' );
+		error_log( 'total_shipping_cost avant :' . $total_shipping_cost );
+
 		/**
-		 * For degugging purposes only.
-		 */
+		* For degugging purposes only.
+		*/
 		$detailed_shipping_cost = array(
+			'nbr_camion'            => $total_trucks ?: 0,
+			'poids_total'           => $total_weight ?: 0,
 			'placo_present'         => $cart_has_plasterboard ? 'Oui' : 'Non',
 			'vrac_poids'            => $vrac_weight ?: 0,
-			'vrac_prix'             => $vrac_shipping_cost ?: 0,
+			'vrac_prix'             => $calculated_vrac_shipping['cost'] ?: 0,
 			'isolation_poids'       => $isolation_weight ?: 0,
-			'isolation_prix'        => $isolation_shipping_cost ?: 0,
+			'isolation_prix'        => $calculated_isolation_shipping['cost'] ?: 0,
 			'autres_produits_poids' => $other_products_weight ?: 0,
-			'autres_produits_prix'  => $other_products_shipping_cost ?: 0,
-			'total_ht'              => $total_shipping_cost ?: 0,
-			'total_ttc'             => $total_shipping_cost * 1.2 ?: 0,
+			'autres_produits_prix'  => $calculated_other_shipping['cost'] ?: 0,
+			'total_livraison_ht'    => $total_shipping_cost ?: 0,
+			'total_livraison_ttc'   => $total_shipping_cost * 1.2 ?: 0,
 		);
 
 		// Convertir le tableau en chaîne JSON pour le stockage dans le cookie.
@@ -163,34 +203,59 @@ class KM_Shipping_Methods {
 		// Enregistrer le cookie avec la durée de vie correcte (24 heures à partir de maintenant).
 		setcookie( sanitize_title( 'km_shipping_cost_' . $shipping_method_name ), $cookie_value, time() + 60 * 60 * 24 * 30, '/' );
 
-		return $total_shipping_cost;
+		error_log( 'shipping_method_id : ' . $shipping_method_id );
+		error_log( 'total_weight : ' . $total_weight );
+		error_log( 'total_trucks : ' . $total_trucks );
+
+		// Simplifier les conditions pour définir $total_shipping_cost.
+		if ( ( in_array( $shipping_method_id, array( 'option2', 'option2express' ) ) && $total_weight <= 2000 && 1 === $total_trucks ) ) {
+			$total_shipping_cost = 0;
+		}
+
+		if ( in_array( $shipping_method_id, array( 'option1', 'option1express' ) ) && $total_trucks > 1 ) {
+			$total_shipping_cost = 0;
+		}
+
+		error_log( 'total_shipping_cost : ' . $total_shipping_cost );
+
+		if ( 'option1' === $shipping_method_id || 'option1express' === $shipping_method_id ) {
+			$shipping_method_info['weight_class'] = $this->get_shipping_description( $total_weight );
+		}
+
+		$shipping_method_info['cost'] = $total_shipping_cost;
+
+		return $shipping_method_info;
 	}
 
 	/**
+	 * Calcule le poids total du panier.
 	 *
-	 * Calcule le prix de la livraison en fonction du poids du panier.
+	 * @param array $cart_items Les articles du panier.
+	 * @return float Le poids total du panier.
+	 */
+	private function calculate_total_weight( $cart_items ) {
+		$total_weight = 0;
+		foreach ( $cart_items as $cart_item ) {
+			$product       = $cart_item['data'];
+			$total_weight += (int) $product->get_weight() * $cart_item['quantity'];
+		}
+		return $total_weight;
+	}
+
+	/**
+	 * Calcule les informations de livraison en fonction du poids total.
 	 *
 	 * @param float  $weight Le poids total du panier.
-	 * @param string $shipping_method_name Le nom de la méthode de livraison.
-	 * @return float Le prix de la livraison.
+	 * @param string $shipping_method_name Nom de la méthode de livraison.
+	 * @return array Informations sur le coût de livraison.
 	 */
-	private function calculate_shipping_for_product( $weight, $shipping_method_name ) {
+	private function calculate_shipping_info( $weight, $shipping_method_name ) {
 		$remaining_weight = $weight / 1000; // Convertir en tonnes.
 
-		// Utiliser les mêmes classes de poids que dans calculate_shipping_cost_based_on_weight.
-		$weight_classes = array(
-			'45 A 60 T' => array( 45, 60 ),
-			'38 A 45 T' => array( 38, 45 ),
-			'32 A 38 T' => array( 32, 38 ),
-			'15 A 30 T' => array( 15, 30 ),
-			'8 A 15 T'  => array( 8, 15 ),
-			'2 A 8 T'   => array( 2, 8 ),
-			'0 A 2 T'   => array( 0, 2 ),
-		);
+		$total_price  = 0;
+		$total_trucks = 0;
 
-		$total_price = 0;
-
-		foreach ( $weight_classes as $weight_class => $range ) {
+		foreach ( $this->weight_classes as $weight_class => $range ) {
 
 			if ( $remaining_weight > $range[1] ) {
 				$times                     = ceil( $remaining_weight / $range[1] );
@@ -198,6 +263,7 @@ class KM_Shipping_Methods {
 				$shipping_price            = $this->get_shipping_price( $delivery_option_full_name );
 				$total_price              += $times * $shipping_price;
 				$remaining_weight         %= $range[1];
+				$total_trucks             += $times;
 
 				// error_log( "Weight is greater than {$range[1]}. Adding {$times} packages. Each package costs {$shipping_price}. New total is {$total_price}. Remaining weight is {$remaining_weight}." );
 
@@ -205,14 +271,43 @@ class KM_Shipping_Methods {
 				$delivery_option_full_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_method_name . ' - ' . $weight_class;
 				$shipping_price            = $this->get_shipping_price( $delivery_option_full_name );
 				$total_price              += $shipping_price;
-
+				$total_trucks             += 1;
 				// error_log( "Weight is between {$range[0]} and {$range[1]}. Adding {$shipping_price}." );
 
 				break;
 			}
 		}
 
-		return $total_price;
+		return array(
+			'cost'    => $total_price,
+			'package' => $total_trucks,
+		);
+	}
+
+	/**
+	 * Récupère la description de livraison basée sur l'ID de la méthode et le poids total.
+	 *
+	 * @param string $shipping_method_id ID de la méthode de livraison.
+	 * @param float  $total_weight Le poids total du panier.
+	 * @return string Description de la méthode de livraison.
+	 */
+	private function get_shipping_description( $total_weight ) {
+
+		$total_tons = $total_weight / 1000; // Convertir en tonnes.
+
+		// if total weight is > 60 tonnes then return.
+
+		if ( $total_tons > 60 ) {
+			$total_tons = 60;
+		}
+
+		// Get total weight fit into a range.
+		foreach ( $this->weight_classes as $weight_class => $range ) {
+			if ( $total_tons > $range[0] && $total_tons <= $range[1] ) {
+				// Get the index of the current weight class.
+				return array_search( $weight_class, array_keys( $this->weight_classes ) );
+			}
+		}
 	}
 
 	/**

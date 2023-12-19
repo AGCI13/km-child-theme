@@ -67,6 +67,9 @@ class Product_filters_Widget extends \Elementor\Widget_Base {
 		?>
 		<div class="sliding-bar-off-canvas"></div>
 		<div class="km-product-filters_sliding-bar sliding-bar-right">
+		<div class="km-product-filters_close">
+    		<span class="close-icon">X</span>
+		</div>
 		<h4 class="sliding-bar_title"><?php esc_html_e( 'Filtrer par :', 'kingmateriaux' ); ?></h4>
 			<form class="km-product-filters__form">
 				<?php if ( $terms_uses ) : ?>

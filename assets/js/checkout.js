@@ -11,7 +11,7 @@ jQuery(document).ready(function ($) {
         "updated_checkout",
         function () {
             setTimeout(function () {
-                reapplySelectedClasses();
+                // reapplySelectedClasses();
                 loadShippingMethods();
                 handleEnterKeydown();
                 checkoutNavigation();

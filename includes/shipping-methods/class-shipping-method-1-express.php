@@ -59,11 +59,37 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 				'description' => __( 'Entrez le nom affiché pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => $this->method_title,
 			),
-			'description'      => array(
-				'title'       => 'Description',
-				'type'        => 'textarea',
-				'description' => __( 'Entrez la description pour cette méthode d\'expédition . ', 'kingmateriaux' ),
-				'default'     => 'Description de ' . $this->method_title,
+			'description_8'    => array(
+				'title' => 'Description de 0 à 2 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_7'    => array(
+				'title' => 'Description de 2 à 8 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_6'    => array(
+				'title' => 'Description de 8 à 15 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_5'    => array(
+				'title' => 'Description de 15 à 30 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_4'    => array(
+				'title' => 'Description de 30 à 32 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_3'    => array(
+				'title' => 'Description de 32 à 38 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_2'    => array(
+				'title' => 'Description de 38 à 45 tonnes',
+				'type'  => 'textarea',
+			),
+			'description_1'    => array(
+				'title' => 'Description de 45 à 60 tonnes',
+				'type'  => 'textarea',
 			),
 			'access_condition' => array(
 				'title'       => 'Condition d\'accès au chantier',
@@ -93,17 +119,24 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 			return;
 		}
 
-		$shipping_cost = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->method_title );
-		if ( ! $shipping_cost || 0 === $shipping_cost ) {
+		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
+
+		if ( ! $shipping_info || 0 === $shipping_info['cost'] ) {
 			return;
 		}
+
+		$description_key          = isset( $shipping_info['weight_class'] ) && ! empty( $shipping_info['weight_class'] ) ? 'description_' . $shipping_info['weight_class'] : 'description_1';
+		$this->method_description = $this->get_option( $description_key );
 
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(
-			'id'    => $this->id,
-			'label' => $this->title,
-			'cost'  => $shipping_cost,
+			'id'        => $this->id,
+			'label'     => $this->title,
+			'cost'      => $shipping_info['cost'],
+			'meta_data' => array(
+				'description' => $this->method_description,
+			),
 		);
 
 		$this->add_rate( $rate );
