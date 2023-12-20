@@ -175,16 +175,7 @@ if ( 'drive' === $chosen_method ) {
 									<div class="slot" data-time="16h00">16h00</div>
 									<div class="slot" data-time="16h30">16h30</div>
 									<div class="slot" data-time="17h00">17h00</div>
-									<div class="slot" data-time="17h30">17h30</div>
 								</div>
-								</div>
-
-								<!-- Evening Slot -->
-								<div class="time-slot evening">
-									<h4>Soir</h4>
-									<div class="slots">
-										<div class="slot">18h00</div>
-									</div>
 								</div>
 								<p id="drive-time-wrapper"  class="form-row must-validate validate-required">
 									<label for="drive-time"><?php esc_html_e( 'Heure d\'enlèvement Drive', 'kingmateriaux' ); ?></label>

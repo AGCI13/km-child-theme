@@ -47,6 +47,13 @@ class KM_Shipping_Zone {
 	public $country_code = '';
 
 	/**
+	 * The shipping zone IDs in the thirtheen's departement.
+	 *
+	 * @var array
+	 */
+	public $zones_in_thirteen = array( 12, 13, 14, 15, 16, 17 );
+
+	/**
 	 * Constructor.
 	 *
 	 * The constructor is protected to prevent creating a new instance from outside
@@ -179,7 +186,7 @@ class KM_Shipping_Zone {
 
 		$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
 
-		if ( in_array( $shipping_zone_id, array( 12, 13, 14, 15, 16, 17 ) ) ) {
+		if ( in_array( $shipping_zone_id, $this->zones_in_thirteen ) ) {
 			global $km_is_in_thirteen;
 			$km_is_in_thirteen = true;
 			return true;
@@ -195,7 +202,7 @@ class KM_Shipping_Zone {
 	 */
 	public function get_related_shipping_product( $product ) {
 
-		if ( ! $product || ! $product instanceof WC_Product ) {
+		if ( ! $product ) {
 			return;
 		}
 
@@ -232,7 +239,6 @@ class KM_Shipping_Zone {
 		);
 
 		$shipping_products_posts = get_posts( $args );
-
 		if ( ! $shipping_products_posts ) {
 			return;
 		}

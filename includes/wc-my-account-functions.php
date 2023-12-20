@@ -74,8 +74,8 @@ add_action( 'woocommerce_account_moyen_paiement_endpoint', 'km_display_payment_m
  */
 function km_add_payment_methods_menu_item( $items ) {
     // L'identifiant de l'onglet doit correspondre à l'identifiant de l'endpoint
-    $items['moyen-paiement'] = 'Moyen de paiement';
-    return $items;
+    //$items['moyen-paiement'] = 'Moyen de paiement';
+    //return $items;
 }
 add_filter( 'woocommerce_account_menu_items', 'km_add_payment_methods_menu_item' );
 
@@ -94,7 +94,7 @@ function km_reorder_my_account_menu( $items ) {
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		// 'edit-address'    => __( 'Addresses', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
-		'payment-methods'  => __( 'Moyen de paiement', 'woocommerce' ),
+		//'payment-methods'  => __( 'Moyen de paiement', 'woocommerce' ),
 		'whishlist'       => __( 'Mes favoris', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	);

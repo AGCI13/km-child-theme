@@ -177,9 +177,6 @@ class KM_Shipping_Methods {
 			$total_shipping_cost      += $calculated_other_shipping['cost'];
 		}
 
-		error_log( '------------------------------' );
-		error_log( 'total_shipping_cost avant :' . $total_shipping_cost );
-
 		/**
 		* For degugging purposes only.
 		*/
@@ -203,10 +200,6 @@ class KM_Shipping_Methods {
 		// Enregistrer le cookie avec la durée de vie correcte (24 heures à partir de maintenant).
 		setcookie( sanitize_title( 'km_shipping_cost_' . $shipping_method_name ), $cookie_value, time() + 60 * 60 * 24 * 30, '/' );
 
-		error_log( 'shipping_method_id : ' . $shipping_method_id );
-		error_log( 'total_weight : ' . $total_weight );
-		error_log( 'total_trucks : ' . $total_trucks );
-
 		// Simplifier les conditions pour définir $total_shipping_cost.
 		if ( ( in_array( $shipping_method_id, array( 'option2', 'option2express' ) ) && $total_weight <= 2000 && 1 === $total_trucks ) ) {
 			$total_shipping_cost = 0;
@@ -215,8 +208,6 @@ class KM_Shipping_Methods {
 		if ( in_array( $shipping_method_id, array( 'option1', 'option1express' ) ) && $total_trucks > 1 ) {
 			$total_shipping_cost = 0;
 		}
-
-		error_log( 'total_shipping_cost : ' . $total_shipping_cost );
 
 		if ( 'option1' === $shipping_method_id || 'option1express' === $shipping_method_id ) {
 			$shipping_method_info['weight_class'] = $this->get_shipping_description( $total_weight );

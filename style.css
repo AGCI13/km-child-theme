@@ -184,8 +184,9 @@ input[type="email"]:active,input[type="tel"]:active,input[type="text"]:active {b
 .king-account img {display: block;margin: 0 auto;}
 .king-account .king-account-content {display: block;margin-top: 8px;}
 /* Messages Woocommerce page produit, catégorie et panier */
-.woocommerce-notices-wrapper{margin: 0px;}
+.woocommerce-notices-wrapper{margin-bottom: 20px !important;}
 .woocommerce-notices-wrapper .woocommerce-message{border-top-color: #BE9D68;margin: 40px 0px 0px 0px;}
+.woocommerce-notices-wrapper .woocommerce-message a{color: #BE9D68;}
 .single-product .woocommerce-notices-wrapper .woocommerce-message{margin: 80px 0px 0px 0px;}
 .woocommerce-notices-wrapper .woocommerce-message::before{color: #BE9D68;}
 .woocommerce-notices-wrapper .woocommerce-message a.button{background-color:#BE9D68;color: white;font-weight:400;}
@@ -223,7 +224,7 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .grille-produit .view-product-btn{display:none;}
 .grille-produit .uael-out-of-stock{display:none;}
 .grille-produit .uael-product-actions{display:none;}
-.grille-produit .uael-woo-product-wrapper .uael-woo-products-thumbnail-wrap img.size-woocommerce_thumbnail{opacity: 0.7;}
+.grille-produit .uael-woo-product-wrapper .uael-woo-products-thumbnail-wrap img.size-woocommerce_thumbnail{opacity: 0.7;border-radius: 5px}
 .grille-produit .uael-woo-product-wrapper:hover .uael-woo-products-thumbnail-wrap img.size-woocommerce_thumbnail{opacity: 1;}
 .grille-produit .uael-woo-product-wrapper .uael-woo-products-summary-wrap{padding: 10px 10px;}
 .grille-produit h2.woocommerce-loop-product__title:hover{color:#BE9D68 !important;}
@@ -450,13 +451,18 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .archive .grille-categorie li.product span.price span.woocommerce-Price-amount{color:#BE9D68;}
 .archive .elementor-widget-text-editor .elementor-widget-container p a,.archive .elementor-widget-text-editor .elementor-widget-container h2 a{color:#BE9D68;}
 /* Single Produit */
+.single-product:not(.has-tonnage-calculator) .lien-calcul-tonnage{display: none;}
 .single-product #pa_variation-conditionnement{width:inherit;}
 .single-product .verified-review {display: flex;flex-direction: row;align-items: center;justify-content: flex-start;width: fit-content;}
 .single-product .verified-review > img{width:40px;}
 .single-product .verified-review .headerStars{margin-left: 5px;}
 .single-product .verified-review .headerStars > div {display: flex;align-items: center;}
 .single-product .verified-review .netreviews_bg_stars_big.headerStars{height: 100%;max-height:100%; min-height:100%; display:flex; align-items:center;}
+.single-product p.price .woocommerce-Price-amount{font-size: 30px !important;font-weight: 900 !important;line-height: 40px;color:#4D4D4D;}
 .single-product .single_variation_wrap .woocommerce-Price-amount.amount{font-size: 30px !important;font-weight: 900 !important;line-height: 40px;color:#4D4D4D;}
+.single-product .elementor-widget-woocommerce-product-price .price{margin-bottom:0!important;}
+.single-product .km-product-ecotaxe{font-size:13px;color:#4D4D4D;margin-bottom:10px;font-style:italic;font-weight: 400;}
+.single-product .km-product-ecotaxe .woocommerce-Price-amount.amount{font-size: 13px !important;font-weight: 500 !important;line-height: 1em;}
 .single-product .product .header_postcode p{color:#4D4D4D;font-family:Lato;font-weight:400;font-size:16px;}
 .single-product .elementor-add-to-cart table tbody tr td{background-color: transparent;}
 .single-product .elementor-add-to-cart table tbody tr th.label, .single-product .elementor-add-to-cart table tbody tr label{display:none;}
@@ -618,6 +624,10 @@ body.modal-open{overflow: hidden!important;}
 .km-modal-close{ position: absolute;right: 15px;top:15px;border: none;display: inline-block; vertical-align: middle;overflow: hidden;height: 20px;width: 20px;text-decoration: none;text-align: center;cursor: pointer;white-space: nowrap;border:none;}
 
 
+
+
+
+
 @media screen and (max-width:766px){
   .invisible-on-mobile{display:none}
   .entete-tab-commande div,.order .colonne-commande{width:33%!important}
@@ -693,6 +703,3 @@ hr{border:1px solid #d1d1d1}
 section.elementor-section.elementor-top-section.elementor-element.elementor-element-2130c13d.elementor-section-boxed.elementor-section-height-default.elementor-section-height-default{margin:0}
 section.elementor-section.elementor-top-section.elementor-element.elementor-element-2130c13d.elementor-section-boxed.elementor-section-height-default.elementor-section-height-default .elementor-widget-wrap.elementor-element-populated{padding-top:0!important}.shopengine-multistep-footer{display:none}
 button.shopengine_add_to_list_action.shopengine-wishlist.badge.inactive{display:none}
-
-
-

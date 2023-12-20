@@ -89,13 +89,13 @@ add_action( 'woocommerce_after_cart_table', 'after_cart_coupon_content' );
  * @return string
  */
 function km_display_ecotaxe_with_unit_price( $price_html, $cart_item, $cart_item_key ) {
-	if ( is_admin() || ! defined( 'DOING_AJAX' ) ) {
+	if ( is_admin() ) {
 		return;
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
 	if ( $km_dynamique_pricing->product_is_bulk_or_bigbag( $cart_item['data'] ) ) {
-		$price_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->ecotaxe_rate ) ) . '</small>';
+		$price_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->ecotaxe_rate_incl_taxes ) ) . '</small>';
 	}
 	return $price_html;
 }
@@ -110,47 +110,19 @@ add_filter( 'woocommerce_cart_item_price', 'km_display_ecotaxe_with_unit_price',
  * @return string
  */
 function km_display_ecotaxe_with_subtotal( $subtotal_html, $cart_item, $cart_item_key ) {
-	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+	if ( is_admin() ) {
 		return;
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
 	if ( $km_dynamique_pricing->product_is_bulk_or_bigbag( $cart_item['data'] ) ) {
-		$ecotaxe_total  = $km_dynamique_pricing->ecotaxe_rate * $cart_item['quantity'];
+		$ecotaxe_total  = $km_dynamique_pricing->ecotaxe_rate_incl_taxes * $cart_item['quantity'];
 		$subtotal_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotaxe_total ) ) . '</small>';
 	}
 	return $subtotal_html;
 }
 add_filter( 'woocommerce_cart_item_subtotal', 'km_display_ecotaxe_with_subtotal', 10, 3 );
 
-/**
- * Ajoute l'éco-taxe au prix de l'article dans le panier
- *
- * @param WC_Cart $cart
- * @return void
- */
-function km_add_ecotaxe_to_cart_item_prices( $cart ) {
-	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-		return;
-	}
-
-	// S'assurer que cette action n'est exécutée qu'une seule fois.
-	if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
-		return;
-	}
-
-	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
-
-	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-		if ( $km_dynamique_pricing->product_is_bulk_or_bigbag( $cart_item['data'] ) ) {
-			// Ajouter l'éco-taxe au prix de l'article dans le panier.
-			$original_price = $cart_item['data']->get_price();
-			$new_price      = $original_price + $km_dynamique_pricing->ecotaxe_rate;
-			$cart_item['data']->set_price( $new_price );
-		}
-	}
-}
-add_action( 'woocommerce_before_calculate_totals', 'km_add_ecotaxe_to_cart_item_prices', 10, 1 );
 
 /**
  * Affiche le message de l'éco-taxe sous le panier
@@ -180,8 +152,13 @@ add_action( 'woocommerce_cart_contents', 'km_ecotaxe_message_display', 99 );
  * @return string
  */
 function add_ecotax_to_order_total_html( $value ) {
-	$ecotax_amount = 50; // Montant fictif de l'écotax. Récupérez la valeur réelle selon votre besoin.
-	$ecotax_text   = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $ecotax_amount ) );
+	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
+
+	if ( $km_dynamique_pricing->ecotaxe_rate <= 0 ) {
+		return $value;
+	}
+
+	$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->get_total_ecotaxe() ) );
 	return str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $value );
 }
 add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_total_html', 10, 1 );
@@ -275,7 +252,7 @@ function km_add_cart_totals_after_order_total() {
 		<?php
 	}
 }
-add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
+// add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande

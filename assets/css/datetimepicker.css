@@ -1,24 +1,26 @@
 .drive-datetimepicker {
-    margin-top:20px;
-    display:none;
+    margin-top: 20px;
+    display: none;
 }
-.drive-datetimepicker h3{
+
+.drive-datetimepicker h3 {
     font-size: 1.22em;
 }
 
-.drive-datetimepicker h4{
+.drive-datetimepicker h4 {
     font-size: 1.1.5em;
 }
 
 .drive-datetimepicker .drive-datepicker-day {
-    margin-bottom:20px;
+    margin-bottom: 20px;
     display: flex;
     align-items: baseline;
-    gap:.5rem;
+    gap: .5rem;
 }
-.drive-datetimepicker .drive-datepicker-day .btn-confirm{
-width: fit-content;
-font-size:15px;
+
+.drive-datetimepicker .drive-datepicker-day .btn-confirm {
+    width: fit-content;
+    font-size: 15px;
 }
 
 .drive-datetimepicker .drive-datepicker-day .day-list {
@@ -64,7 +66,7 @@ font-size:15px;
     padding: 0;
     list-style: none;
     gap: 1rem;
-    margin-bottom:30px;
+    margin-bottom: 30px;
 }
 
 .drive-datetimepicker .time-slot {
@@ -79,7 +81,7 @@ font-size:15px;
     padding: 0;
     list-style: none;
     cursor: pointer;
-    gap: .5rem;
+    gap: .49rem;
 }
 
 
@@ -100,4 +102,8 @@ font-size:15px;
 
 .drive-datetimepicker .day-list::-webkit-scrollbar-thumb:hover {
     background: rgb(173, 173, 173);
+}
+
+.time-slot.disabled {
+    visibility: hidden;
 }

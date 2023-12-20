@@ -4,43 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-// Hide Price Range for WooCommerce Variable Products.
-add_filter( 'woocommerce_variable_sale_price_html', 'km_variable_product_price', 10, 2 );
-add_filter( 'woocommerce_variable_price_html', 'km_variable_product_price', 10, 2 );
-/**
- * Change the price display for variable products.
- *
- * @param  string $v_price The variable product price.
- * @param  object $v_product The variable product object.
- * @return string The updated variable product price.
- */
-function km_variable_product_price( $v_price, $v_product ) {
-	// Product Price.
-	$prod_prices = array(
-		$v_product->get_variation_price( 'min', true ),
-		$v_product->get_variation_price( 'max', true ),
-	);
-	/* translators: 1: product price 2: product regular price */
-	$prod_price = $prod_prices[0] !== $prod_prices[1] ? sprintf( __( 'À partir de %1$s', 'woocommerce' ), wc_price( $prod_prices[0] ) ) : wc_price( $prod_prices[0] );
-
-	// Regular Price.
-	$regular_prices = array(
-		$v_product->get_variation_regular_price( 'min', true ),
-		$v_product->get_variation_regular_price( 'max', true ),
-	);
-	sort( $regular_prices );
-	$regular_price = $regular_prices[0] !== $regular_prices[1] ? sprintf(
-		__( 'À partir de %1$s', 'woocommerce' ),
-		wc_price( $regular_prices[0] )
-	) : wc_price( $regular_prices[0] );
-
-	if ( $prod_price !== $regular_price ) {
-		$prod_price = '<del>' . $regular_price . $v_product->get_price_suffix() . '</del> <ins>' .
-						$prod_price . $v_product->get_price_suffix() . '</ins>';
-	}
-	return $prod_price;
-}
-
 add_action( 'wp_ajax_tonnage_calculation', 'km_tonnage_calculation' );
 add_action( 'wp_ajax_nopriv_tonnage_calculation', 'km_tonnage_calculation' );
 /**
@@ -256,3 +219,47 @@ function km_display_shipping_delays_on_product_page( $product_id ) {
 
 	echo '<div class="km-product-delivery-delay">' . esc_html( $delivery_message ) . '</div>';
 }
+
+function has_tonnage_calculator() {
+	// Si c'est un produit et qu'il n'y a pas l'option "Afficher le calculateur de tonnage" de coché, on ne l'affiche pas.
+	if ( is_product() ) {
+		global $product;
+
+		// Obtenir les catégories de produits.
+		$categories      = wp_get_post_terms( $product->get_id(), 'product_cat' );
+		$parent_category = null;
+		$child_category  = null;
+
+		foreach ( $categories as $category ) {
+			if ( $category->parent == 0 ) {
+				// C'est une catégorie parente.
+				$parent_category = $category;
+			} else {
+				// C'est une catégorie enfant.
+				$child_category = $category;
+			}
+		}
+
+		$target_category = $child_category ? $child_category : $parent_category;
+		$cat_term_id     = $target_category->term_id;
+
+		if ( $cat_term_id ) {
+			// Récupérer la valeur du champ ACF pour cette catégorie.
+			$acf_value = get_field( 'show_tonnage_calculator', 'product_cat_' . $cat_term_id );
+			if ( $acf_value ) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+add_filter(
+	'body_class',
+	function ( $classes ) {
+		if ( is_product() && has_tonnage_calculator() ) {
+			return array_merge( $classes, array( 'has-tonnage-calculator' ) );
+		}
+		return $classes;
+	}
+);

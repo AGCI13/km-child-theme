@@ -296,6 +296,16 @@ jQuery(document).ready(function ($) {
                 dateTimePicker.querySelector('#drive-date-wrapper').classList.add('woocommerce-validated');
                 localStorage.setItem('driveDate', chosenDate);
                 setDriveTotalsInfo();
+
+                if (day.innerText.includes('samedi')) {
+                    document.querySelector('.time-slot.afternoon').classList.add('disabled');
+                    document.querySelectorAll('.time-slot.afternoon .slot').forEach((slot) => {
+                        slot.classList.remove('active');
+                    });
+                }
+                else {
+                    document.querySelector('.time-slot.afternoon').classList.remove('disabled');
+                }
             };
 
             const handleSlotClick = (slot) => {
@@ -365,6 +375,10 @@ jQuery(document).ready(function ($) {
                     const selectedDay = dateTimePicker.querySelector('.drive-datepicker-day .day[data-date="' + selectedStoredDate + '"]');
                     if (selectedDay) {
                         selectedDay.click();
+                    }
+                    
+                    if (selectedDay.innerText.includes('samedi')) {
+                        document.querySelector('.time-slot.afternoon').classList.add('disabled');
                     }
                 }
 

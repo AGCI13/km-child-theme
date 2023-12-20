@@ -74,10 +74,6 @@ function km_admin_scripts_enqueue( $hook ) {
 		if ( isset( $_GET['zone_id'] ) && ! empty( $_GET['zone_id'] ) ) {
 			wp_enqueue_script( 'km-shipping-zone-script', $js_uri . 'shipping-zone.js', array( 'jquery' ), filemtime( $js_path . 'shipping-zone.js' ), false );
 		}
-
-		// if ( isset( $_GET['tab'] ) && 'shipping' === $_GET['tab'] && isset( $_GET['section'] ) && 'drive' !== $_GET['section'] ) {
-		// 	wp_enqueue_script( 'km-shipping-shipping-methods-script', $js_uri . 'shipping-methods.js', array( 'jquery' ), filemtime( $js_path . 'shipping-methods.js' ), false );
-		// }
 	}
 
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );

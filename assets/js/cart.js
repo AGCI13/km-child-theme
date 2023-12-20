@@ -115,7 +115,7 @@ const showCouponForm = () => {
 
 jQuery(document).ready(function ($) {
     // Patch bug lorsque le panier est vide, rechargement de la page
-    (function removeCartItem() {
+    function removeCartItem() {
         var count = $('.cart_item td.product-remove').length;
         if (count === 1) {
             $('.product-remove .remove').off('click').on('click', function(event) {
@@ -123,8 +123,8 @@ jQuery(document).ready(function ($) {
                 document.querySelector('.clear-cart').click();
             });
         }
-    })();
-
+    }
+    removeCartItem();
     $(document.body).on('updated_cart_totals', function() {
         removeCartItem();
     });
