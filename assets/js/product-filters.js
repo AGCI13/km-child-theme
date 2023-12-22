@@ -71,15 +71,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formDataObj = {};
             dataForm.forEach((value, key) => {
-                if (!formDataObj.hasOwnProperty(key)) {
-                    formDataObj[key] = [];
+                // Si la clé finit par '[]', c'est un tableau
+                if (key.endsWith('[]')) {
+                    // Retirer les '[]' pour obtenir la clé réelle
+                    key = key.slice(0, -2);
+            
+                    // Initialiser la clé avec un tableau si elle n'existe pas
+                    if (!formDataObj.hasOwnProperty(key)) {
+                        formDataObj[key] = [];
+                    }
+                    // Ajouter la valeur au tableau
+                    formDataObj[key].push(value);
+                } else {
+                    // Pour les champs non-tableaux, assigner directement la valeur
+                    formDataObj[key] = value;
                 }
-                formDataObj[key].push(value);
             });
+
             // kmAjaxCall est une fonction que vous devez définir
             kmAjaxCall('filter_archive_products', formDataObj, {}).then((response) => {
                 if (response.success) {
-                    console.log(response);
                     const product_wrapper = document.querySelector('.products'); // Si plusieurs, ajustez la logique
                     const resultCount = document.querySelector('.woocommerce-result-count');
                     const pagination = document.querySelector('.woocommerce-pagination');

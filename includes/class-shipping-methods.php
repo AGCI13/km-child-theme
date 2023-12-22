@@ -44,6 +44,7 @@ class KM_Shipping_Methods {
 		'45 A 60 T' => array( 45, 60 ),
 		'38 A 45 T' => array( 38, 45 ),
 		'32 A 38 T' => array( 32, 38 ),
+		'30 A 32 T' => array( 30, 32 ),
 		'15 A 30 T' => array( 15, 30 ),
 		'8 A 15 T'  => array( 8, 15 ),
 		'2 A 8 T'   => array( 2, 8 ),
@@ -177,6 +178,18 @@ class KM_Shipping_Methods {
 			$total_shipping_cost      += $calculated_other_shipping['cost'];
 		}
 
+		// error_log( '----------------------------------------' );
+		// error_log( $total_shipping_cost );
+		// error_log( $total_weight );
+		// error_log( gettype( $total_weight ) );
+		// error_log( $total_trucks );
+		// error_log( gettype( $total_trucks ) );
+
+		if ( ( in_array( $shipping_method_id, array( 'option2', 'option2express' ) ) && $total_weight <= 2000 && 1 === $total_trucks ) ) {
+			$shipping_method_info['cost'] = 0;
+			return $shipping_method_info;
+		}
+
 		/**
 		* For degugging purposes only.
 		*/
@@ -200,17 +213,12 @@ class KM_Shipping_Methods {
 		// Enregistrer le cookie avec la durée de vie correcte (24 heures à partir de maintenant).
 		setcookie( sanitize_title( 'km_shipping_cost_' . $shipping_method_name ), $cookie_value, time() + 60 * 60 * 24 * 30, '/' );
 
-		// Simplifier les conditions pour définir $total_shipping_cost.
-		if ( ( in_array( $shipping_method_id, array( 'option2', 'option2express' ) ) && $total_weight <= 2000 && 1 === $total_trucks ) ) {
-			$total_shipping_cost = 0;
-		}
-
 		if ( in_array( $shipping_method_id, array( 'option1', 'option1express' ) ) && $total_trucks > 1 ) {
 			$total_shipping_cost = 0;
 		}
 
 		if ( 'option1' === $shipping_method_id || 'option1express' === $shipping_method_id ) {
-			$shipping_method_info['weight_class'] = $this->get_shipping_description( $total_weight );
+			$shipping_method_info['weight_class'] = $this->get_weight_class_index( $total_weight );
 		}
 
 		$shipping_method_info['cost'] = $total_shipping_cost;
@@ -261,10 +269,10 @@ class KM_Shipping_Methods {
 			} elseif ( $remaining_weight > $range[0] && $remaining_weight <= $range[1] ) {
 				$delivery_option_full_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_method_name . ' - ' . $weight_class;
 				$shipping_price            = $this->get_shipping_price( $delivery_option_full_name );
-				$total_price              += $shipping_price;
-				$total_trucks             += 1;
-				// error_log( "Weight is between {$range[0]} and {$range[1]}. Adding {$shipping_price}." );
 
+				$total_price  += $shipping_price;
+				$total_trucks += 1;
+				// error_log( "Weight is between {$range[0]} and {$range[1]}. Adding {$shipping_price}." );
 				break;
 			}
 		}
@@ -282,12 +290,11 @@ class KM_Shipping_Methods {
 	 * @param float  $total_weight Le poids total du panier.
 	 * @return string Description de la méthode de livraison.
 	 */
-	private function get_shipping_description( $total_weight ) {
+	private function get_weight_class_index( $total_weight ) {
 
 		$total_tons = $total_weight / 1000; // Convertir en tonnes.
 
 		// if total weight is > 60 tonnes then return.
-
 		if ( $total_tons > 60 ) {
 			$total_tons = 60;
 		}
@@ -295,8 +302,7 @@ class KM_Shipping_Methods {
 		// Get total weight fit into a range.
 		foreach ( $this->weight_classes as $weight_class => $range ) {
 			if ( $total_tons > $range[0] && $total_tons <= $range[1] ) {
-				// Get the index of the current weight class.
-				return array_search( $weight_class, array_keys( $this->weight_classes ) );
+				return array_search( $weight_class, array_keys( $this->weight_classes ) ) + 1;
 			}
 		}
 	}
@@ -334,8 +340,12 @@ class KM_Shipping_Methods {
 
 		foreach ( $rates as $rate_id => $rate ) {
 			if ( strpos( $rate_id, $specific_method_id ) !== false ) {
-				// Stocker le coût dans la session de WooCommerce
-				WC()->session->set( 'option1_shipping_cost', $rate->get_cost() );
+				if ( $rate->get_cost() && $rate->get_taxes() ) {
+					$cost_including_taxes = $rate->get_cost() + array_sum( $rate->get_taxes() );
+				}
+
+				// Stocker le coût dans la session de WooCommerce.
+				WC()->session->set( 'option1_shipping_cost', $cost_including_taxes );
 				break;
 			}
 		}

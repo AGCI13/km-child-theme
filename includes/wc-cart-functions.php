@@ -252,7 +252,7 @@ function km_add_cart_totals_after_order_total() {
 		<?php
 	}
 }
-// add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
+add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande

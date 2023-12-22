@@ -304,7 +304,7 @@ display: flex;
 padding: 7px 24px;
 align-items: center;
 border-radius: 5px;
-background: linear-gradient(180deg,#be9e67 0%,#a98951 100%);
+background: #be9e67;
 box-shadow: 0px 2px 6px 0px rgba(219,163,66,.5);
 color: white;
 font-size: 1.2em;

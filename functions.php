@@ -10,8 +10,19 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 		function () {
 			echo '<div class="error">'
 			. '<p><strong>Attention</strong>:'
-			. ' WooCommerce est requis pour que ce <strong>thème personnalisé fonctionne.</strong> Veuillez l\'activer.
-			.</p></div>';
+			. ' WooCommerce est requis pour que ce <strong>thème personnalisé fonctionne.</strong></p></div>';
+		}
+	);
+	return;
+}
+
+if ( ! class_exists( 'ACF' ) ) {
+	add_action(
+		'admin_notices',
+		function () {
+			echo '<div class="error">'
+			. '<p><strong>Attention</strong>:'
+			. ' Advanced Custom Field PRO (ACF) est requis pour que ce <strong>thème personnalisé fonctionne.</strong></p></div>';
 		}
 	);
 	return;

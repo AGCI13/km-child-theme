@@ -45,6 +45,13 @@ class KM_Dynamic_Pricing {
 	 */
 	public $ecotaxe_info_html;
 
+	/*
+	 * The list of products that are not purchasable.
+	 *
+	 * @var array
+	 */
+	private $unpurchasable_products = array();
+
 	/**
 	 * Constructor.
 	 *
@@ -109,12 +116,12 @@ class KM_Dynamic_Pricing {
 	 */
 	public function disable_variation_if_no_shipping_product( $variation_data, $product, $variation ) {
 
-		// Vérifier le prix du produit de livraison.
-		if ( ! $this->check_shipping_product_price( $variation ) && ! $this->km_shipping_zone->is_in_thirteen() ) {
+		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $this->km_shipping_zone->is_in_thirteen() )
+		|| ( $this->km_shipping_zone->is_in_thirteen() && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
+		|| ( $this->km_shipping_zone->is_in_thirteen() && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', $this->km_shipping_zone->shipping_zone_name ) ) ) ) {
 			// Désactiver la variation si aucun produit de livraison n'est disponible ou si le prix est 0.
-			$variation_data['is_sold_individually'] = 'yes';
-			$variation_data['is_purchasable']       = false;
-			$variation_data['variation_is_active']  = false;
+			$variation_data['is_purchasable']      = false;
+			$variation_data['variation_is_active'] = false;
 		}
 
 		return $variation_data;
@@ -188,13 +195,14 @@ class KM_Dynamic_Pricing {
 	 * @return string La fourchette de prix du produit.
 	 */
 	public function adjust_variable_product_price_html( $price, $product ) {
-		$has_ecotaxe = false;
 
 		// Vérifiez si le produit est un produit variable.
-		if ( ! $product->is_type( 'variable' ) ) {
+		if ( ! is_product() || ! $product->is_type( 'variable' ) ) {
 			return $price;
 		}
-		$prices = array();
+
+		$prices      = array();
+		$has_ecotaxe = false;
 
 		// Parcourez les variations disponibles.
 		foreach ( $product->get_available_variations() as $variation ) {
@@ -224,7 +232,7 @@ class KM_Dynamic_Pricing {
 				$price = wc_format_price_range( $min_price, $max_price );
 			}
 
-			if ( true === $has_ecotaxe && is_product() ) {
+			if ( true === $has_ecotaxe ) {
 				$price .= $this->ecotaxe_info_html;
 			}
 		}
@@ -240,50 +248,64 @@ class KM_Dynamic_Pricing {
 	 */
 
 	public function maybe_set_product_unpurchasable( $is_purchasable, $product ) {
+		$product_id = $product->get_id();
 
-		if ( $this->km_shipping_zone->is_in_thirteen() && get_field( 'dont_sell_in_thirteen', $product->get_id() ) === true ) {
-			$this->add_price_html_filter();
-			return false;
+		if ( ! $product_id ) {
+			return $is_purchasable;
 		}
 
-		// Vérifier si nous sommes dans la zone spécifique "thirteen".
-		if ( ! $this->km_shipping_zone->is_in_thirteen() ) {
-			// Traitement pour les produits simples.
-			if ( $product->is_type( 'simple' ) ) {
-				if ( ! $product->get_shipping_class_id() ) {
-					$this->add_price_html_filter();
-					return false; // Aucune variation n'est achetable.
-				}
-			} elseif ( $product->is_type( 'variable' ) ) {
-				foreach ( $product->get_children() as $variation_id ) {
-					$variation = wc_get_product( $variation_id );
-					if ( $variation->is_purchasable() && $variation->get_shipping_class_id() && $this->check_shipping_product_price( $variation ) ) {
-						return true; // Au moins une variation est achetable.
-					}
-				}
-				$this->add_price_html_filter();
+		if ( $this->km_shipping_zone->is_in_thirteen() ) {
+			$dontsell = get_field( 'dont_sell_in_thirteen', $product_id );
+			if ( true === $dontsell ) {
+				$this->add_price_html_filter( $product_id );
+				return false;
+			}
+		} elseif ( $product->is_type( 'simple' ) ) {
+			if ( ! $product->get_shipping_class_id() ) {
+				$this->add_price_html_filter( $product_id );
 				return false; // Aucune variation n'est achetable.
 			}
+		} elseif ( $product->is_type( 'variable' ) ) {
+			foreach ( $product->get_children() as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				if ( $variation->is_purchasable() && $variation->get_shipping_class_id() && $this->check_shipping_product_price( $variation ) ) {
+					return $is_purchasable; // Au moins une variation est achetable.
+				}
+			}
+			$this->add_price_html_filter( $product_id );
+			return false; // Aucune variation n'est achetable.
 		}
 
 		return $is_purchasable;
 	}
 
 	/**
-	 * Ajoute le filtre pour afficher le message au lieu du prix.
+	 * Ajoute un filtre pour afficher un message au lieu du prix du produit.
+	 *
+	 * @param int $product_id L'ID du produit.
+	 * @return void
 	 */
-	private function add_price_html_filter() {
-		add_filter( 'woocommerce_get_price_html', array( $this, 'display_unavailable_message' ), 99, 2 );
+	private function add_price_html_filter( $product_id ) {
+		if ( ! in_array( $product_id, $this->unpurchasable_products ) ) {
+			$this->unpurchasable_products[] = $product_id;
+			add_filter( 'woocommerce_get_price_html', array( $this, 'display_unavailable_message' ), 99, 2 );
+		}
 	}
 
 	/**
 	 * Affiche un message au lieu du prix du produit.
 	 *
-	 * @param string $price Le prix du produit.Z
+	 * @param string     $price Le prix du produit.
+	 * @param WC_Product $product Le produit.
+	 * @return string Le prix du produit.
 	 */
 	public function display_unavailable_message( $price, $product ) {
-		return __( 'Ce produit n\'est pas disponible dans votre zone de livraison', 'kingmateriaux' );
+		if ( in_array( $product->get_id(), $this->unpurchasable_products ) ) {
+			return __( 'Ce produit n\'est pas disponible dans votre zone de livraison', 'kingmateriaux' );
+		}
+		return $price;
 	}
+
 
 	/**
 	 * @param WC_Product $product Le produit.

@@ -79,7 +79,7 @@ class KM_Shipping_Zone {
 	}
 
 	/**
-	 *  Checks if the current shipping zone is in the thirtheen.
+	 * Checks if the current shipping zone is in the thirtheen.
 	 *
 	 * @return string
 	 */
@@ -268,8 +268,13 @@ class KM_Shipping_Zone {
 			wp_send_json_error( array( 'message' => __( 'La vérification du nonce a échoué.' ) ) );
 		}
 
-		$form_data = $this->validate_postcode_form_data( $_POST );
-		$this->get_shipping_zone_id_from_zip( $form_data['zip_code'] );
+		$form_data  = $this->validate_postcode_form_data( $_POST );
+		$found_zone = $this->get_shipping_zone_id_from_postcode( $form_data['zip_code'] );
+		if ( $found_zone ) {
+			wp_send_json_success( $found_zone );
+		} else {
+			wp_send_json_error( array( 'message' => 'Une erreur est survenue.' ) );
+		}
 	}
 
 	/**
@@ -280,17 +285,17 @@ class KM_Shipping_Zone {
 	 */
 	public function validate_postcode_form_data() {
 
-		$zip_code = isset( $_POST['zip'] ) && ! empty( $_POST['zip'] ) ? wp_unslash( $_POST['zip'] ) : '';
-		$zip_code = sanitize_text_field( $zip_code );
+		$postcode = isset( $_POST['zip'] ) && ! empty( $_POST['zip'] ) ? wp_unslash( $_POST['zip'] ) : '';
+		$postcode = sanitize_text_field( $postcode );
 
-		if ( empty( $zip_code ) ) {
+		if ( empty( $postcode ) ) {
 			wp_send_json_error( array( 'message' => __( 'Le code postal est vide.', 'kingmateriaux' ) ) );
 		}
 
 		$country = isset( $_POST['country'] ) && ! empty( $_POST['country'] ) ? wp_unslash( $_POST['country'] ) : '';
 		$country = sanitize_text_field( $country );
 
-		if ( empty( $zip_code ) ) {
+		if ( empty( $country ) ) {
 			wp_send_json_error( array( 'message' => __( 'Le code pays est vide.', 'kingmateriaux' ) ) );
 		}
 
@@ -298,63 +303,67 @@ class KM_Shipping_Zone {
 			wp_send_json_error( array( 'message' => __( 'Le code pays est invalide.', 'kingmateriaux' ) ) );
 		}
 
-		if ( $country === 'FR' && strlen( $zip_code ) !== 5 ) {
+		if ( $country === 'FR' && strlen( $postcode ) !== 5 ) {
 			wp_send_json_error( array( 'message' => __( 'Le code postal FR doit contenir 5 chiffres.', 'kingmateriaux' ) ) );
 		}
 
-		if ( $country === 'BE' && strlen( $zip_code ) !== 4 ) {
+		if ( $country === 'BE' && strlen( $postcode ) !== 4 ) {
 			wp_send_json_error( array( 'message' => __( 'Le code postal BE doit contenir 4 chiffres.', 'kingmateriaux' ) ) );
+		}
+
+		$zone_id = $this->get_shipping_zone_id_from_postcode( $postcode );
+		error_log( $zone_id );
+
+		if ( ! $zone_id ) {
+			wp_send_json_error( array( 'message' => __( 'Aucune zone de livraison trouvée. Si ce code postal est bien le votre, veuillez contacter le service client.', 'kingmateriaux' ) ) );
 		}
 
 		$user_id = is_user_logged_in();
 
 		if ( $user_id ) {
-			update_user_meta( $user_id, 'shipping_postcode', $zip_code );
+			update_user_meta( $user_id, 'shipping_postcode', $postcode );
 			update_user_meta( $user_id, 'shipping_country', $country );
 		}
 
-		WC()->customer->set_shipping_postcode( wc_clean( $zip_code ) );
-		WC()->customer->set_billing_postcode( wc_clean( $zip_code ) );
+		WC()->customer->set_shipping_postcode( wc_clean( $postcode ) );
+		WC()->customer->set_billing_postcode( wc_clean( $postcode ) );
 
 		return array(
-			'zip_code' => $zip_code,
+			'zip_code' => $postcode,
 			'country'  => $country,
 		);
 	}
 
 	/**
-	 * Ajax callback to get the shipping zone ID from a zip code.
+	 * Gets the shipping zone ID from a postcode.
 	 *
-	 * @return void | json
+	 * @param string $postcode The zip code.
+	 * @return int|null The shipping zone ID or null if no zone is found.
 	 */
-	public function get_shipping_zone_id_from_zip( $zip_code ) {
-		setcookie( 'shipping_zone', '', time() - 3600, '/' );
 
+	public function get_shipping_zone_id_from_postcode( $postcode ) {
 		$shipping_zones = WC_Shipping_Zones::get_zones();
 		$found_zone     = null;
 
-		try {
-			foreach ( $shipping_zones as $zone_data ) {
-				$zone           = new WC_Shipping_Zone( $zone_data['id'] );
-				$zone_locations = $zone->get_zone_locations();
+		foreach ( $shipping_zones as $zone_data ) {
+			$zone           = new WC_Shipping_Zone( $zone_data['id'] );
+			$zone_locations = $zone->get_zone_locations();
 
-				foreach ( $zone_locations as $location ) {
-					if ( strpos( $location->code, '...' ) !== false ) {
-						list($start_zip, $end_zip) = explode( '...', $location->code );
-						if ( $zip_code >= $start_zip && $zip_code <= $end_zip ) {
-							$found_zone = $zone_data['id'];
-							break 2; // Break out of both foreach loops.
-						}
-					} elseif ( $zip_code === $location->code ) {
-							$found_zone = $zone_data['id'];
-							break 2;
+			foreach ( $zone_locations as $location ) {
+				if ( strpos( $location->code, '...' ) !== false ) {
+					list($start_zip, $end_zip) = explode( '...', $location->code );
+					if ( $postcode >= $start_zip && $postcode <= $end_zip ) {
+						$found_zone = $zone_data['id'];
+						break 2; // Break out of both foreach loops.
 					}
+				} elseif ( $postcode === $location->code ) {
+						$found_zone = $zone_data['id'];
+						break 2;
 				}
 			}
-			wp_send_json_success( $found_zone );
-		} catch ( Exception $e ) {
-			wp_send_json_error( array( 'message' => 'Une erreur est survenue : ' . $e->getMessage() ) );
 		}
+
+		return $found_zone;
 	}
 
 	/**

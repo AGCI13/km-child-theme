@@ -260,7 +260,7 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .uael-mc-offcanvas__items .woocommerce-cart-form__contents .product-name a{color:#BE9D68;}
 .uael-mc-offcanvas__items .elementor-menu-cart__footer-buttons a{background-color:#BE9D68;}
 .elementor-menu-cart__product, .elementor-menu-cart__subtotal{padding-bottom:6px !important;padding-top:6px !important}
-.elementor-menu-cart__product-name, .elementor-menu-cart__product-price{line-height: 1.2em;}
+.elementor-menu-cart__product-name, .elementor-menu-cart__product-price{line-height: 1.2em;color:#262626!important;}
 
 #km-customer-email-marketing{padding: 18px 14% 14px 14%;background-color: #FBFBFB;border-radius: 8px;border: 1px solid #C6C6C6;}
 #km-customer-email-marketing p.label{font-family:Lato;font-weight:600;font-size:22px;color:#262626;}

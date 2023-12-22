@@ -126,7 +126,8 @@ class Shipping_method_1 extends WC_Shipping_Method {
 			return;
 		}
 
-		$description_key          = isset( $shipping_info['weight_class'] ) && ! empty( $shipping_info['weight_class'] ) ? 'description_' . $shipping_info['weight_class'] : 'description_1';
+		$description_key = isset( $shipping_info['weight_class'] ) && ! empty( $shipping_info['weight_class'] ) ? 'description_' . $shipping_info['weight_class'] : 'description_8';
+
 		$this->method_description = $this->get_option( $description_key );
 
 		$this->title = $this->get_option( 'title', $this->method_title );

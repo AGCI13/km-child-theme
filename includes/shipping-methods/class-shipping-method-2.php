@@ -95,8 +95,9 @@ class Shipping_method_2 extends WC_Shipping_Method {
 			return;
 		}
 
-		$shipping_cost = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
-		if ( ! $shipping_cost || 0 === $shipping_cost ) {
+		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
+
+		if ( ! $shipping_info || 0 === $shipping_info['cost'] ) {
 			return;
 		}
 
@@ -105,7 +106,7 @@ class Shipping_method_2 extends WC_Shipping_Method {
 		$rate = array(
 			'id'    => $this->id,
 			'label' => $this->title,
-			'cost'  => $shipping_cost,
+			'cost'  => $shipping_info['cost'],
 		);
 
 		$this->add_rate( $rate );

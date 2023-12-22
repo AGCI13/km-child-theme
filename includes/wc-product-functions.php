@@ -254,12 +254,48 @@ function has_tonnage_calculator() {
 	}
 }
 
-add_filter(
-	'body_class',
-	function ( $classes ) {
-		if ( is_product() && has_tonnage_calculator() ) {
-			return array_merge( $classes, array( 'has-tonnage-calculator' ) );
-		}
-		return $classes;
+/**
+ * Ajoute une classe au body pour les produits avec calculateur de tonnage
+ *
+ * @param array $classes Les classes du body.
+ * @return array Les classes du body.
+ */
+add_filter( 'body_class', 'km_add_body_class_for_products_with_tonnage_calculator' );
+function km_add_body_class_for_products_with_tonnage_calculator( $classes ) {
+	if ( is_product() && has_tonnage_calculator() ) {
+		return array_merge( $classes, array( 'has-tonnage-calculator' ) );
 	}
-);
+	return $classes;
+}
+
+/**
+ * Ajoute un champ personnalisé pour désactiver une variation dans le 13
+ *
+ * @param int    $loop
+ * @param array  $variation_data
+ * @param object $variation
+ * @return void
+ */
+function km_add_custom_field_to_variations( $loop, $variation_data, $variation ) {
+	// Créer une case à cocher
+	woocommerce_wp_checkbox(
+		array(
+			'id'    => '_disable_variation_in_13[' . $loop . ']',
+			'label' => 'Désactiver cette variation dans le 13',
+			'value' => get_post_meta( $variation->ID, '_disable_variation_in_13', true ),
+		)
+	);
+}
+add_action( 'woocommerce_variation_options', 'km_add_custom_field_to_variations', 10, 3 );
+/**
+ * Enregistre la valeur du champ personnalisé pour désactiver une variation dans le 13
+ *
+ * @param int $variation_id
+ * @param int $i
+ * @return void
+ */
+function km_save_custom_field_variations( $variation_id, $i ) {
+	$checkbox_value = isset( $_POST['_disable_variation_in_13'][ $i ] ) ? 'yes' : 'no';
+	update_post_meta( $variation_id, '_disable_variation_in_13', $checkbox_value );
+}
+add_action( 'woocommerce_save_product_variation', 'km_save_custom_field_variations', 10, 2 );
