@@ -41,6 +41,10 @@ function km_front_scripts_enqueue() {
 
 	wp_register_script( 'add-to-cart-confirmation', $js_uri . 'add-to-cart-confirmation.js', array(), filemtime( $js_path . 'add-to-cart-confirmation.js' ), false );
 
+	if ( is_product_category() ) {
+		wp_enqueue_style( 'km-product-cat-style', '/wp-content/plugins/elementor-pro/assets/css/frontend.min.css', array(), filemtime( 'https://km.agci.dev/wp-content/plugins/elementor-pro/assets/css/frontend.min.css' ), 'all' );
+	}
+
 	if ( is_checkout() ) {
 		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.css', array(), filemtime( $css_path . 'checkout.css' ), 'all' );
 		wp_enqueue_style( 'km-datetimepicker-style', $css_uri . 'datetimepicker.css', array(), filemtime( $css_path . 'datetimepicker.css' ), 'all' );
@@ -62,6 +66,8 @@ function km_admin_scripts_enqueue( $hook ) {
 	$js_path         = $stylesheet_path . '/assets/js/';
 	$css_path        = $stylesheet_path . '/assets/css/';
 
+	wp_register_style( 'km-tonnage-calculator-style', $css_uri . 'tonnage-calculator.css', array(), filemtime( $css_path . 'tonnage-calculator.css' ), 'all' );
+
 	wp_enqueue_style( 'km-admin-style', $css_uri . 'admin-style.css', array(), filemtime( $css_path . 'admin-style.css' ), 'all' );
 
 	if ( 'woocommerce_page_wc-settings' === $hook ) {
@@ -74,6 +80,10 @@ function km_admin_scripts_enqueue( $hook ) {
 		if ( isset( $_GET['zone_id'] ) && ! empty( $_GET['zone_id'] ) ) {
 			wp_enqueue_script( 'km-shipping-zone-script', $js_uri . 'shipping-zone.js', array( 'jquery' ), filemtime( $js_path . 'shipping-zone.js' ), false );
 		}
+	}
+
+	if ( 'edit.php' === $hook && isset( $_GET['post_type'] ) && 'shop_order' === $_GET['post_type'] ) {
+		wp_enqueue_script( 'km-orders-script', $js_uri . 'wc-orders.js', array(), filemtime( $js_path . 'shipping-zone.js' ), true );
 	}
 
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );

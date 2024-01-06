@@ -29,7 +29,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <h1 class="email-heading"><?php printf( esc_html( $email_heading ) . ' <span class="highlighted">%s</span>', esc_html( $customer_first_name ) ); ?></h1>
 
-<img id="km-order-steps" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/wc-order-steps-confirmed.jpg' ); ?>" alt="order step" />
+<img id="km-order-steps" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/wc-order-steps-payed.jpg' ); ?>" alt="order step" />
 
 <p><?php printf( __( 'Bonjour <span class="highlighted"><strong>%s</strong></span>,', 'woocommerce' ), esc_html( $customer_first_name ) ); ?></p>
 

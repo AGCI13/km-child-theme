@@ -215,6 +215,44 @@ function km_display_shipping_delays_after_shipping() {
 	return $html;
 }
 
+function km_add_custom_hidden_fields_to_checkout() {
+
+	// Ajouter la condition, if is thirteen.
+	$km_shipping_zone = KM_Shipping_Zone::get_instance();
+	if ( ! $km_shipping_zone->is_in_thirteen() ) {
+		return;
+	}
+
+	// Ajouter un champ caché pour km_shipping_sku.
+	woocommerce_form_field(
+		'km_shipping_sku',
+		array(
+			'type'  => 'hidden',
+			'class' => array( 'km-shipping-sku-field' ),
+		),
+	);
+
+	// Ajouter un champ caché pour km_shipping_price.
+	woocommerce_form_field(
+		'km_shipping_price',
+		array(
+			'type'  => 'hidden',
+			'class' => array( 'km-shipping-price-field' ),
+		),
+	);
+
+	// Ajouter un champ caché pour km_shipping_tax.
+	woocommerce_form_field(
+		'km_shipping_tax',
+		array(
+			'type'  => 'hidden',
+			'class' => array( 'km-shipping-tax-field' ),
+		),
+	);
+}
+
+add_action( 'woocommerce_after_checkout_billing_form', 'km_add_custom_hidden_fields_to_checkout' );
+
 /** --------------  DEBUG CODE START ----------------- */
 
 function km_display_shipping_info_in_footer() {

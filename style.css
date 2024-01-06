@@ -169,6 +169,7 @@ input[type="email"],input[type="tel"],input[type="text"]{border: 1px solid #2626
 input[type="email"]:focus,input[type="tel"]:focus,input[type="text"]:focus,
 input[type="email"]:hover,input[type="tel"]:hover,input[type="text"]:hover,
 input[type="email"]:active,input[type="tel"]:active,input[type="text"]:active {border: 1px solid #BE9E67 !important;}
+
 /* Checkbox */
 .elementor-field-option{color: #262626;}
 .elementor-field-option input[type="checkbox"]{display:none !important;}
@@ -224,8 +225,8 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .grille-produit .view-product-btn{display:none;}
 .grille-produit .uael-out-of-stock{display:none;}
 .grille-produit .uael-product-actions{display:none;}
-.grille-produit .uael-woo-product-wrapper .uael-woo-products-thumbnail-wrap img.size-woocommerce_thumbnail{opacity: 0.7;border-radius: 5px}
-.grille-produit .uael-woo-product-wrapper:hover .uael-woo-products-thumbnail-wrap img.size-woocommerce_thumbnail{opacity: 1;}
+.grille-produit .uael-woo-product-wrapper .uael-woo-products-thumbnail-wrap .size-woocommerce_thumbnail img{opacity: 0.7;border-radius: 5px}
+.grille-produit .uael-woo-product-wrapper:hover .uael-woo-products-thumbnail-wrap .size-woocommerce_thumbnail img{opacity: 1;}
 .grille-produit .uael-woo-product-wrapper .uael-woo-products-summary-wrap{padding: 10px 10px;}
 .grille-produit h2.woocommerce-loop-product__title:hover{color:#BE9D68 !important;}
 .grille-produit span.woocommerce-Price-amount.amount{font-weight: 700;color:#262626;}
@@ -443,13 +444,13 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .archive .grille-categorie form.woocommerce-ordering select{border: inherit;width: 150px;}
 .archive .grille-categorie ul.products{grid-template-columns: repeat(4, 1fr) !important;}
 .archive .grille-categorie li.product a.button{display:none;}
-.archive .grille-categorie li.product img.attachment-woocommerce_thumbnail{opacity: 0.7;transition: all 0.3s ease;}
-.archive .grille-categorie li.product:hover img.attachment-woocommerce_thumbnail{opacity: 1;}
-.archive .grille-categorie h2.woocommerce-loop-product__title{}
+.archive .grille-categorie li.product img{border-radius: 4px;opacity: 0.7;transition: all 0.3s ease;}
+.archive .grille-categorie li.product:hover img{opacity: 1;}
+.archive .grille-categorie h2.woocommerce-loop-product__title{text-align: center;}
 .archive .grille-categorie h2.woocommerce-loop-product__title:hover{color:#BE9D68 !important;}
-.archive .grille-categorie li.product span.price{font-weight: 700;color:#262626;}
+.archive .grille-categorie li.product span.price{font-weight: 700;color:#262626;text-align: center;}
 .archive .grille-categorie li.product span.price span.woocommerce-Price-amount{color:#BE9D68;}
-.archive .elementor-widget-text-editor .elementor-widget-container p a,.archive .elementor-widget-text-editor .elementor-widget-container h2 a{color:#BE9D68;}
+.archive .elementor-widget-text-editor .elementor-widget-container p a,.archive .elementor-widget-text-editor .elementor-widget-container h2 a{color:#BE9D68;text-align: center;}
 /* Single Produit */
 .single-product:not(.has-tonnage-calculator) .lien-calcul-tonnage{display: none;}
 .single-product #pa_variation-conditionnement{width:inherit;}
@@ -469,13 +470,22 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 .single-product .informations-livraison .elementor-accordion-item{border-left:inherit;border-right:inherit;}
 .single-product .informations-livraison .elementor-accordion-item .elementor-tab-content{border:inherit;}
 .single-product table.variations a.reset_variations{color:#BE9D68;}
-.single-product .woocommerce-variation-add-to-cart .quantity .qty{width: 82px;padding:.5rem;}
+.single-product .woocommerce-variation-add-to-cart .quantity .qty,.woocommerce div.product.elementor .quantity .qty{width:70px;padding:.5rem;}
 .single-product .woocommerce-variation-add-to-cart button[type="submit"].single_add_to_cart_button{background-color:#BE9D68 !important;}
 .single-product .produits-similaires form.woocommerce-ordering select{border: inherit;width: 150px;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item:hover{box-shadow: inherit;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-thumb img{border-radius: 4px;opacity: 0.7;transition: all 0.3s ease;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-thumb:hover img{opacity: 1;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item h3.product-title{font-size: 18px;display: block;text-align: center;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item h3.product-title:hover{color:#BE9D68 !important;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item h3.product-title:hover a{color:#BE9D68 !important;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-price p.price{justify-content: center;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-price p.price .woocommerce-Price-amount{font-size: 18px !important;}
+.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-price .km-product-ecotaxe{text-align: center;}
 .single-product .produits-similaires li.product a span.onsale{background-color:#BE9D68;}
 .single-product .produits-similaires li.product a.button{display:none;}
-.single-product .produits-similaires li.product img.attachment-woocommerce_thumbnail{border-radius: 4px;opacity: 0.7;transition: all 0.3s ease;}
-.single-product .produits-similaires li.product:hover img.attachment-woocommerce_thumbnail{opacity: 1;}
+.single-product .produits-similaires li.product img{border-radius: 4px;opacity: 0.7;transition: all 0.3s ease;}
+.single-product .produits-similaires li.product:hover img{opacity: 1;}
 .single-product .produits-similaires h2.woocommerce-loop-product__title{text-align: inherit;}
 .single-product .produits-similaires h2.woocommerce-loop-product__title:hover{color:#BE9D68 !important;}
 .single-product .produits-similaires li.product span.price{font-weight: 700;color:#262626;}
@@ -500,6 +510,23 @@ ul#menu-2-bc4d358 .menu-item-121569 > a, ul#menu-2-bc4d358 .menu-item-121571 > a
 /* Mentions légales */
 .page-id-1975 .faq-mentions-legales .elementor-accordion-item{border-top:inherit;border-left:inherit;border-right:inherit;}
 .page-id-1975 .faq-mentions-legales .elementor-accordion-item .elementor-tab-content{border:inherit;}
+
+
+/* Résultat de recherche */
+.search-results .wct-categories a:hover{color:#BE9D68;}
+.search-results .grille-produits form.woocommerce-ordering select{border: inherit;width: 150px;}
+.search-results .grille-produits ul.products{grid-template-columns: repeat(5, 1fr) !important;}
+.search-results .grille-produits li.product a.button{display:none;}
+.search-results .grille-produits li.product img{border-radius: 4px;opacity: 0.7;transition: all 0.3s ease;}
+.search-results .grille-produits li.product:hover img{opacity: 1;}
+.search-results .grille-produits h2.woocommerce-loop-product__title{text-align: center;}
+.search-results .grille-produits h2.woocommerce-loop-product__title:hover{color:#BE9D68 !important;}
+.search-results .grille-produits li.product span.price{font-weight: 700;color:#262626;text-align: center;}
+.search-results .grille-produits li.product span.price span.woocommerce-Price-amount{color:#BE9D68;}
+.search-results .elementor-widget-text-editor .elementor-widget-container p a,.search-results .elementor-widget-text-editor .elementor-widget-container h2 a{color:#BE9D68;text-align: center;}
+
+
+
 
 
 

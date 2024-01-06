@@ -71,8 +71,26 @@ const numberInputPlusMinus = () => {
         // Insertion des boutons
         input.parentNode.insertBefore(minusButton, input);
         input.parentNode.appendChild(plusButton);
+
+
+        // Mise à jour du panier
+        const handleMouseOut = () => {
+            setTimeout(() => {
+                updateCart();
+            }, 200);
+        };
+        minusButton.addEventListener('mouseout', handleMouseOut);
+        plusButton.addEventListener('mouseout', handleMouseOut);
+
     });
 }
+// Mise à jour du panier
+const updateCart = () => {
+    const updateCartButton = document.querySelector('[name="update_cart"]');
+    if (updateCartButton) {
+        updateCartButton.click();
+    }
+};
 /**
  * Trigger change event
  * @param {HTMLElement} element

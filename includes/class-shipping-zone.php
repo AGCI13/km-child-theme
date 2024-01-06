@@ -51,7 +51,9 @@ class KM_Shipping_Zone {
 	 *
 	 * @var array
 	 */
-	public $zones_in_thirteen = array( 12, 13, 14, 15, 16, 17 );
+	public $zones_in_thirteen = array( 12, 13, 14, 15, 16, 17, 18 );
+
+	public $is_in_thirteen = false;
 
 	/**
 	 * Constructor.
@@ -63,6 +65,9 @@ class KM_Shipping_Zone {
 		$this->get_zip_and_country_from_cookie();
 		$this->shipping_zone_id   = $this->get_shipping_zone_id_from_cookie();
 		$this->shipping_zone_name = $this->get_shipping_zone_name();
+
+		$this->is_in_thirteen = $this->is_in_thirteen();
+
 		$this->register();
 	}
 
@@ -230,15 +235,18 @@ class KM_Shipping_Zone {
 
 		$shipping_product_name = $this->shipping_zone_name . ' ' . $shipping_class_name;
 
+		// Récupérer le produit de livraison associé.
 		$args = array(
-			'fields'         => 'ids',
+			'fields'         => 'ids', // Ce qu'on demande à recupérer.
 			'post_type'      => 'product',
-			'posts_per_page' => 1,
 			'post_status'    => array( 'private' ),
-			'name'           => sanitize_title( $shipping_product_name ),
+			'posts_per_page' => 1,
+			'title'          => $shipping_product_name,
+			'exact'          => true,
 		);
 
 		$shipping_products_posts = get_posts( $args );
+
 		if ( ! $shipping_products_posts ) {
 			return;
 		}

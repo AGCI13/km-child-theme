@@ -59,35 +59,35 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 				'description' => __( 'Entrez le nom affiché pour cette méthode d\'expédition . ', 'kingmateriaux' ),
 				'default'     => $this->method_title,
 			),
-			'description_8'    => array(
+			'description_7'    => array(
 				'title' => 'Description de 0 à 2 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_7'    => array(
+			'description_6'    => array(
 				'title' => 'Description de 2 à 8 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_6'    => array(
+			'description_5'    => array(
 				'title' => 'Description de 8 à 15 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_5'    => array(
+			'description_4'    => array(
 				'title' => 'Description de 15 à 30 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_4'    => array(
+			'description_3'    => array(
 				'title' => 'Description de 30 à 32 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_3'    => array(
+			'description_2'    => array(
 				'title' => 'Description de 32 à 38 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_2'    => array(
+			'description_1'    => array(
 				'title' => 'Description de 38 à 45 tonnes',
 				'type'  => 'textarea',
 			),
-			'description_1'    => array(
+			'description_0'    => array(
 				'title' => 'Description de 45 à 60 tonnes',
 				'type'  => 'textarea',
 			),
@@ -121,11 +121,11 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 
 		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
 
-		if ( ! $shipping_info || 0 === $shipping_info['cost'] ) {
+		if ( ! $shipping_info || ! $shipping_info['price_incl_tax'] || ! $shipping_info['ugs'] || ! $shipping_info['weight_class'] || ! $shipping_info['tax_amount'] ) {
 			return;
 		}
 
-		$description_key          = isset( $shipping_info['weight_class'] ) && ! empty( $shipping_info['weight_class'] ) ? 'description_' . $shipping_info['weight_class'] : 'description_1';
+		$description_key          = isset( $shipping_info['weight_class'] ) && ! empty( $shipping_info['weight_class'] ) ? 'description_' . $shipping_info['weight_class'] : 'description_0';
 		$this->method_description = $this->get_option( $description_key );
 
 		$this->title = $this->get_option( 'title', $this->method_title );
@@ -133,9 +133,12 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 		$rate = array(
 			'id'        => $this->id,
 			'label'     => $this->title,
-			'cost'      => $shipping_info['cost'],
+			'cost'      => $shipping_info['price_incl_tax'],
 			'meta_data' => array(
-				'description' => $this->method_description,
+				'description'             => $this->method_description,
+				'shipping_ugs'            => $shipping_info['ugs'],
+				'shipping_price_excl_tax' => $shipping_info['price_excl_tax'],
+				'shipping_tax'            => $shipping_info['tax_amount'],
 			),
 		);
 

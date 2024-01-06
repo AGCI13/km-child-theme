@@ -13,7 +13,7 @@
  *
  * @var $wishlist \YITH_WCWL_Wishlist Current wishlist
  * @var $is_custom_list bool Whether current wishlist is custom
- * @var $can_user_edit_title bool Whether current user can edit title
+ * @var $can_user_edit_title bool Whether cur rent user can edit title
  * @var $form_action string Action for the wishlist form
  * @var $page_title string Page title
  * @var $fragment_options array Array of items to use for fragment generation

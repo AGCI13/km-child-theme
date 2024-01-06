@@ -127,20 +127,33 @@ function km_custom_completed_order_email_subject( $subject, $order ) {
 // add_filter('woocommerce_email_subject_customer_completed_order', 'km_custom_completed_order_email_subject', 10, 2);
 
 function km_add_transporter_to_order_status_column( $column ) {
-	global $post, $the_order;
+	global $post;
 
+	// Récupérer la commande actuelle.
+	$order = wc_get_order( $post->ID );
+	if ( ! $order ) {
+		return;
+	}
+
+	// Afficher le nombre d'articles pour la colonne 'order_items'.
+	if ( 'order_items' === $column ) {
+		$items_count = $order->get_item_count();
+		echo $items_count;
+	}
+
+	// Personnaliser l'affichage pour la colonne 'order_status'.
 	if ( 'order_status' === $column ) {
-		// Si $the_order n'est pas défini ou si ce n'est pas la bonne commande, récupérez la commande.
-		if ( ! $the_order || $the_order->get_id() !== $post->ID ) {
-			$the_order = wc_get_order( $post->ID );
+		// Si la commande est en attente et payée par virement bancaire (bacs).
+		if ( 'on-hold' === $order->get_status() && 'bacs' === $order->get_payment_method() ) {
+			echo '<style>.order-status.status-on-hold { background:#f9e466!important; }</style>';
 		}
 
-		// Vérifiez si la commande est terminée.
-		if ( $the_order && 'completed' === $the_order->get_status() ) {
-			// Obtenez la valeur du champ ACF 'transporteur' pour cette commande.
-			$transporter = get_post_meta( $the_order->get_id(), 'transporteur', true );
+		// Si la commande est terminée.
+		if ( 'completed' === $order->get_status() ) {
+			// Récupérer la valeur du champ 'transporteur'.
+			$transporter = get_post_meta( $order->get_id(), 'transporteur', true );
 
-			// Si le transporteur est défini, ajoutez-le à l'étiquette d'état de commande.
+			// Afficher le transporteur si défini.
 			if ( $transporter ) {
 				echo '<mark class="order-status status-completed"><span>' . esc_html( $transporter ) . '</span></mark>';
 			}
@@ -149,38 +162,18 @@ function km_add_transporter_to_order_status_column( $column ) {
 }
 add_action( 'manage_shop_order_posts_custom_column', 'km_add_transporter_to_order_status_column' );
 
-// Ajoute une colonne pour le nombre de produits commandés
-function km_add_items_column( $columns ) {
-	$columns['order_items'] = __( 'Nombre d\'article(s)', 'woocommerce' );
-	return $columns;
-}
-add_filter( 'manage_edit-shop_order_columns', 'km_add_items_column' );
-
-// Remplit la colonne avec le nombre de produits pour chaque commande
-function km_display_items_column( $column ) {
-	global $post;
-
-	if ( 'order_items' === $column ) {
-		$order       = wc_get_order( $post->ID );
-		$items_count = $order->get_item_count();
-		echo $items_count;
-	}
-}
-add_action( 'manage_shop_order_posts_custom_column', 'km_display_items_column' );
-
-
 /**
  * Ajoute les données du calendrier du drive à la commande
  *
  * @param WC_Order $order
  * @return void
  */
-function display_drive_details_in_admin_order( $order ) {
+function km_display_drive_details_in_admin_order( $order ) {
 	// Get the drive date and the drive time from the order meta.
 	$drive_date = get_post_meta( $order->get_id(), '_drive_date', true );
 	$drive_time = get_post_meta( $order->get_id(), '_drive_time', true );
 
-	// If there is no drive date and no drive time, we don't need to display anything.
+	// If there is no drive date and no drive time, we don't need to display anything .
 	if ( empty( $drive_date ) && empty( $drive_time ) ) {
 		return;
 	}
@@ -203,7 +196,7 @@ function display_drive_details_in_admin_order( $order ) {
 	// Display the HTML.
 	echo $html;
 }
-add_action( 'woocommerce_admin_order_data_after_shipping_address', 'display_drive_details_in_admin_order' );
+add_action( 'woocommerce_admin_order_data_after_shipping_address', 'km_display_drive_details_in_admin_order' );
 
 /**
  * Ajoute les données du calendrier du drive à l'email de commande
@@ -235,3 +228,36 @@ function km_maybe_copy_shipping_to_billing( $order_id ) {
 	}
 }
 add_action( 'woocommerce_checkout_update_order_meta', 'km_maybe_copy_shipping_to_billing' );
+
+function km_modify_order_number_column( $column ) {
+	global $post;
+
+	if ( 'order_number' === $column ) {
+		// Obtenir l'objet commande pour le post actuel.
+		$the_order = wc_get_order( $post->ID );
+
+		// Obtenir l'ID du client associé à la commande.
+		$customer_id = $the_order->get_customer_id();
+
+		// Récupérer les commandes du client.
+		$customer_orders = wc_get_orders( array( 'customer_id' => $customer_id ) );
+
+		// Compter le nombre de commandes.
+		$order_count = count( $customer_orders );
+		$user_note   = get_user_meta( $customer_id, 'user_note', true );
+		$user_note   = empty( $user_note ) ? 'Aucune note' : esc_attr( $user_note );
+
+		// Si le client a plus de 2 commandes, appliquez un style personnalisé.
+		if ( $order_count > 1 ) {
+			echo '<style type="text/css">
+                #post-' . esc_attr( $the_order->get_id() ) . ' .order-view { 
+                    color: #1f7800;
+                }
+            </style>';
+		}
+
+		// Ajoutez un attribut de données personnalisé avec la note de l'utilisateur.
+		echo '<a href="#" class="km-note-preview" data-user-id="' . esc_attr( $customer_id ) . '" data-user-note="' . $user_note . '" style="margin-left:10px;">Note</a>';
+	}
+}
+add_action( 'manage_shop_order_posts_custom_column', 'km_modify_order_number_column' );

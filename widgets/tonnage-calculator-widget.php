@@ -55,15 +55,19 @@ class Tonnage_Calculator_Widget extends \Elementor\Widget_Base {
 							<div id="close_info_bull_density">
 								<img id="img_close_info_bull_density" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/close-info-tooltip.svg' ); ?>" alt="close info bull densite">
 							</div>
-							<?php esc_html_e( 'Définition, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris, cursus morbi ac auctor.', 'kingmateriaux' ); ?>
+							<?php esc_html_e( 'La densité correspond ici à la masse en tonnes d\'un mètre cube de matière', 'kingmateriaux' ); ?>
 						</div>
 						<select name="den" required>
 							<option value="" disabled selected><?php esc_html_e( 'Choisissez une option', 'kingmateriaux' ); ?></option>
-							<option value="1"><?php esc_html_e( 'Galets - 1', 'kingmateriaux' ); ?></option>
-							<option value="1.8"><?php esc_html_e( 'Sables - 1,8', 'kingmateriaux' ); ?></option>
-							<option value="1.6"><?php esc_html_e( 'Mélanges - 1,6', 'kingmateriaux' ); ?></option>
-							<option value="1.2"><?php esc_html_e( 'Terre - 1,2', 'kingmateriaux' ); ?></option>
-							<option value="0.8"><?php esc_html_e( 'Pouzzolane - 0,8', 'kingmateriaux' ); ?></option>
+							<option value="1.5"><?php esc_html_e( 'Galets jusqu’à 40/60mm - 1,5T/m3', 'kingmateriaux' ); ?></option>
+							<option value="3"><?php esc_html_e( 'Galets supérieurs à 40/60mm - 3T/m3', 'kingmateriaux' ); ?></option>
+							<option value="1.5"><?php esc_html_e( 'Graviers jusqu’à 40/60mm - 1,5T/m3', 'kingmateriaux' ); ?></option>
+							<option value="3"><?php esc_html_e( 'Graviers supérieurs à 40/60mm - 3T/m3', 'kingmateriaux' ); ?></option>
+							<option value="1.6"><?php esc_html_e( 'Mélange - 1,6T/m3', 'kingmateriaux' ); ?></option>
+							<option value="1.6"><?php esc_html_e( 'Pierres à gabion - 1,6T/m3', 'kingmateriaux' ); ?></option>
+							<option value="0.8"><?php esc_html_e( 'Pouzzolane - 0,8T/m3', 'kingmateriaux' ); ?></option>
+							<option value="1.8"><?php esc_html_e( 'Sables - 1,8T/m3', 'kingmateriaux' ); ?></option>
+							<option value="1.2"><?php esc_html_e( 'Terre - 1,2T/m3', 'kingmateriaux' ); ?></option>
 						</select>
 					</label>
 					<?php wp_nonce_field( 'tonnage_calculation', 'nonce_tonnage_calculator' ); ?>

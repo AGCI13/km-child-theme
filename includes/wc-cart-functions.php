@@ -268,3 +268,24 @@ function km_add_pallet_description_under_product_name( $cart_item, $cart_item_ke
 	}
 }
 add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
+
+
+function km_check_cart_weight_before_adding( $passed, $product_id, $quantity ) {
+	$max_weight     = 59999; // Le poids maximum du panier en kg.
+	$product        = wc_get_product( $product_id );
+	$product_weight = $product->get_weight() * $quantity; // Poids du produit à ajouter.
+
+	// Calculer le poids total du panier actuel.
+	$cart_weight = WC()->cart->get_cart_contents_weight();
+	error_log( $cart_weight );
+
+	// Vérifier si l'ajout du produit dépasse le poids maximum.
+	if ( ( $cart_weight + $product_weight ) > $max_weight ) {
+		// Ajouter un message d'erreur.
+		wc_add_notice( __( 'Désolé, l\'ajout de ce produit dépasse le poids maximum de 60 tonnes autorisé.', 'kingmateriaux' ), 'error' );
+		return false;
+	}
+
+	return $passed;
+}
+add_filter( 'woocommerce_add_to_cart_validation', 'km_check_cart_weight_before_adding', 10, 3 );

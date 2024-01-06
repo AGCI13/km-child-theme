@@ -29,7 +29,7 @@ if ( ! class_exists( 'ACF' ) ) {
 }
 
 // Importation des fichiers.
-require_once 'config/enqueue.php';
+require_once 'enqueue.php';
 
 require_once 'widgets/register-widgets.php';
 
@@ -48,6 +48,7 @@ add_action(
 		require_once 'includes/wc-product-archive-functions.php';
 		require_once 'includes/wc-checkout-functions.php';
 		require_once 'includes/wc-my-account-functions.php';
+		require_once 'includes/wp-users-functions.php';
 
 		require_once 'includes/class-singleton-trait.php';
 		require_once 'includes/class-dynamic-pricing.php';

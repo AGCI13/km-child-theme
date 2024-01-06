@@ -175,3 +175,10 @@ th#date {
   align-items: center;
   gap: 0.75rem;
 }
+
+.km-note-preview{
+  float: right;
+}
+.km-user-note-modal{
+  min-width: 400px;;
+}

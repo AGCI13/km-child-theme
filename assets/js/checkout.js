@@ -5,6 +5,10 @@ jQuery(document).ready(function ($) {
     const stepShippingElements = document.querySelectorAll('.step-shipping');
     stepShippingElements.forEach(element => element.classList.add('active'));
 
+    $('.step-cart').on('click', function () {
+        window.location.href = window.location.origin + '/panier/';
+    });
+
     //On est obligé d'utilisé $ pour le checkout car il est chargé en AJAX et les events sont détectés par $
     //Fist load, keep loading order !!!
     $(document.body).on(
@@ -109,9 +113,9 @@ jQuery(document).ready(function ($) {
         }
         if (shippingCountry && billingCountry && billingCountry.value === '') {
             billingCountry.value = shippingCountry.value;
-        }   
+        }
     }
-        
+
 
 
     const handleShippingMethodClick = (shippingMethod, shippingOptions, shippingInputs, billingActions, billingFields, shippingSection) => {
@@ -376,7 +380,7 @@ jQuery(document).ready(function ($) {
                     if (selectedDay) {
                         selectedDay.click();
                     }
-                    
+
                     if (selectedDay.innerText.includes('samedi')) {
                         document.querySelector('.time-slot.afternoon').classList.add('disabled');
                     }
@@ -425,9 +429,37 @@ jQuery(document).ready(function ($) {
                 validateCustomFields();
                 copyShippingAddressToBillingAdress();
                 deleteLocalStorage();
+                setHiddenShippingFields();
                 stepPayment.click();
             });
         });
+    }
+
+
+    const setHiddenShippingFields = () => {
+
+        //Detect if a shipping option is selected :
+        const selectedShippingOption = document.querySelector('.km-shipping-option.selected');
+
+        if (!selectedShippingOption) return;
+
+        shipping_price = selectedShippingOption.getAttribute('data-shipping-price');
+        shipping_sku = selectedShippingOption.getAttribute('data-shipping-sku');
+        shipping_tax = selectedShippingOption.getAttribute('data-shipping-tax');
+
+        if (shipping_price) {
+            //set value of km-shipping-price input field 
+            document.getElementById('km_shipping_price').value = shipping_price;
+        }
+        if (shipping_sku) {
+            //set value of km-shipping-sku input field 
+            document.getElementById('km_shipping_sku').value = shipping_sku;
+        }
+
+        if (shipping_tax) {
+            //set value of km-shipping-tax input field
+            document.getElementById('km_shipping_tax').value = shipping_tax;
+        }
     }
 
     const deleteLocalStorage = () => {
@@ -442,11 +474,11 @@ jQuery(document).ready(function ($) {
         const multistepWrapper = $('.shopengine-steps-wrapper');
         let isValid = true;
         let errorMessages = {};
-    
+
         // Reset error messages
         checkoutErrorsContainer.empty();
         $('.km-validation-info').remove();
-    
+
         const updateErrorMessage = () => {
             let errorMessageHtml = '<ul>';
             Object.values(errorMessages).forEach(message => {
@@ -454,14 +486,14 @@ jQuery(document).ready(function ($) {
             });
             errorMessageHtml += '</ul>';
             checkoutErrorsContainer.html(errorMessageHtml);
-    
+
             if (Object.keys(errorMessages).length === 0) {
                 checkoutErrorsContainer.hide();
             } else {
                 checkoutErrorsContainer.show();
             }
         };
-    
+
         // Validate required fields
         multistepWrapper.find('.validate-required, .validate-phone, .validate-email').each(function () {
             const fieldWrapper = $(this);
@@ -469,12 +501,12 @@ jQuery(document).ready(function ($) {
             const fieldLabel = fieldWrapper.find('label').text().replace('*', '').trim();
             const fieldKey = fieldWrapper.attr('id') || inputField.attr('name'); // Use ID or name as a key
             const errorMessage = `Le champ "${fieldLabel}" n'est pas correctement rempli.`;
-    
+
             if ((inputField.is(':checkbox') && !inputField.is(':checked')) || (inputField.val() === '')) {
                 isValid = false;
                 fieldWrapper.append('<span class="km-validation-info">Ce champ est requis</span>');
                 errorMessages[fieldKey] = errorMessage;
-    
+
                 // Event listener to remove specific error message
                 inputField.on('input change', function () {
                     fieldWrapper.find('.km-validation-info').remove();
@@ -483,11 +515,11 @@ jQuery(document).ready(function ($) {
                 });
             }
         });
-    
+
         updateErrorMessage();
         return isValid;
     };
-    
+
 
     const handleEnterKeydown = () => {
         const checkoutForm = document.querySelector('form.checkout');

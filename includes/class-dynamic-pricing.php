@@ -268,7 +268,7 @@ class KM_Dynamic_Pricing {
 		} elseif ( $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $variation_id ) {
 				$variation = wc_get_product( $variation_id );
-				if ( $variation->is_purchasable() && $variation->get_shipping_class_id() && $this->check_shipping_product_price( $variation ) ) {
+				if ( $this->check_shipping_product_price( $variation ) ) {
 					return $is_purchasable; // Au moins une variation est achetable.
 				}
 			}
@@ -306,8 +306,9 @@ class KM_Dynamic_Pricing {
 		return $price;
 	}
 
-
 	/**
+	 * Check if a product has a shipping class.
+	 *
 	 * @param WC_Product $product Le produit.
 	 *
 	 * @return bool Si le produit a une classe de livraison ou non.
@@ -329,7 +330,6 @@ class KM_Dynamic_Pricing {
 
 		// Vérifie si le produit de livraison existe et si son prix est supérieur à 0€.
 		if ( $shipping_product && $shipping_product->get_price() > 0 ) {
-
 			return true;
 		}
 

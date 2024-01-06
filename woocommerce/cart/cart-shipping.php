@@ -59,7 +59,11 @@ if ( 'drive' === $chosen_method ) {
 					<div class="km-shipping-options">
 						<?php foreach ( $shipping_methods as $method ) : ?>
 
-							<div class="km-shipping-option  <?php echo $chosen_method === $method->id ? 'selected' : ''; ?>">
+							<div class="km-shipping-option  <?php echo $chosen_method === $method->id ? 'selected' : ''; ?>" 
+							data-shipping-sku="<?php echo esc_attr( $method->get_meta_data()['shipping_ugs'] ); ?>"
+							data-shipping-price="<?php echo esc_attr( $method->get_meta_data()['shipping_price_excl_tax'] ); ?>"
+							data-shipping-tax="<?php echo esc_attr( $method->get_meta_data()['shipping_tax'] ); ?>">
+
 									<span class="select-shipping-option" data-shipping="shipping-option"></span>
 									<div class="km-shipping-option-content">
 										<?php
