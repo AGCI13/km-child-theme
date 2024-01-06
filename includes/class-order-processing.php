@@ -74,11 +74,12 @@ class KM_Order_Processing {
 		}
 	}
 
-
 	/**
 	 *  Add custom order meta
 	 *
-	 * @param int $order_id
+	 * @param int      $order_id
+	 * @param array    $posted_data
+	 * @param WC_Order $order
 	 * @return void
 	 */
 	public function add_custom_order_item_meta( $order_id, $posted_data, $order ) {
@@ -86,94 +87,79 @@ class KM_Order_Processing {
 			return;
 		}
 
+		$first_item_processed = false;
+
 		foreach ( $order->get_items() as $item_id => $item ) {
-
-			$item_data = $item->get_data();
-
-			$product_id = $item_data['variation_id'] ? $item_data['variation_id'] : $item_data['product_id'];
+			$item_data  = $item->get_data();
+			$product_id = $item_data['variation_id'] ?: $item_data['product_id'];
 			$product    = wc_get_product( $product_id );
 
 			if ( ! $product ) {
 				continue;
 			}
 
-			// Get the product price excluding tax with the product id.
 			$product_price_excl_tax = wc_get_price_excluding_tax( $product );
+			$product_tax_price      = wc_get_price_including_tax( $product ) - $product_price_excl_tax;
 
-			$product_price_incl_tax = wc_get_price_including_tax( $product );
-
-			$product_tax_price = $product_price_incl_tax - $product_price_excl_tax;
-
-			// Check if the product is product_is_bulk_or_bigbag().
-			$is_bulk_or_bigbag = $this->km_dynamic_pricing->product_is_bulk_or_bigbag( $product_id );
-
-			// If product $is_bulk_or_bigbag add the ecotaxe price to the price.
-			if ( $is_bulk_or_bigbag ) {
+			if ( $this->km_dynamic_pricing->product_is_bulk_or_bigbag( $product_id ) ) {
 				$product_price_excl_tax += $this->km_dynamic_pricing->ecotaxe_rate;
 				$product_tax_price      += $this->km_dynamic_pricing->ecotaxe_rate_incl_taxes - $this->km_dynamic_pricing->ecotaxe_rate;
 			}
 
-			/* C'est le prix d'une unité de produit comme il est dans le backoffice + écotaxe HT s'il y en a une, HORS 13, vérifier dans 13 et hors 13 */
 			wc_update_order_item_meta( $item_id, '_actual_product_price_excl', $product_price_excl_tax );
-
-			/* C'est la TVA d'une unité de produit + TVA écotaxe vérifier dans 13 et hors 13 */
 			wc_update_order_item_meta( $item_id, '_actual_product_tax_price', $product_tax_price );
 
-			// Check if the product name contains 'vrac' and update item meta.
 			if ( stripos( $item_data['name'], 'vrac' ) !== false ) {
 				wc_update_order_item_meta( $item_id, '_tonnes', $item_data['quantity'] );
 			}
 
-			if ( $this->km_shipping_zone->is_in_thirteen ) {
-
-				static $first_item_processed = false;
-
-				// Vérifier si c'est le premier article de la commande.
-				if ( ! $first_item_processed ) {
-					// Marquer que le premier article a été traité.
-					$first_item_processed = true;
-
-					// Récupérer les données des champs cachés et les nettoyer.
-					$km_shipping_sku   = isset( $_POST['km_shipping_sku'] ) ? sanitize_text_field( $_POST['km_shipping_sku'] ) : '';
-					$km_shipping_price = isset( $_POST['km_shipping_price'] ) ? (float) $_POST['km_shipping_price'] : '';
-					$km_shipping_tax   = isset( $_POST['km_shipping_tax'] ) ? (float) $_POST['km_shipping_tax'] : '';
-
-					// Ajouter les métadonnées à l'article de la commande
-					if ( ! empty( $km_shipping_sku ) ) {
-						wc_update_order_item_meta( $item_id, '_ugs_product_shipping', $km_shipping_sku );
-					}
-					if ( ! empty( $km_shipping_price ) ) {
-						wc_update_order_item_meta( $item_id, '_shipping_price_product_excl', $km_shipping_price );
-					}
-					if ( ! empty( $km_shipping_tax ) ) {
-						wc_update_order_item_meta( $item_id, '_tax_prices_on_product_shipping', $km_shipping_tax );
-					}
-				}
-			} else {
-				$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
-
-				if ( $shipping_product ) {
-
-					// Obtenir le prix TTC
-					$shipping_price_incl_tax = wc_get_price_including_tax( $shipping_product );
-					// Obtenir le prix HT
-					$shipping_price_excl_tax = wc_get_price_excluding_tax( $shipping_product );
-					// Calculer le montant de la taxe
-					$shipping_tax_amount = $shipping_price_incl_tax - $shipping_price_excl_tax;
-
-					wc_update_order_item_meta( $item_id, '_ugs_product_shipping', $shipping_product->get_sku() );
-
-					/*
-					TODO: ex. 134811 - Si le prix du produit est à zéro, mettre le prix du transport à zéro. */
-					wc_update_order_item_meta( $item_id, '_shipping_price_product_excl', $shipping_price_excl_tax );
-
-					/*
-					TODO: Si le prix du produit est à zéro, mettre les taxes du transport à zéro */
-					wc_update_order_item_meta( $item_id, '_tax_prices_on_product_shipping', $shipping_tax_amount );
-				}
+			if ( $this->km_shipping_zone->is_in_thirteen && ! $first_item_processed ) {
+				$first_item_processed = true;
+				$this->add_shipping_meta_data( $item_id, $_POST );
+			} elseif ( ! $this->km_shipping_zone->is_in_thirteen ) {
+				$this->add_shipping_product_meta_data( $item_id, $product );
 			}
 		}
 
 		update_post_meta( $order_id, '_cookie_cp', $this->km_shipping_zone->zip_code );
+	}
+
+	/**
+	 * Add shipping meta data
+	 *
+	 * @param int   $item_id
+	 * @param array $post_data
+	 * @return void
+	 */
+	private function add_shipping_meta_data( $item_id, $post_data ) {
+		$km_shipping_sku        = sanitize_text_field( $post_data['km_shipping_sku'] ?? '0' );
+		$product_price_excl_tax = floatval( $post_data['km_shipping_price'] ?? '0' );
+		$shipping_tax_amount    = floatval( $post_data['km_shipping_tax'] ?? '0' );
+
+		if ( ! empty( $km_shipping_sku ) ) {
+			wc_update_order_item_meta( $item_id, '_ugs_product_shipping', $km_shipping_sku );
+			wc_update_order_item_meta( $item_id, '_shipping_price_product_excl', $product_price_excl_tax );
+			wc_update_order_item_meta( $item_id, '_tax_prices_on_product_shipping', $shipping_tax_amount );
+		}
+	}
+
+	/**
+	 * Add shipping product meta data
+	 *
+	 * @param int        $item_id
+	 * @param WC_Product $product
+	 * @return void
+	 */
+	private function add_shipping_product_meta_data( $item_id, $product ) {
+		$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
+
+		if ( $shipping_product ) {
+			$shipping_price_excl_tax = wc_get_price_excluding_tax( $shipping_product );
+			$shipping_tax_amount     = wc_get_price_including_tax( $shipping_product ) - $shipping_price_excl_tax;
+
+			wc_update_order_item_meta( $item_id, '_ugs_product_shipping', $shipping_product->get_sku() );
+			wc_update_order_item_meta( $item_id, '_shipping_price_product_excl', $shipping_price_excl_tax );
+			wc_update_order_item_meta( $item_id, '_tax_prices_on_product_shipping', $shipping_tax_amount );
+		}
 	}
 }

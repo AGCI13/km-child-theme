@@ -116,7 +116,7 @@ class KM_Shipping_Methods {
 
 		// Détermination de la nécessité d'utiliser plusieurs camions.
 		$multiple_trucks      = $vrac_count > 1 || $cart_has_plasterboard || $total_weight > 2000;
-		$multiple_trucks_only = $cart_has_plasterboard && ( $vrac_count > 0 || $other_product_count > 0 );
+		$multiple_trucks_only = $cart_has_plasterboard && ( $vrac_count > 0 || $other_product_count > 0 ) || $vrac_count > 1;
 
 		$weight_index              = $this->get_weight_class_index( $total_weight );
 		$weight_class_name         = array_keys( $this->weight_classes )[ $weight_index ];
@@ -126,7 +126,7 @@ class KM_Shipping_Methods {
 
 		if ( ! $shipping_product ) {
 			$this->debug_shipping_vars( $total_weight, $multiple_trucks, $cart_has_plasterboard, 0, 0, $shipping_method_name );
-			return array( 'cost' => 0 );
+			return array( 'price_incl_tax' => 0 );
 		}
 
 		$shipping_price_excluding_taxes = wc_get_price_excluding_tax( $shipping_product );
@@ -136,11 +136,11 @@ class KM_Shipping_Methods {
 
 		// Traitement spécifique selon la méthode de livraison et le besoin de plusieurs camions.
 		if ( in_array( $shipping_method_id, array( 'option2', 'option2express' ), true ) && ! $multiple_trucks && ! $multiple_trucks_only ) {
-			return array( 'cost' => 0 );
+			return array( 'price_incl_tax' => 0 );
 		}
 
 		if ( in_array( $shipping_method_id, array( 'option1', 'option1express' ), true ) && $multiple_trucks_only ) {
-			return array( 'cost' => 0 );
+			return array( 'price_incl_tax' => 0 );
 		}
 
 		return array(

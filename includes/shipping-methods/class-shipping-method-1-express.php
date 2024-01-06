@@ -121,7 +121,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 
 		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
 
-		if ( ! $shipping_info || ! $shipping_info['price_incl_tax'] || ! $shipping_info['ugs'] || ! $shipping_info['weight_class'] || ! $shipping_info['tax_amount'] ) {
+		if ( ! $shipping_info || 0 === $shipping_info['price_incl_tax'] ) {
 			return;
 		}
 

@@ -43,7 +43,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 	</tr>
 	<tr>
 		<td>
-			<?php echo wp_kses_post( $before . sprintf( __( 'Passée le : <time datetime="%1$s">%2$s</time>s', 'woocommerce' ), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) ); ?>
+			<?php echo wp_kses_post( $before . sprintf( __( 'Passée le : <time datetime="%1$s">%2$s</time>', 'woocommerce' ), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) ); ?>
 		<td>
 	</tr>
 </table>

@@ -268,7 +268,6 @@ function km_display_shipping_info_in_footer() {
 		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
 		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
 		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
-		echo '$chosen_shipping_methods :' . WC()->session->chosen_shipping_methods[0];
 
 	foreach ( $shipping_methods as $method ) {
 		$cookie_name = 'km_shipping_cost_' . $method;

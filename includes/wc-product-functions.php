@@ -221,39 +221,40 @@ function km_display_shipping_delays_on_product_page( $product_id ) {
 }
 
 function has_tonnage_calculator() {
-	// Si c'est un produit et qu'il n'y a pas l'option "Afficher le calculateur de tonnage" de coché, on ne l'affiche pas.
+	// Vérifier si c'est une page produit.
 	if ( is_product() ) {
 		global $product;
 
 		// Obtenir les catégories de produits.
-		$categories      = wp_get_post_terms( $product->get_id(), 'product_cat' );
-		$parent_category = null;
-		$child_category  = null;
-
-		foreach ( $categories as $category ) {
-			if ( $category->parent == 0 ) {
-				// C'est une catégorie parente.
-				$parent_category = $category;
-			} else {
-				// C'est une catégorie enfant.
-				$child_category = $category;
-			}
+		$categories = wp_get_post_terms( $product->get_id(), 'product_cat' );
+		if ( empty( $categories ) ) {
+			return false;
 		}
 
-		$target_category = $child_category ? $child_category : $parent_category;
-		$cat_term_id     = $target_category->term_id;
+		// Trouver la catégorie enfant si elle existe, sinon utiliser la catégorie parente.
+		$target_category = current(
+			array_filter(
+				$categories,
+				function ( $cat ) {
+					return $cat->parent !== 0;
+				}
+			)
+		);
 
-		if ( $cat_term_id ) {
-			// Récupérer la valeur du champ ACF pour cette catégorie.
-			$acf_value = get_field( 'show_tonnage_calculator', 'product_cat_' . $cat_term_id );
-			if ( $acf_value ) {
-				return true;
-			}
+		if ( ! $target_category ) {
+			$target_category = current( $categories );
 		}
-		return false;
+
+		if ( ! $target_category ) {
+			return false;
+		}
+
+		// Vérifier le champ ACF pour la catégorie cible.
+		return get_field( 'show_tonnage_calculator', 'product_cat_' . $target_category->term_id ) ? true : false;
 	}
-}
 
+	return false;
+}
 /**
  * Ajoute une classe au body pour les produits avec calculateur de tonnage
  *

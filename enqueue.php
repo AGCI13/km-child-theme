@@ -66,8 +66,6 @@ function km_admin_scripts_enqueue( $hook ) {
 	$js_path         = $stylesheet_path . '/assets/js/';
 	$css_path        = $stylesheet_path . '/assets/css/';
 
-	wp_register_style( 'km-tonnage-calculator-style', $css_uri . 'tonnage-calculator.css', array(), filemtime( $css_path . 'tonnage-calculator.css' ), 'all' );
-
 	wp_enqueue_style( 'km-admin-style', $css_uri . 'admin-style.css', array(), filemtime( $css_path . 'admin-style.css' ), 'all' );
 
 	if ( 'woocommerce_page_wc-settings' === $hook ) {
