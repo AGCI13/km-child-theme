@@ -119,6 +119,7 @@ class KM_Dynamic_Pricing {
 		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $this->km_shipping_zone->is_in_thirteen() )
 		|| ( $this->km_shipping_zone->is_in_thirteen() && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
 		|| ( $this->km_shipping_zone->is_in_thirteen() && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', $this->km_shipping_zone->shipping_zone_name ) ) ) ) {
+
 			// Désactiver la variation si aucun produit de livraison n'est disponible ou si le prix est 0.
 			$variation_data['is_purchasable']      = false;
 			$variation_data['variation_is_active'] = false;

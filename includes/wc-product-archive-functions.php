@@ -206,12 +206,18 @@ function km_archive_product_assets() {
 add_shortcode( 'archive_product_assets', 'km_archive_product_assets' );
 
 /**
- * display Out o stock if product simple is OOS or if every variations of a variable product are OOS
+ * display Out of stock if product simple is OOS or if every variations of a variable product are OOS
  *
  * @return void
  */
 function km_woocommerce_template_loop_price() {
 	global $product;
+
+	if ( ! $product->is_purchasable() ) {
+		return;
+	}
+	// Retirer l'action qui affiche le prix par défaut et ajouter la vôtre.
+	remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
 
 	// Pour les produits variables.
 	if ( $product->is_type( 'variable' ) ) {
@@ -240,7 +246,4 @@ function km_woocommerce_template_loop_price() {
 	// Affiche le prix si le produit est en stock.
 	wc_get_template( 'loop/price.php' );
 }
-
-// Retirer l'action qui affiche le prix par défaut et ajouter la vôtre.
-remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
 add_action( 'woocommerce_after_shop_loop_item_title', 'km_woocommerce_template_loop_price', 10 );
