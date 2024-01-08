@@ -182,7 +182,8 @@ class KM_Dynamic_Pricing {
 	 */
 	public function adjust_simple_product_price_html( $price, $product ) {
 
-		if ( $this->product_is_bulk_or_bigbag( $product->get_name() ) && is_product() ) {
+		if ( $this->product_is_bulk_or_bigbag( $product->get_name() ) && is_product()
+		&& ( $product->is_type( 'simple' ) || $product->is_type( 'variation' ) ) ) {
 			$price .= $this->ecotaxe_info_html;
 		}
 		return $price;
@@ -210,7 +211,7 @@ class KM_Dynamic_Pricing {
 			$variation_obj = wc_get_product( $variation['variation_id'] );
 
 			// Vérifiez si la variation est achetable.
-			if ( $variation_obj->is_purchasable() ) {
+			if ( $variation_obj->is_purchasable() && $this->disable_variation_if_no_shipping_product( $variation, $product, $variation_obj )['is_purchasable'] ) {
 				$prices[] = wc_get_price_including_tax( $variation_obj );
 
 				if ( $this->product_is_bulk_or_bigbag( $variation_obj->get_name() ) ) {
@@ -400,25 +401,23 @@ class KM_Dynamic_Pricing {
 	 */
 	public function product_is_bulk_or_bigbag( $item_name ) {
 
+		// Get product categories.
+		$terms = get_the_terms( get_the_ID(), 'product_cat' );
+
+		// Check if product has location-big-bag category.
+		if ( ! empty( $terms ) ) {
+			foreach ( $terms as $term ) {
+				if ( 'location-big-bag' === $term->slug ) {
+					return false;
+				}
+			}
+		}
+
 		if ( false !== stripos( $item_name, 'big bag' ) || false !== stripos( $item_name, 'vrac' ) ) {
 			return true;
 		}
 
 		return false;
-	}
-
-	/**
-	 * Ajoute l'écotaxe au prix du produit si c'est un big bag ou un vrac à la tonne.
-	 *
-	 * @param float      $price Le prix du produit.
-	 * @param WC_Product $product Le produit.
-	 * @return float Le prix du produit.
-	 */
-	public function maybe_add_eco_tax( $price, $product ) {
-		if ( $this->product_is_bulk_or_bigbag( $product->get_name() ) ) {
-			$price += $this->ecotaxe_rate;
-		}
-		return $price;
 	}
 
 	/**

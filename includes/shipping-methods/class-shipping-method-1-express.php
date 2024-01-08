@@ -121,7 +121,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 
 		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
 
-		if ( ! $shipping_info || 0 === $shipping_info['price_incl_tax'] ) {
+		if ( ! $shipping_info || 0 === $shipping_info['price_excl_tax'] ) {
 			return;
 		}
 
@@ -133,7 +133,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 		$rate = array(
 			'id'        => $this->id,
 			'label'     => $this->title,
-			'cost'      => $shipping_info['price_incl_tax'],
+			'cost'      => $shipping_info['price_excl_tax'],
 			'meta_data' => array(
 				'description'             => $this->method_description,
 				'shipping_ugs'            => $shipping_info['ugs'],

@@ -128,6 +128,20 @@ class Shipping_method_drive extends WC_Shipping_Method {
 			return;
 		}
 
+		// Vérifier si tous les produits dans le panier sont de la catégorie 'location-bennes'.
+		$all_location_bennes = true;
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( ! has_term( 'location-bennes', 'product_cat', $cart_item['product_id'] ) ) {
+				$all_location_bennes = false;
+				break;
+			}
+		}
+
+		// Si tous les produits sont de la catégorie 'location-bennes', ne pas ajouter cette méthode de livraison.
+		if ( $all_location_bennes ) {
+			return;
+		}
+
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(

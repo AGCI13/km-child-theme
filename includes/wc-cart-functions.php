@@ -253,6 +253,7 @@ function km_add_cart_totals_after_order_total() {
 	}
 }
 add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
+add_action( 'woocommerce_review_order_before_order_total', 'km_add_cart_totals_after_order_total', 80 );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande
@@ -277,7 +278,6 @@ function km_check_cart_weight_before_adding( $passed, $product_id, $quantity ) {
 
 	// Calculer le poids total du panier actuel.
 	$cart_weight = WC()->cart->get_cart_contents_weight();
-	error_log( $cart_weight );
 
 	// Vérifier si l'ajout du produit dépasse le poids maximum.
 	if ( ( $cart_weight + $product_weight ) > $max_weight ) {

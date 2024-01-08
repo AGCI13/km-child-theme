@@ -82,6 +82,18 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 			</div>
 
 		<?php
+		// Display woocoommerce order comment field.
+		woocommerce_form_field(
+			'order_comments',
+			array(
+				'type'        => 'textarea',
+				'class'       => array( 'form-row-wide', 'notes' ),
+				'label'       => esc_html__( 'Notes de commande', 'kingmateriaux' ),
+				'placeholder' => esc_html__( 'Notes sur votre commande, par exemple des informations particulières pour la livraison.', 'kingmateriaux' ),
+			),
+			$checkout->get_value( 'order_comments' )
+		);
+
 		do_action( 'woocommerce_after_checkout_billing_form', $checkout );
 	}
 }

@@ -253,6 +253,59 @@ function km_add_custom_hidden_fields_to_checkout() {
 
 add_action( 'woocommerce_after_checkout_billing_form', 'km_add_custom_hidden_fields_to_checkout' );
 
+/**
+ * Ajoute les conditions de livraison pour les modes de livraison.
+ *
+ * @param string $chosen_method Le mode de livraison choisi.
+ * @return void
+ */
+function km_add_shipping_rate_conditions( $chosen_method ) {
+	// Get WC Cart weight.
+	$cart_weight        = WC()->cart->get_cart_contents_weight();
+	$chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' );
+
+	// Check if cart contains product named "benne".
+	$contains_benne = false;
+	foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+		if ( strpos( $cart_item['data']->get_name(), 'benne' ) !== false ) {
+			$contains_benne = true;
+			break;
+		}
+	}
+
+	ob_start();
+
+	if ( $cart_weight > 2000 && ( ! empty( $chosen_method_data['unload_condition'] ) || ! empty( $chosen_method_data['access_condition'] ) ) ) :
+		?>
+		<h4><?php esc_html_e( 'Pour valider votre mode de livraison, veuillez accepter les conditions suivantes :', 'kingmateriaux' ); ?></h4>
+
+			<?php if ( ! empty( $chosen_method_data['access_condition'] ) ) : ?>
+			<div class="shipping-condition validate-required">
+				<input type="checkbox" name="delivery_access_confirmation" id="delivery-access-confirmation" required>
+				<label for="delivery-access-confirmation"><?php echo esc_html( $chosen_method_data['access_condition'] ); ?><span style="color:red">*</span></label>
+			</div>
+		<?php endif; ?>
+
+			<?php if ( ! empty( $chosen_method_data['unload_condition'] ) ) : ?>
+			<div class="shipping-condition validate-required">
+				<input type="checkbox" name="delivery_unloading_confirmation" id="delivery-unloading-confirmation" required>
+				<label for="delivery-unloading-confirmation"><?php echo esc_html( $chosen_method_data['unload_condition'] ); ?><span style="color:red">*</span></label>
+			</div>
+		<?php endif; ?>
+		<?php
+	endif;
+	?>
+
+	<?php if ( $contains_benne ) : ?>
+		<div class="shipping-condition validate-required">
+			<input type="checkbox" name="delivery_benne_confirmation" id="delivery-benne-confirmation" required>
+			<label for="delivery-benne-confirmation"><?php esc_html_e( 'Les bennes placées sur la voie publique doivent obligatoirement faire l’objet d’une demande d’autorisation d’occupation temporaire (AOT) auprès de votre mairie.', 'kingmateriaux' ); ?><span style="color:red">*</span></label>
+		</div>
+		<?php
+	endif;
+}
+add_action( 'km_after_shipping_rate', 'km_add_shipping_rate_conditions', 10, 1 );
+
 /** --------------  DEBUG CODE START ----------------- */
 
 function km_display_shipping_info_in_footer() {
@@ -267,6 +320,7 @@ function km_display_shipping_info_in_footer() {
 
 		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
 		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
+		echo '<button class="btn btn-primary km-recalc-cart">Recalculer le panier</button><script>jQuery(document).ready(function(){jQuery(".km-recalc-cart").on("click",function(){jQuery("body").trigger("update_checkout");});});</script>';
 		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
 
 	foreach ( $shipping_methods as $method ) {

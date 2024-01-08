@@ -345,3 +345,39 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
     /* Checkout */
     .recapitulatif .elementor-widget-wrap{width: 100% !important;}
 }
+
+.redeem-coupon {
+    display: none;
+    align-items: center;
+    width: 100%;
+    gap: .5rem;
+}
+
+.coupon th {
+    display: none;
+}
+
+#km-coupon-label:before {
+ content: attr(data-title);
+ color:#BE9E67 !important;
+ font-weight: 600;
+ font-size:15px;
+ float: left;
+}
+
+#km-coupon-label{
+cursor: pointer;
+}
+
+#km-coupon-label.active{
+    cursor: default;
+}
+
+#km-coupon-label.active .redeem-coupon{
+    display: flex;
+}
+
+#km-coupon-label.active:before{
+    color:#000 !important;
+}
+ 

@@ -32,10 +32,9 @@ if ( $available_methods ) {
 		}
 	}
 }
-$km_shipping_zone   = KM_Shipping_zone::get_instance();
-$checkout           = WC()->checkout();
-$chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' );
-$shipping_selected  = 'selected';
+$km_shipping_zone  = KM_Shipping_zone::get_instance();
+$checkout          = WC()->checkout();
+$shipping_selected = 'selected';
 if ( 'drive' === $chosen_method ) {
 	$drive_selected    = 'selected';
 	$shipping_selected = '';
@@ -87,26 +86,7 @@ if ( 'drive' === $chosen_method ) {
 							</div>
 						<?php endforeach; ?>
 
-						<!-- Start Shipping Conditions -->					
-								<?php if ( ! empty( $chosen_method_data['unload_condition'] ) || ! empty( $chosen_method_data['access_condition'] ) ) : ?>
-									<h4><?php esc_html_e( 'Pour valider votre mode de livraison, veuillez accepter les conditions suivantes :', 'kingmateriaux' ); ?></h4>
-
-									<?php if ( ! empty( $chosen_method_data['access_condition'] ) ) : ?>
-										<div class="shipping-condition validate-required">
-											<input type="checkbox" name="delivery_access_confirmation" id="delivery-access-confirmation" required>
-											<label for="delivery-access-confirmation"><?php echo esc_html( $chosen_method_data['access_condition'] ); ?><span style="color:red">*</span></label>
-										</div>
-									<?php endif; ?>
-
-									<?php if ( ! empty( $chosen_method_data['unload_condition'] ) ) : ?>
-										<div class="shipping-condition validate-required">
-											<input type="checkbox" name="delivery_unloading_confirmation" id="delivery-unloading-confirmation" required>
-											<label for="delivery-unloading-confirmation"><?php echo esc_html( $chosen_method_data['unload_condition'] ); ?><span style="color:red">*</span></label>
-										</div>
-									<?php endif; ?>
-								<?php endif; ?>
-						<!-- End Shipping Conditions -->
-						
+						<?php do_action( 'km_after_shipping_rate', $chosen_method ); ?>						
 					</div>
 					<?php endif; ?>	
 			</div>
@@ -188,7 +168,6 @@ if ( 'drive' === $chosen_method ) {
 									</span>
 								</p>
 							</div>
-
 
 							<?php if ( $drive_method_settings['location'] ) : ?>
 							<div class="drive-location-adress">

@@ -15,6 +15,7 @@ jQuery(document).ready(function ($) {
         "updated_checkout",
         function () {
             setTimeout(function () {
+                showCouponForm();
                 // reapplySelectedClasses();
                 loadShippingMethods();
                 handleEnterKeydown();
@@ -31,6 +32,17 @@ jQuery(document).ready(function ($) {
     $(document.body).on('updated_checkout', () => {
         hideLoader('.shopengine-checkout-shipping-methods');
     });
+
+    const showCouponForm = () => {
+        couponLabel = document.querySelector('#km-coupon-label');
+    
+        if (couponLabel) {
+            couponLabel.addEventListener('click', () => {
+                couponLabel.classList.add('active');
+                couponLabel.attributes['data-title'].value = 'Entrez votre code promo';
+            });
+        }
+    }
 
     const showLoader = (selector) => {
         const loaderHtml = `<div class="shopengine-loader"><div class="spinner"></div></div>`;

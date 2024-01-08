@@ -213,32 +213,22 @@ add_shortcode( 'archive_product_assets', 'km_archive_product_assets' );
 function km_woocommerce_template_loop_price() {
 	global $product;
 
-	if ( ! $product->is_purchasable() ) {
-		return;
-	}
-	// Retirer l'action qui affiche le prix par défaut et ajouter la vôtre.
-	remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
-
-	// Pour les produits variables.
 	if ( $product->is_type( 'variable' ) ) {
-		$available = false;
+		// Vérifier les variations.
+		$oos_variations = true;
 
-		foreach ( $product->get_available_variations() as $variation ) {
-			$variation_obj = new WC_Product_Variation( $variation['variation_id'] );
-			if ( $variation_obj->is_in_stock() ) {
-				$available = true;
+		foreach ( $product->get_available_variations()as $variation ) {
+			if ( $variation['is_in_stock'] ) {
+				$oos_variations = false;
 				break;
 			}
 		}
 
-		if ( ! $available ) {
+		if ( $oos_variations ) {
 			echo '<span class="price out-of-stock">' . __( 'Rupture de stock', 'woocommerce' ) . '</span>';
 			return;
 		}
-	}
-
-	// Pour les produits simples.
-	if ( $product->is_type( 'simple' ) && ! $product->is_in_stock() ) {
+	} elseif ( $product->is_type( 'simple' ) && ! $product->is_in_stock() ) {
 		echo '<span class="price out-of-stock">' . __( 'Rupture de stock', 'woocommerce' ) . '</span>';
 		return;
 	}
@@ -246,4 +236,6 @@ function km_woocommerce_template_loop_price() {
 	// Affiche le prix si le produit est en stock.
 	wc_get_template( 'loop/price.php' );
 }
+// Retirer l'action qui affiche le prix par défaut et ajouter la vôtre.
+remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
 add_action( 'woocommerce_after_shop_loop_item_title', 'km_woocommerce_template_loop_price', 10 );

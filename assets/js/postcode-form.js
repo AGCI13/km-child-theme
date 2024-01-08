@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => {
                 if (response.success) {
                     //Traiement de la réponse
+                    label_modal_postcode.textContent = '';
                     setCookie('zip_code', zip_modal + '-' + country_modal, 1);
                     setCookie('shipping_zone', response.data, 1);
                     setTimeout(() => {
@@ -90,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (response.data && typeof response.data.message === 'string') {
                         label_modal_postcode.textContent = response.data.message;
                     } else {
-                        label_modal_postcode.textContent = 'Une erreur inattendue est survenue.';
+                        label_modal_postcode.textContent = 'Une erreur inattendue est survenue. Veuillez réessayer.';
                     }
                 }
                 handleLoading(event, false);

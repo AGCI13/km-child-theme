@@ -98,8 +98,13 @@ class KM_Order_Processing {
 				continue;
 			}
 
-			$product_price_excl_tax = wc_get_price_excluding_tax( $product );
-			$product_tax_price      = wc_get_price_including_tax( $product ) - $product_price_excl_tax;
+			// Utiliser get_price('edit') pour obtenir le prix en mode édition.
+			$product_price_excl_tax = $product->get_price( 'edit' );
+
+			// Calculer le prix TTC en ajoutant la TVA.
+			$tax_rates         = WC_Tax::get_rates( $product->get_tax_class() );
+			$tax_rate          = WC_Tax::get_rate_percent_value( array_shift( array_keys( $tax_rates ) ) );
+			$product_tax_price = $product_price_excl_tax * ( $tax_rate / 100 );
 
 			if ( $this->km_dynamic_pricing->product_is_bulk_or_bigbag( $product_id ) ) {
 				$product_price_excl_tax += $this->km_dynamic_pricing->ecotaxe_rate;

@@ -320,7 +320,6 @@ class KM_Shipping_Zone {
 		}
 
 		$zone_id = $this->get_shipping_zone_id_from_postcode( $postcode );
-		error_log( $zone_id );
 
 		if ( ! $zone_id ) {
 			wp_send_json_error( array( 'message' => __( 'Aucune zone de livraison trouvée. Si ce code postal est bien le votre, veuillez contacter le service client.', 'kingmateriaux' ) ) );

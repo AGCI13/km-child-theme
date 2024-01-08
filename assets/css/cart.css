@@ -123,7 +123,6 @@ color:#BE9E67 !important;
     font-size: 13px;
 }
 /* Panier */
-.shopengine-cart .e-cart__column-start{}
 .shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 32px;font-weight: 900;line-height: 1.2em;width: fit-content;position: relative;z-index: 1;}
 .shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2:after{content: '';width: 100%;display: block;position: absolute;height: 25px;background: #D9D9D9;transform: rotate(-0.21deg);bottom: 2px;z-index: -1;}
 .shopengine-cart .elementor-widget-woocommerce-cart .e-cart__container{position:relative;grid-template-columns: 70% auto;}

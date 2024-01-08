@@ -92,24 +92,32 @@ class KM_Shipping_Methods {
 		$cart_items = WC()->cart->get_cart();
 
 		if ( ! $cart_items ) {
-			return array( 'cost' => 0 );
+			return array( 'price_excl_tax' => 0 );
 		}
 
+		$total_weight          = 0;
 		$vrac_count            = 0;
 		$other_product_count   = 0;
 		$cart_has_plasterboard = false;
-		$total_weight          = 0;
 
 		foreach ( $cart_items as $cart_item ) {
 			$product        = $cart_item['data'];
+			$product_name   = $product->get_name();
 			$product_weight = (int) $product->get_weight() * $cart_item['quantity'];
-			$total_weight  += $product_weight;
 
-			if ( stripos( $product->get_name(), 'vrac' ) !== false ) {
+			// Vérifiez si le produit n'est pas une 'benne'.
+			if ( stripos( $product_name, 'benne' ) === false ) {
+				$total_weight += $product_weight;
+			}
+
+			// Comptez les produits 'vrac'.
+			if ( stripos( $product_name, 'vrac' ) !== false ) {
 				++$vrac_count;
-			} elseif ( strpos( $product->get_name(), 'Plaque de plâtre' ) !== false ) {
+			} // Vérifiez si le panier contient une 'Plaque de plâtre'.
+			elseif ( stripos( $product_name, 'Plaque de plâtre' ) !== false ) {
 				$cart_has_plasterboard = true;
-			} else {
+			} // Comptez d'autres types de produits.
+			else {
 				++$other_product_count;
 			}
 		}
@@ -126,21 +134,20 @@ class KM_Shipping_Methods {
 
 		if ( ! $shipping_product ) {
 			$this->debug_shipping_vars( $total_weight, $multiple_trucks, $cart_has_plasterboard, 0, 0, $shipping_method_name );
-			return array( 'price_incl_tax' => 0 );
+			return array( 'price_excl_tax' => 0 );
 		}
 
 		$shipping_price_excluding_taxes = wc_get_price_excluding_tax( $shipping_product );
 		$shipping_price_including_taxes = wc_get_price_including_tax( $shipping_product );
-
 		$this->debug_shipping_vars( $total_weight, $multiple_trucks, $cart_has_plasterboard, $shipping_price_excluding_taxes, $shipping_price_including_taxes, $shipping_method_name );
 
 		// Traitement spécifique selon la méthode de livraison et le besoin de plusieurs camions.
 		if ( in_array( $shipping_method_id, array( 'option2', 'option2express' ), true ) && ! $multiple_trucks && ! $multiple_trucks_only ) {
-			return array( 'price_incl_tax' => 0 );
+			return array( 'price_excl_tax' => 0 );
 		}
 
 		if ( in_array( $shipping_method_id, array( 'option1', 'option1express' ), true ) && $multiple_trucks_only ) {
-			return array( 'price_incl_tax' => 0 );
+			return array( 'price_excl_tax' => 0 );
 		}
 
 		return array(
