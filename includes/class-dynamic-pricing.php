@@ -76,20 +76,12 @@ class KM_Dynamic_Pricing {
 		}
 
 		add_filter( 'woocommerce_is_purchasable', array( $this, 'maybe_set_product_unpurchasable' ), 10, 2 );
-
 		add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
-		// add_filter( 'woocommerce_product_get_regular_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 50, 2 );
 		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
-		// add_filter( 'woocommerce_product_variation_get_regular_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_variation_prices_price', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 80, 3 );
-		// add_filter( 'woocommerce_variation_prices_regular_price', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 80, 3 );
-
 		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 99, 2 );
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
-		// Décommenter la ligne ci dessous afin de masquer les produits lorsqu'ils n'ont pas de classe de livraison.
-		// add_action( 'pre_get_posts', array( $this, 'hide_products_out_thirteen' ), 10, 1 );
 		add_filter( 'woocommerce_available_variation', array( $this, 'disable_variation_if_no_shipping_product' ), 10, 3 );
-
 		add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
 	}
 
@@ -197,11 +189,6 @@ class KM_Dynamic_Pricing {
 	 * @return string La fourchette de prix du produit.
 	 */
 	public function adjust_variable_product_price_html( $price, $product ) {
-
-		// Vérifiez si le produit est un produit variable.
-		if ( ! is_product() || ! $product->is_type( 'variable' ) ) {
-			return $price;
-		}
 
 		$prices      = array();
 		$has_ecotaxe = false;

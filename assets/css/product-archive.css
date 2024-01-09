@@ -156,3 +156,8 @@
         color: #262626;
     }
 }
+
+.archive .grille-categorie li.product span.price .km-product-ecotaxe {
+    font-size: .8em;
+    font-style: italic;
+}

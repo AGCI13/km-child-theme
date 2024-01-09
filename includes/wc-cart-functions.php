@@ -55,7 +55,7 @@ add_action( 'init', 'clear_cart_url' );
  *
  * @return void
  */
-function after_cart_coupon_content() {
+function km_after_cart_coupon_content() {
 
 	// Add email to WC session
 	$email = WC()->session->get( 'wac_email' );
@@ -75,7 +75,7 @@ function after_cart_coupon_content() {
 	</div>
 	<?php
 }
-add_action( 'woocommerce_after_cart_table', 'after_cart_coupon_content' );
+add_action( 'woocommerce_after_cart_table', 'km_after_cart_coupon_content' );
 /**
  *  --------------- START ECO-TAX ----------------------
  */
@@ -173,33 +173,53 @@ add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_tot
  */
 
 function display_shipping_info_text() {
-
 	// Vérifiez si WC_Cart est initialisé
 	if ( is_admin() || ! is_a( WC()->cart, 'WC_Cart' ) ) {
 		return;
 	}
 
-	$km_shpping_zone = KM_Shipping_Zone::get_instance();
+	$km_shipping_zone = KM_Shipping_Zone::get_instance();
 
-	if ( $km_shpping_zone->is_in_thirteen() ) {
-		$shipping_cost = (int) WC()->session->get( 'option1_shipping_cost' );
-		$value         = empty( $shipping_cost ) || 0 === $shipping_cost ? __( 'Calcul à l\'étape suivante', 'kingmateriaux' ) : __( 'À partir de ' . wc_price( $shipping_cost ), 'kingmateriaux' );
-	} elseif ( $km_shpping_zone->zip_code && $km_shpping_zone->shipping_zone_id ) {
-		$value = __( 'Incluse', 'kingmateriaux' );
-	} else {
+	// Vérifie si les conditions pour afficher les informations de livraison sont remplies
+	if ( ! $km_shipping_zone->zip_code || ( ! $km_shipping_zone->is_in_thirteen() && ! $km_shipping_zone->shipping_zone_id ) ) {
 		return;
 	}
-	?>
-		<tr class="shipping-info">
-			<th><?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?></th>
-			<td data-title="<?php esc_html_e( 'Livraison', 'kingmateriaux' ); ?>">
-				<?php echo $value; ?>
-			</td>
-		</tr>
 
-		<?php
-		do_action( 'km_after_checkout_shipping' );
+	$shipping_html = get_shipping_info_text( $km_shipping_zone );
+
+	?>
+	<tr class="shipping-info">
+		<th><?php esc_html_e( 'Expédition', 'kingmateriaux' ); ?></th>
+		<td data-title="<?php esc_html_e( 'Expédition', 'kingmateriaux' ); ?>">
+			<?php echo $shipping_html; ?>
+		</td>
+	</tr>
+	<?php
+	do_action( 'km_after_checkout_shipping' );
 }
+
+/**
+ * Retourne le texte à afficher pour les informations de livraison
+ *
+ * @param KM_Shipping_Zone $km_shipping_zone
+ * @return string
+ */
+function get_shipping_info_text( $km_shipping_zone ) {
+	if ( $km_shipping_zone->is_in_thirteen() ) {
+		$shipping_cost = (int) WC()->session->get( 'option1_shipping_cost' );
+		$shipping_text = $shipping_cost === 0 ? __( 'Calcul à l\'étape suivante', 'kingmateriaux' ) : __( 'À partir de ' . wc_price( $shipping_cost ), 'kingmateriaux' );
+	} elseif ( $km_shipping_zone->shipping_zone_id ) {
+		$shipping_text = __( 'Incluse', 'kingmateriaux' );
+	} else {
+		return '';
+	}
+
+	$shipping_text .= '<br>' . __( 'Livraison à ', 'kingmateriaux' ) . '<b>' . $km_shipping_zone->zip_code . '</b>';
+	$shipping_text .= '<br><a class="btn-link modal_pc_open_btn" href="#">' . __( 'Modifier le code postal', 'kingmateriaux' ) . '</a>';
+
+	return $shipping_text;
+}
+
 add_filter( 'woocommerce_cart_totals_before_order_total', 'display_shipping_info_text', 10 );
 
 /**

@@ -252,13 +252,12 @@ class KM_Shipping_Methods {
 		return $total_trucks;
 	}
 
-		/**
-		 * Récupère la description de livraison basée sur l'ID de la méthode et le poids total.
-		 *
-		 * @param string $shipping_method_id ID de la méthode de livraison.
-		 * @param float  $total_weight Le poids total du panier.
-		 * @return string Description de la méthode de livraison.
-		 */
+	/**
+	 * Récupère la description de livraison basée sur l'ID de la méthode et le poids total.
+	 *
+	 * @param float $total_weight Le poids total du panier.
+	 * @return string Description de la méthode de livraison.
+	 */
 	private function get_weight_class_index( $total_weight ) {
 
 		$total_tons = $total_weight / 1000; // Convertir en tonnes.

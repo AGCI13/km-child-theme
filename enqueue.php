@@ -36,8 +36,8 @@ function km_front_scripts_enqueue() {
 	wp_enqueue_script( 'km-cart-script', $js_uri . 'cart.js', array(), filemtime( $js_path . 'cart.js' ), array( 'in_footer' => true ) );
 	wp_localize_script( 'km-cart-script', 'themeObject', array( 'themeUrl' => get_stylesheet_directory_uri() ) );
 
-	wp_register_style( 'km-archive-product-style', $css_uri . 'product-archive.css', array(), filemtime( $css_path . 'product-archive.css' ), 'all' );
-	wp_enqueue_script( 'km-archive-product-script', $js_uri . '/product-archive.js', array( 'jquery' ), filemtime( $js_path . 'product-archive.js' ), false );
+	wp_enqueue_style( 'km-archive-product-style', $css_uri . 'product-archive.css', array(), filemtime( $css_path . 'product-archive.css' ), 'all' );
+	wp_enqueue_script( 'km-archive-product-script', $js_uri . 'product-archive.js', array( 'jquery' ), filemtime( $js_path . 'product-archive.js' ), false );
 
 	wp_register_script( 'add-to-cart-confirmation', $js_uri . 'add-to-cart-confirmation.js', array(), filemtime( $js_path . 'add-to-cart-confirmation.js' ), false );
 

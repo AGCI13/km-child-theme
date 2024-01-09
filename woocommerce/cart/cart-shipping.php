@@ -75,18 +75,14 @@ if ( 'drive' === $chosen_method ) {
 										?>
 										<br>
 										<?php
-										if ( ! in_array( $method->id, array( 'option1', 'option1express' ), true ) ) {
-											echo esc_html( get_option( 'woocommerce_' . esc_attr( sanitize_title( $method->id ) ) . '_settings' )['description'] );
-										} else {
-											echo esc_html( $method->get_meta_data()['description'] );
-										}
+										echo esc_html( $method->get_meta_data()['description'] );
 										do_action( 'woocommerce_after_shipping_rate', $method, $index );
 										?>
 								</div>
 							</div>
 						<?php endforeach; ?>
 
-						<?php do_action( 'km_after_shipping_rate', $chosen_method ); ?>						
+						<?php do_action( 'km_after_shipping_rate', $chosen_method ); ?>
 					</div>
 					<?php endif; ?>	
 			</div>

@@ -20,6 +20,41 @@ button,a{
   color:var(--primary-color);
 }
 
+/* Style de base pour les inputs checkbox */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;;
+  border: 2px solid #7f7f7f;
+  /* Couleur de la bordure par défaut */
+  cursor: pointer;
+  position: relative;
+  border-radius: 3px;
+}
+
+/* Style de la bordure au survol */
+ input[type="checkbox"]:hover {
+  border-color: #BE9E67;
+  /* Couleur de bordure au survol */
+}
+
+/* Style lorsque la checkbox est cochée */
+ input[type="checkbox"]:checked::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: -4px;
+  width: 9px;
+  height: 17px;
+  border: solid #BE9E67;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
 /*
 COULEURS :
 GOLD : #BE9D68

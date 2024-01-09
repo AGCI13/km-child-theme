@@ -260,53 +260,89 @@ add_action( 'woocommerce_after_checkout_billing_form', 'km_add_custom_hidden_fie
  * @return void
  */
 function km_add_shipping_rate_conditions( $chosen_method ) {
-	// Get WC Cart weight.
+	if ( WC()->cart->is_empty() ) {
+		return;
+	}
+
 	$cart_weight        = WC()->cart->get_cart_contents_weight();
 	$chosen_method_data = get_option( 'woocommerce_' . $chosen_method . '_settings' );
 
-	// Check if cart contains product named "benne".
 	$contains_benne = false;
 	foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
-		if ( strpos( $cart_item['data']->get_name(), 'benne' ) !== false ) {
+		if ( stripos( $cart_item['data']->get_name(), 'benne' ) !== false ) {
 			$contains_benne = true;
 			break;
 		}
 	}
 
-	ob_start();
+	$show_conditions = false;
 
-	if ( $cart_weight > 2000 && ( ! empty( $chosen_method_data['unload_condition'] ) || ! empty( $chosen_method_data['access_condition'] ) ) ) :
+	if ( ( $cart_weight > 2000 && ( ! empty( $chosen_method_data['unload_condition'] ) || ! empty( $chosen_method_data['access_condition'] ) ) ) || $contains_benne ) {
+		$show_conditions = true;
+	}
+
+	if ( $show_conditions ) {
 		?>
 		<h4><?php esc_html_e( 'Pour valider votre mode de livraison, veuillez accepter les conditions suivantes :', 'kingmateriaux' ); ?></h4>
+		<?php
 
-			<?php if ( ! empty( $chosen_method_data['access_condition'] ) ) : ?>
+		if ( $cart_weight > 2000 && ! empty( $chosen_method_data['access_condition'] ) ) {
+			?>
 			<div class="shipping-condition validate-required">
 				<input type="checkbox" name="delivery_access_confirmation" id="delivery-access-confirmation" required>
 				<label for="delivery-access-confirmation"><?php echo esc_html( $chosen_method_data['access_condition'] ); ?><span style="color:red">*</span></label>
 			</div>
-		<?php endif; ?>
-
-			<?php if ( ! empty( $chosen_method_data['unload_condition'] ) ) : ?>
+			<?php
+		}
+		if ( $cart_weight > 2000 && ! empty( $chosen_method_data['unload_condition'] ) ) {
+			?>
 			<div class="shipping-condition validate-required">
 				<input type="checkbox" name="delivery_unloading_confirmation" id="delivery-unloading-confirmation" required>
 				<label for="delivery-unloading-confirmation"><?php echo esc_html( $chosen_method_data['unload_condition'] ); ?><span style="color:red">*</span></label>
 			</div>
-		<?php endif; ?>
-		<?php
-	endif;
-	?>
+			<?php
+		}
 
-	<?php if ( $contains_benne ) : ?>
-		<div class="shipping-condition validate-required">
-			<input type="checkbox" name="delivery_benne_confirmation" id="delivery-benne-confirmation" required>
-			<label for="delivery-benne-confirmation"><?php esc_html_e( 'Les bennes placées sur la voie publique doivent obligatoirement faire l’objet d’une demande d’autorisation d’occupation temporaire (AOT) auprès de votre mairie.', 'kingmateriaux' ); ?><span style="color:red">*</span></label>
-		</div>
-		<?php
-	endif;
+		if ( $contains_benne ) {
+			?>
+			<div class="shipping-condition validate-required">
+				<input type="checkbox" name="delivery_benne_confirmation" id="delivery-benne-confirmation" required>
+				<label for="delivery-benne-confirmation"><?php esc_html_e( 'Les bennes placées sur la voie publique doivent obligatoirement faire l’objet d’une demande d’autorisation d’occupation temporaire (AOT) auprès de votre mairie.', 'kingmateriaux' ); ?><span style="color:red">*</span></label>
+			</div>
+			<?php
+		}
+	}
 }
 add_action( 'km_after_shipping_rate', 'km_add_shipping_rate_conditions', 10, 1 );
 
-/** --------------  DEBUG CODE START ----------------- */
+function km_add_newsletter_checkbox() {
+	woocommerce_form_field(
+		'inscription_newsletter',
+		array(
+			'type'        => 'checkbox',
+			'class'       => array( 'form-row newsletter' ),
+			'label_class' => array( 'woocommerce-form__label woocommerce-form__label-for-checkbox checkbox' ),
+			'input_class' => array( 'woocommerce-form__input woocommerce-form__input-checkbox input-checkbox' ),
+			'required'    => false,
+			'label'       => __( 'Je m\'inscris à la newsletter et je profite d\'offres exclusives !' ),
+		)
+	);
+}
+add_action( 'woocommerce_review_order_before_submit', 'km_add_newsletter_checkbox', 9 );
+
+function km_save_newsletter_choice( $order_id ) {
+	if ( ! empty( $_POST['inscription_newsletter'] ) ) {
+		update_post_meta( $order_id, '_inscription_newsletter', sanitize_text_field( $_POST['inscription_newsletter'] ) );
+	}
+	// Save as user meta
+	$user_id = get_current_user_id();
+	if ( $user_id && ! empty( $_POST['inscription_newsletter'] ) ) {
+		update_user_meta( $user_id, '_inscription_newsletter', sanitize_text_field( $_POST['inscription_newsletter'] ) );
+	}
+}
+// add_action( 'woocommerce_checkout_update_order_meta', 'km_save_newsletter_choice' );
+
+		/** --------------  DEBUG CODE START ----------------- */
 
 function km_display_shipping_info_in_footer() {
 	$km_shipping_zone = KM_Shipping_Zone::get_instance();
@@ -351,6 +387,6 @@ function km_display_shipping_info_in_footer() {
 
 	echo '</div></div>';
 }
-add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
+		add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
 
-/** --------------  DEBUG CODE END ----------------- */
+		/** --------------  DEBUG CODE END ----------------- */

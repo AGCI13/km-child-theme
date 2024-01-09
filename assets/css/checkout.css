@@ -1,48 +1,197 @@
 /* Checkout */
-.woocommerce-checkout .shopengine-multistep-navbar{display:none !important;}
-.woocommerce-checkout .h2_grey_back h2{margin: inherit;}
-.woocommerce-checkout .uael-logged-in-message a{color:#BE9D68 !important;}
-.woocommerce-checkout .uael-login-form-social .uael-login-form-google{margin-top:20px;}
-.woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper{border: 1px solid black;border-radius: 6px;padding: 0px 40px;background-color: transparent;}
-.woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper .uaelGoogleButtonIcon{border: none;margin-left: 15px;background-color: transparent;}
-.woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper .uael-google-text{background-color: transparent;color: black;font-weight: 600;font-size: 18px;padding: 10px 22px 10px 5px;}
+.woocommerce-checkout .shopengine-multistep-navbar {
+    display: none !important;
+}
+
+.woocommerce-checkout .h2_grey_back h2 {
+    margin: inherit;
+}
+
+.woocommerce-checkout .uael-logged-in-message a {
+    color: #BE9D68 !important;
+}
+
+.woocommerce-checkout .uael-login-form-social .uael-login-form-google {
+    margin-top: 20px;
+}
+
+.woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper {
+    border: 1px solid black;
+    border-radius: 6px;
+    padding: 0px 40px;
+    background-color: transparent;
+}
+
+.woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper .uaelGoogleButtonIcon {
+    border: none;
+    margin-left: 15px;
+    background-color: transparent;
+}
+
+.woocommerce-checkout .uael-login-form-social .uaelGoogleContentWrapper .uael-google-text {
+    background-color: transparent;
+    color: black;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 10px 22px 10px 5px;
+}
+
 .woocommerce-checkout .uael-form.uael-login-form input[type="text"]:focus,
-.woocommerce-checkout .uael-form.uael-login-form input[type="password"]:focus{border: 1px solid black;}
+.woocommerce-checkout .uael-form.uael-login-form input[type="password"]:focus {
+    border: 1px solid black;
+}
 
-.shopengine-checkout .shopengine-multistep-enabled>.elementor-container{overflow: unset!important;}
+.shopengine-checkout .shopengine-multistep-enabled>.elementor-container {
+    overflow: unset !important;
+}
 
-.woocommerce-checkout .elementor-widget-km_checkout_billing_adress .shipping_address{margin-top:40px;}
-.woocommerce-checkout .elementor-widget-km_checkout_billing_adress .woocommerce-billing-fields__field-wrapper{margin-top:40px;}
+.woocommerce-checkout .elementor-widget-km_checkout_billing_adress .shipping_address {
+    margin-top: 40px;
+}
+
+.woocommerce-checkout .elementor-widget-km_checkout_billing_adress .woocommerce-billing-fields__field-wrapper {
+    margin-top: 40px;
+}
 
 
 
 
-.woocommerce-checkout .elementor-widget-km_delivery_conditions h4{font-size: 18px;font-family: "Arca Majora 3", Sans-serif;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label{font-style:italic;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required{color: #262626;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]{display:none !important;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label{font-family: "Lato", Sans-serif;font-weight: 400;font-style: italic;cursor: pointer;display: block;width:100%;margin: 0px 10px 10px 0px;position: relative;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label:before{font-size: calc( 20px / 1.2 );width: 20px;height: 20px;background-color: #FFFFFF;border-color: #A5AFB8;border-width: 1px;border-style: solid;border-radius: 4px;content: '';text-align: center;display: inline-block;;vertical-align: middle;-webkit-box-sizing: content-box;-moz-box-sizing: content-box;box-sizing: content-box;margin-right: 10px;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]:checked + label:after {content: '✔';position: absolute;top: 0;left: 5px;color: black;font-size: 20px;}
-.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label a{color:#BE9D68;}
-.woocommerce-checkout .step-cart:hover,.woocommerce-checkout .step-payment:hover,.woocommerce-checkout .step-shipping:hover{cursor:pointer;}
-.woocommerce-checkout .step-shipping:not(.active) .elementor-element-populated.lazyloaded{--e-bg-lazyload: url(/wp-content/uploads/2023/08/etape-valide.png) !important;}
-.woocommerce-checkout .step-shipping:not(.active) .elementor-widget-heading:first-child .elementor-heading-title{display:none;}
-.woocommerce-checkout .step-shipping:not(.active) .elementor-widget-heading:nth-child(2) .elementor-heading-title{color:#BE9D68 !important;}
-.woocommerce-checkout .step-cart:hover:hover a{color:#262626 !important;}
-.woocommerce-checkout .step-payment:hover .elementor-widget-heading:nth-child(2) .elementor-heading-title{color:#262626 !important;}
-.woocommerce-checkout .step-payment.active .elementor-widget-heading:nth-child(2) .elementor-heading-title{color:#262626 !important;}
+.woocommerce-checkout .elementor-widget-km_delivery_conditions h4 {
+    font-size: 18px;
+    font-family: "Arca Majora 3", Sans-serif;
+}
 
-.conteneur-recapitulatif{display: block !important;position:-webkit-sticky!important;position:sticky!important;top:20px;z-index: 10;height: fit-content;}
-.conteneur-recapitulatif .elementor-element-populated{box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.5);width: 320px;padding: 24px 30px !important;border-radius:3px;height: auto;display:block;}
-.conteneur-recapitulatif .woocommerce-checkout-review-order tr th{color:#262626 !important;}
-.conteneur-recapitulatif .woocommerce-checkout-review-order tr.cart_item td.product-name{line-height:1.2em !important;}
-.conteneur-recapitulatif .woocommerce-checkout-review-order tfoot tr#pi-overall-estimate-checkout td{font-style:italic;}
-.conteneur-recapitulatif #custom_paiement_btn:hover{background-color:#BE9E67;} 
-.conteneur-recapitulatif #place_order:hover{background-color:#BE9E67;} 
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label {
+    font-style: italic;
+}
 
-table.shopengine_woocommerce_shipping_methods {table-layout: fixed;}
-table.shopengine_woocommerce_shipping_methods td {width: 100%;}
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required {
+    color: #262626;
+}
+
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"] {
+    display: none !important;
+}
+
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label {
+    font-family: "Lato", Sans-serif;
+    font-weight: 400;
+    font-style: italic;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin: 0px 10px 10px 0px;
+    position: relative;
+}
+
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label:before {
+    font-size: calc(20px / 1.2);
+    width: 20px;
+    height: 20px;
+    background-color: #FFFFFF;
+    border-color: #A5AFB8;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px;
+    content: '';
+    text-align: center;
+    display: inline-block;
+    ;
+    vertical-align: middle;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    margin-right: 10px;
+}
+
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required input[type="checkbox"]:checked+label:after {
+    content: '✔';
+    position: absolute;
+    top: 0;
+    left: 5px;
+    color: black;
+    font-size: 20px;
+}
+
+.woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label a {
+    color: #BE9D68;
+}
+
+.woocommerce-checkout .step-cart:hover,
+.woocommerce-checkout .step-payment:hover,
+.woocommerce-checkout .step-shipping:hover {
+    cursor: pointer;
+}
+
+.woocommerce-checkout .step-shipping:not(.active) .elementor-element-populated.lazyloaded {
+    --e-bg-lazyload: url(/wp-content/uploads/2023/08/etape-valide.png) !important;
+}
+
+.woocommerce-checkout .step-shipping:not(.active) .elementor-widget-heading:first-child .elementor-heading-title {
+    display: none;
+}
+
+.woocommerce-checkout .step-shipping:not(.active) .elementor-widget-heading:nth-child(2) .elementor-heading-title {
+    color: #BE9D68 !important;
+}
+
+.woocommerce-checkout .step-cart:hover:hover a {
+    color: #262626 !important;
+}
+
+.woocommerce-checkout .step-payment:hover .elementor-widget-heading:nth-child(2) .elementor-heading-title {
+    color: #262626 !important;
+}
+
+.woocommerce-checkout .step-payment.active .elementor-widget-heading:nth-child(2) .elementor-heading-title {
+    color: #262626 !important;
+}
+
+.conteneur-recapitulatif {
+    display: block !important;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 20px;
+    z-index: 10;
+    height: fit-content;
+}
+
+.conteneur-recapitulatif .elementor-element-populated {
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+    width: 320px;
+    padding: 24px 30px !important;
+    border-radius: 3px;
+    height: auto;
+    display: block;
+}
+
+.conteneur-recapitulatif .woocommerce-checkout-review-order tr th {
+    color: #262626 !important;
+}
+
+.conteneur-recapitulatif .woocommerce-checkout-review-order tr.cart_item td.product-name {
+    line-height: 1.2em !important;
+}
+
+.conteneur-recapitulatif .woocommerce-checkout-review-order tfoot tr#pi-overall-estimate-checkout td {
+    font-style: italic;
+}
+
+.conteneur-recapitulatif #custom_paiement_btn:hover {
+    background-color: #BE9E67;
+}
+
+.conteneur-recapitulatif #place_order:hover {
+    background-color: #BE9E67;
+}
+
+table.shopengine_woocommerce_shipping_methods {
+    table-layout: fixed;
+}
+
+table.shopengine_woocommerce_shipping_methods td {
+    width: 100%;
+}
 
 table.shopengine_woocommerce_shipping_methods {
     table-layout: fixed;
@@ -76,26 +225,28 @@ table.shopengine_woocommerce_shipping_methods td {
     gap: 0.5rem;
 }
 
-.woocommerce-shipping-methods:not(.selected){
+.woocommerce-shipping-methods:not(.selected) {
     cursor: pointer;
 }
 
-.woocommerce-shipping-methods .km-shipping-header .drive-location{
-    font-style:italic;
+.woocommerce-shipping-methods .km-shipping-header .drive-location {
+    font-style: italic;
 }
-.woocommerce-shipping-methods .drive-location-adress{
+
+.woocommerce-shipping-methods .drive-location-adress {
     display: flex;
     align-items: flex-start;
-    gap:1rem;
+    gap: 1rem;
     background-color: #f7f7f7;
     padding: 15px 20px;
     border-radius: 5px;
     width: fit-content;
     font-weight: 500;
 }
+
 .woocommerce-shipping-methods .drive-location-adress p {
-    margin-bottom:0;
-    line-height:1.4em;
+    margin-bottom: 0;
+    line-height: 1.4em;
 }
 
 .woocommerce-shipping-methods .km-shipping-option {
@@ -116,14 +267,16 @@ table.shopengine_woocommerce_shipping_methods td {
     height: 22px;
 }
 
-.woocommerce-shipping-methods .select-shipping-option{
+.woocommerce-shipping-methods .select-shipping-option {
     width: 18px;
     height: 18px;
     margin-right: 8px;
     min-width: 18px;
+    min-height: 18px;
 }
+
 .woocommerce-shipping-methods .km-shipping-header .select-shipping::after,
-.woocommerce-shipping-methods .select-shipping-option::after{
+.woocommerce-shipping-methods .select-shipping-option::after {
     content: '';
     background-color: #BE9D68;
     border-radius: 50%;
@@ -140,7 +293,7 @@ table.shopengine_woocommerce_shipping_methods td {
     height: 13px;
 }
 
-.woocommerce-shipping-methods .km-shipping-option.selected{
+.woocommerce-shipping-methods .km-shipping-option.selected {
     border-color: #BE9D68;
     border-width: 2px;
 }
@@ -173,12 +326,17 @@ table.shopengine_woocommerce_shipping_methods td {
     border: 1px solid rgb(192, 192, 192);
     border-radius: 5px;
     cursor: pointer;
-    font-size:14px;
+    font-size: 14px;
 }
-.woocommerce-shipping-methods .shipping-condition{
+
+.woocommerce-shipping-methods .shipping-condition {
     display: flex;
     gap: 0.5rem;
     align-items: flex-start;
+}
+
+.woocommerce-shipping-methods .shipping-condition label {
+    line-height: 1.33em;
 }
 
 .woocommerce-shipping-methods .km-shipping-option label {
@@ -191,7 +349,7 @@ table.shopengine_woocommerce_shipping_methods td {
     display: none;
 }
 
-.woocommerce-shipping-methods .km-shipping-option input[type="radio"]::after{
+.woocommerce-shipping-methods .km-shipping-option input[type="radio"]::after {
     content: '';
     position: absolute;
     display: block;
@@ -218,9 +376,9 @@ table.shopengine_woocommerce_shipping_methods td {
 .woocommerce-shipping-methods .shipping-cost {
     font-style: italic;
     font-weight: 600;
-    color:#BE9E67;
-    margin-left:auto;
-    margin-right:10px;
+    color: #BE9E67;
+    margin-left: auto;
+    margin-right: 10px;
 }
 
 .woocommerce-shipping-methods .km-shipping-option:hover {
@@ -236,10 +394,11 @@ label[for="shipping_method_0_drive"],
 
 /** Billing adress */
 
-.woocommerce-checkout .woocommerce-billing-fields{
+.woocommerce-checkout .woocommerce-billing-fields {
     display: none;
 }
-.woocommerce-checkout .woocommerce-billing-fields.active{
+
+.woocommerce-checkout .woocommerce-billing-fields.active {
     display: block;
 }
 
@@ -247,9 +406,9 @@ label[for="shipping_method_0_drive"],
     font-size: 18px;
 }
 
-.woocommerce-billing-actions{
-    margin-bottom:30px; 
-    margin-top:20px;
+.woocommerce-billing-actions {
+    margin-bottom: 30px;
+    margin-top: 20px;
 }
 
 .woocommerce-billing-actions .bool-action {
@@ -260,7 +419,7 @@ label[for="shipping_method_0_drive"],
     cursor: pointer;
     font-weight: 600;
     border: 1px solid transparent;
-    margin-right:14px; 
+    margin-right: 14px;
     font-size: 1em;
 }
 
@@ -288,7 +447,7 @@ label[for="shipping_method_0_drive"],
 }
 
 .shopengine-loader .spinner {
-    border: 4px solid rgba(0,0,0,.1);
+    border: 4px solid rgba(0, 0, 0, .1);
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -297,18 +456,25 @@ label[for="shipping_method_0_drive"],
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 
-#km-checkout-errors, .km-validation-info{
-    color:red;
+#km-checkout-errors,
+.km-validation-info {
+    color: red;
     font-weight: 500;
     font-family: 'Lato';
 }
 
-#drive-date-wrapper, #drive-time-wrapper{
+#drive-date-wrapper,
+#drive-time-wrapper {
     display: none;
 }
 
@@ -322,28 +488,88 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
 
 
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs{position:relative;min-height: 80px;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs:after{content:"";background:url('/wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg');position: absolute;background-size:160px 31px;width: 160px;height: 31px;top: 35px;left: 0px;border-radius: 4px;border: 1px solid black;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs div.payment_method_bacs p{margin-top: 30px;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs {
+    position: relative;
+    min-height: 80px;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs:after {
+    content: "";
+    background: url('/wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg');
+    position: absolute;
+    background-size: 160px 31px;
+    width: 160px;
+    height: 31px;
+    top: 35px;
+    left: 0px;
+    border-radius: 4px;
+    border: 1px solid black;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs div.payment_method_bacs p {
+    margin-top: 30px;
+}
 
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma{position:relative;min-height: 80px;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma:after{content:"";background:url('/wp-content/uploads/2023/12/rassurance-paiement-4-fois.jpg');position: absolute;background-size:160px 31px;width: 160px;height: 31px;top: 35px;left: 0px;border-radius: 4px;border: 1px solid black;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma div.payment_method_alma > div{margin-top: 30px;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma {
+    position: relative;
+    min-height: 80px;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma:after {
+    content: "";
+    background: url('/wp-content/uploads/2023/12/rassurance-paiement-4-fois.jpg');
+    position: absolute;
+    background-size: 160px 31px;
+    width: 160px;
+    height: 31px;
+    top: 35px;
+    left: 0px;
+    border-radius: 4px;
+    border: 1px solid black;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma div.payment_method_alma>div {
+    margin-top: 30px;
+}
 
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1{position:relative;min-height: 80px;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1:after{content:"";background:url('/wp-content/uploads/2023/12/rassurance-paiment-carte-bancaire.jpg');position: absolute;background-size:160px 31px;width: 160px;height: 31px;top: 35px;left: 0px;border-radius: 4px;border: 1px solid black;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 img{display:none;}
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 div.payment_method_etransactions_std_card_1 p{margin-top: 30px;}
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 {
+    position: relative;
+    min-height: 80px;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1:after {
+    content: "";
+    background: url('/wp-content/uploads/2023/12/rassurance-paiment-carte-bancaire.jpg');
+    position: absolute;
+    background-size: 160px 31px;
+    width: 160px;
+    height: 31px;
+    top: 35px;
+    left: 0px;
+    border-radius: 4px;
+    border: 1px solid black;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 img {
+    display: none;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 div.payment_method_etransactions_std_card_1 p {
+    margin-top: 30px;
+}
 
 .woocommerce-checkout-review-order-table th {
-    margin-right:10px;
+    margin-right: 10px;
 }
 
 @media (max-width: 768px) {
+
     /* Checkout */
-    .recapitulatif .elementor-widget-wrap{width: 100% !important;}
+    .recapitulatif .elementor-widget-wrap {
+        width: 100% !important;
+    }
 }
 
 .redeem-coupon {
@@ -358,26 +584,34 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
 }
 
 #km-coupon-label:before {
- content: attr(data-title);
- color:#BE9E67 !important;
- font-weight: 600;
- font-size:15px;
- float: left;
+    content: attr(data-title);
+    color: #BE9E67 !important;
+    font-weight: 600;
+    font-size: 15px;
+    float: left;
 }
 
-#km-coupon-label{
-cursor: pointer;
+#km-coupon-label {
+    cursor: pointer;
 }
 
-#km-coupon-label.active{
+#km-coupon-label.active {
     cursor: default;
 }
 
-#km-coupon-label.active .redeem-coupon{
+#km-coupon-label.active .redeem-coupon {
     display: flex;
 }
 
-#km-coupon-label.active:before{
-    color:#000 !important;
+#km-coupon-label.active:before {
+    color: #000 !important;
 }
- 
+
+.shopengine-widget .shopengine-checkout-payment #payment .woocommerce-terms-and-conditions-wrapper input[type="checkbox"], .woocommerce form .form-row .input-checkbox {
+   border: 2px solid #7f7f7f!important;
+}
+
+.woocommerce form .form-row label.checkbox, .woocommerce-page form .form-row label.checkbox{
+    display: flex;
+    align-items: center;
+}

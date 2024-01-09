@@ -176,9 +176,15 @@ th#date {
   gap: 0.75rem;
 }
 
-.km-note-preview{
+.km-note-preview {
   float: right;
 }
-.km-user-note-modal{
-  min-width: 400px;;
+
+.km-user-note-modal {
+  min-width: 400px;
+}
+
+.wc-shipping-zone-method-fields textarea {
+  height: 80px;
+  width: 100%;
 }
