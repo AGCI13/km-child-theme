@@ -1,14 +1,14 @@
 <?php
 
-class Shipping_method_out_13 extends WC_Shipping_Method {
+class Shipping_method_dumpster extends WC_Shipping_Method {
 
 	/**
 	 *  Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                 = 'out13';
-		$this->method_title       = 'Hors 13';
-		$this->method_description = 'Livraison hors 13';
+		$this->id                 = 'dumpster';
+		$this->method_title       = 'Bennes';
+		$this->method_description = 'Livraison bennes';
 		$this->tax_status         = 'taxable';
 
 		$this->instance_id = absint( $instance_id );
@@ -58,7 +58,7 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 			'description' => array(
 				'title'       => 'Description',
 				'type'        => 'textarea',
-				'description' => __( 'Entrez la description pour cette méthode d\'expédition . ', 'kingmateriaux' ),
+				'description' => __( 'Les bennes placées sur la voie publique doivent obligatoirement faire l’objet d’une demande d’autorisation d’occupation temporaire (AOT) auprès de votre mairie', 'kingmateriaux' ),
 				'default'     => 'Description de ' . $this->method_title,
 			),
 		);
@@ -75,6 +75,16 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 
 		if ( 'yes' !== $this->get_option( 'enabled', 'yes' ) ) {
 			return;
+		}
+
+		// Vérifier si tous les produits dans le panier ont 'benne' dans leur titre
+		foreach ( $package['contents'] as $item_id => $values ) {
+			$product = $values['data'];
+			if ( stripos( $product->get_name(), 'benne' ) === false ) {
+
+				// Si un produit ne contient pas 'benne', ne pas ajouter de tarif
+				return;
+			}
 		}
 
 		$this->title = $this->get_option( 'title', $this->method_title );

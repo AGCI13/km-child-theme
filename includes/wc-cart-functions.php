@@ -152,13 +152,15 @@ add_action( 'woocommerce_cart_contents', 'km_ecotaxe_message_display', 99 );
  * @return string
  */
 function add_ecotax_to_order_total_html( $value ) {
-	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
-	if ( $km_dynamique_pricing->ecotaxe_rate <= 0 ) {
+	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
+	$total_ecotaxe        = $km_dynamique_pricing->get_total_ecotaxe();
+
+	if ( 0 === $total_ecotaxe ) {
 		return $value;
 	}
 
-	$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->get_total_ecotaxe() ) );
+	$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $total_ecotaxe ) );
 	return str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $value );
 }
 add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_total_html', 10, 1 );

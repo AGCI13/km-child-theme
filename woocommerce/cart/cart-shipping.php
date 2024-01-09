@@ -46,13 +46,28 @@ if ( 'drive' === $chosen_method ) {
 		<?php if ( $shipping_methods ) : ?>
 			<div id="shipping-method-shipping" class="woocommerce-shipping-methods <?php echo esc_html( $shipping_selected ); ?>">	
 				<div class="km-shipping-header">
+					<?php
+					// Check if shipping method has only one entry
+					if ( count( $shipping_methods ) > 1 ) :
+						?>
 					<span class="select-shipping <?php echo esc_html( $shipping_selected ); ?>" data-shipping="shipping"></span>
-					<h3><?php esc_html_e( 'Livraison à Domicile ou sur Chantier', 'kingmateriaux' ); ?></h3>
-					<?php if ( $km_shipping_zone->is_in_thirteen() ) : ?>
-						<span class="shipping-cost"><?php esc_html_e( 'Sélectionnez une option', 'kingmateriaux' ); ?></span>
-					<?php else : ?>
-						<span class="shipping-cost"><?php esc_html_e( 'Inclus', 'kingmateriaux' ); ?></span>
 					<?php endif; ?>
+					<h3><?php esc_html_e( 'Livraison à Domicile ou sur Chantier', 'kingmateriaux' ); ?></h3>
+
+					<?php
+					// check if shipping methods has more than one entry and has a price > 0.
+					foreach ( $shipping_methods as $shipping_method ) {
+						if ( $shipping_method->get_meta_data()['shipping_price_excl_tax'] > 0 ) {
+							$shipping_has_price = true;
+						}
+					}
+					if ( count( $shipping_methods ) > 1 ) :
+						?>
+						<span class="shipping-cost"><?php esc_html_e( 'Sélectionnez une option', 'kingmateriaux' ); ?></span>
+					<?php elseif ( ! $shipping_has_price ) : ?>
+						<span class="shipping-cost"><?php esc_html_e( 'Incluse', 'kingmateriaux' ); ?></span>
+					<?php endif; ?>
+
 				</div>
 				<?php if ( preg_match( "/\b{'option'}\b/i", $chosen_method ) !== false ) : ?>
 					<div class="km-shipping-options">
@@ -84,7 +99,7 @@ if ( 'drive' === $chosen_method ) {
 
 						<?php do_action( 'km_after_shipping_rate', $chosen_method ); ?>
 					</div>
-					<?php endif; ?>	
+				<?php endif; ?>	
 			</div>
 		<?php endif; ?>	
 

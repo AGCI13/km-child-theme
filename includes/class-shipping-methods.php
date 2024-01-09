@@ -65,6 +65,7 @@ class KM_Shipping_Methods {
 		$methods['option2express'] = 'Shipping_method_2_express';
 		$methods['drive']          = 'Shipping_method_drive';
 		$methods['out13']          = 'Shipping_method_out_13';
+		$methods['dumpster']       = 'Shipping_method_dumpster';
 		return $methods;
 	}
 
