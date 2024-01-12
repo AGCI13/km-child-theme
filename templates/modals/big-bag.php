@@ -1,7 +1,7 @@
 <?php
 /**
  * @package HelloElementor
- * @subpackage HelloElementorChild
+ * @subpackage Kingmateriaux
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

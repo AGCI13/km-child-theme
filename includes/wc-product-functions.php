@@ -96,87 +96,6 @@ function add_custom_body_class_for_unpurchasable_products( $classes ) {
 
 add_filter( 'body_class', 'add_custom_body_class_for_unpurchasable_products' );
 
-
-/**
- * Ajoute les métadonnées de la palette sur la page produit
- *
- * @return void
- */
-function km_debug_single_product() {
-	if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! is_product() ) {
-		return;
-	}
-	global $product;
-
-	// Obtenir l'ID du produit.
-	$product_id = $product->get_id();
-
-	// Récupérer les valeurs des métadonnées.
-	$quantite_par_palette = get_post_meta( $product_id, '_quantite_par_palette', true ) ?: 'Non renseigné';
-	$palette_a_partir_de  = get_post_meta( $product_id, '_palette_a_partir_de', true ) ?: 'Non renseigné';
-	$product_info         = '';
-
-	if ( $product->is_type( 'variable' ) ) {
-		foreach ( $product->get_available_variations() as $variation ) {
-			// Get variation name.
-			$variation_name = $variation['attributes']['attribute_pa_variation-conditionnement'];
-			// Get variation price.
-			$variation_id    = $variation['variation_id'];
-			$variation_obj   = new WC_Product_Variation( $variation_id );
-			$variation_price = $variation_obj->get_price();
-			// Get shipping class.
-			$shipping_class = $variation_obj->get_shipping_class_id();
-			// Get shipping class name.
-			if ( $shipping_class ) {
-				$shipping_class_name = get_term_by( 'term_id', $shipping_class, 'product_shipping_class' )->name;
-			} else {
-				$shipping_class_name = 'Aucune';
-			}
-
-			$price_including_taxes = wc_get_price_including_tax( $variation_obj );
-
-			$product_info .= '<tr><th colspan="2">Variation : ' . esc_html( $variation_name ) . '</th></tr>';
-			$product_info .= '<tr><td>Prix HT</td><td>' . esc_html( $variation_price ) . '</td></tr>';
-			$product_info .= '<tr><td>Prix TTC</td><td>' . esc_html( $price_including_taxes ) . '</td></tr>';
-			$product_info .= '<tr><td>Classe de livraison</td><td>' . esc_html( $shipping_class_name ) . '</td></tr>';
-		}
-	} else {
-		// Get product shipping classe.
-		$shipping_class = $product->get_shipping_class_id();
-		// Get including taxes price.
-		$price_including_taxes = wc_get_price_including_tax( $product );
-		// Get shipping class name.
-		if ( $shipping_class ) {
-			$shipping_class_name = get_term_by( 'term_id', $shipping_class, 'product_shipping_class' )->name;
-		} else {
-			$shipping_class_name = 'Aucune';
-		}
-
-		$product_info .= '<tr><th colspan="2">Produit : ' . esc_html( $product->get_name() ) . '</th></tr>';
-		$product_info .= '<tr><td>Prix HT</td><td>' . esc_html( $product->get_price() ) . ' €</td></tr>';
-		$product_info .= '<tr><td>Prix TTC</td><td>' . esc_html( $price_including_taxes ) . ' €</td></tr>';
-		$product_info .= '<tr><td>Classe de livraison</td><td>' . esc_html( $shipping_class_name ) . '</td></tr>';
-	}
-
-	// Check if product is purchasable.
-	$is_purchasable = $product->is_purchasable() ? 'Oui' : 'Non';
-
-	// Afficher les métadonnées sur la page produit.
-	echo '<div id="km-shipping-info-debug" class="km-debug-bar">'
-	. '<h4>DEBUG INFOS</h4>'
-	. '<img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>'
-	. '<div class="debug-content"><table>'
-	. '<tr><th colspan="2">Est achetable ?</th></tr><tr><td colspan="2">' . $is_purchasable . '</td></tr>'
-	. '<tr><th colspan="2">Palettisation</th></tr>'
-	. '<tr><td>Quantité par palette</td><td>' . esc_html( $quantite_par_palette ) . '</td></tr>'
-	. '<tr><td>Palette à partir de</td><td>' . esc_html( $palette_a_partir_de ) . '</td></tr>'
-	. '</table><table>'
-	. $product_info
-	. '</table></div></div>';
-}
-// Ajouter l'action au résumé du produit WooCommerce.
-add_action( 'woocommerce_after_single_product', 'km_debug_single_product' );
-
 function km_display_shipping_delays_on_product_page( $product_id ) {
 
 	global $product;
@@ -300,3 +219,87 @@ function km_save_custom_field_variations( $variation_id, $i ) {
 	update_post_meta( $variation_id, '_disable_variation_in_13', $checkbox_value );
 }
 add_action( 'woocommerce_save_product_variation', 'km_save_custom_field_variations', 10, 2 );
+
+/* ---------- Start Debug code ---------- */
+
+// /**
+// * Ajoute les métadonnées de la palette sur la page produit
+// *
+// * @return void
+// */
+// function km_debug_single_product() {
+// if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! is_product() ) {
+// return;
+// }
+// global $product;
+
+// Obtenir l'ID du produit.
+// $product_id = $product->get_id();
+
+// Récupérer les valeurs des métadonnées.
+// $quantite_par_palette = get_post_meta( $product_id, '_quantite_par_palette', true ) ?: 'Non renseigné';
+// $palette_a_partir_de  = get_post_meta( $product_id, '_palette_a_partir_de', true ) ?: 'Non renseigné';
+// $product_info         = '';
+
+// if ( $product->is_type( 'variable' ) ) {
+// foreach ( $product->get_available_variations() as $variation ) {
+// Get variation name.
+// $variation_name = $variation['attributes']['attribute_pa_variation-conditionnement'];
+// Get variation price.
+// $variation_id    = $variation['variation_id'];
+// $variation_obj   = new WC_Product_Variation( $variation_id );
+// $variation_price = $variation_obj->get_price();
+// Get shipping class.
+// $shipping_class = $variation_obj->get_shipping_class_id();
+// Get shipping class name.
+// if ( $shipping_class ) {
+// $shipping_class_name = get_term_by( 'term_id', $shipping_class, 'product_shipping_class' )->name;
+// } else {
+// $shipping_class_name = 'Aucune';
+// }
+
+// $price_including_taxes = wc_get_price_including_tax( $variation_obj );
+
+// $product_info .= '<tr><th colspan="2">Variation : ' . esc_html( $variation_name ) . '</th></tr>';
+// $product_info .= '<tr><td>Prix HT</td><td>' . esc_html( $variation_price ) . '</td></tr>';
+// $product_info .= '<tr><td>Prix TTC</td><td>' . esc_html( $price_including_taxes ) . '</td></tr>';
+// $product_info .= '<tr><td>Classe de livraison</td><td>' . esc_html( $shipping_class_name ) . '</td></tr>';
+// }
+// } else {
+// Get product shipping classe.
+// $shipping_class = $product->get_shipping_class_id();
+// Get including taxes price.
+// $price_including_taxes = wc_get_price_including_tax( $product );
+// Get shipping class name.
+// if ( $shipping_class ) {
+// $shipping_class_name = get_term_by( 'term_id', $shipping_class, 'product_shipping_class' )->name;
+// } else {
+// $shipping_class_name = 'Aucune';
+// }
+
+// $product_info .= '<tr><th colspan="2">Produit : ' . esc_html( $product->get_name() ) . '</th></tr>';
+// $product_info .= '<tr><td>Prix HT</td><td>' . esc_html( $product->get_price() ) . ' €</td></tr>';
+// $product_info .= '<tr><td>Prix TTC</td><td>' . esc_html( $price_including_taxes ) . ' €</td></tr>';
+// $product_info .= '<tr><td>Classe de livraison</td><td>' . esc_html( $shipping_class_name ) . '</td></tr>';
+// }
+
+// Check if product is purchasable.
+// $is_purchasable = $product->is_purchasable() ? 'Oui' : 'Non';
+
+// Afficher les métadonnées sur la page produit.
+// echo '<div id="km-shipping-info-debug" class="km-debug-bar">'
+// . '<h4>DEBUG INFOS</h4>'
+// . '<img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>'
+// . '<div class="debug-content"><table>'
+// . '<tr><th colspan="2">Est achetable ?</th></tr><tr><td colspan="2">' . $is_purchasable . '</td></tr>'
+// . '<tr><th colspan="2">Palettisation</th></tr>'
+// . '<tr><td>Quantité par palette</td><td>' . esc_html( $quantite_par_palette ) . '</td></tr>'
+// . '<tr><td>Palette à partir de</td><td>' . esc_html( $palette_a_partir_de ) . '</td></tr>'
+// . '</table><table>'
+// . $product_info
+// . '</table></div></div>';
+// }
+// // Ajouter l'action au résumé du produit WooCommerce.
+// add_action( 'woocommerce_after_single_product', 'km_debug_single_product' );
+
+/*---------- End Debug code ----------*/

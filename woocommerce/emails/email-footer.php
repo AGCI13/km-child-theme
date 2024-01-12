@@ -32,10 +32,10 @@ $this_theme_uri = get_stylesheet_directory_uri();
 						<h4><?php echo __( 'Notre showroom', 'woocommerce' ); ?><img src="<?php echo $this_theme_uri . '/assets/img/icon-crown.png'; ?>"></h4>
 						<table>
 							<tr>
-								<td><a href="https://www.google.com/maps/@43.5160293,5.2320563,3a,75y,135.88h,83.35t/data=!3m6!1e1!3m4!1sUPY3jOLPqU7mK26NGa7PYA!2e0!7i16384!8i8192?entry=ttu"><?php echo __( '13B rue André Marie Ampère,', 'woocommerce' ); ?></a></td>
+								<td><a href="https://www.google.fr/maps/place/KING+MAT%C3%89RIAUX/@43.503956,5.2173679,16z/data=!4m6!3m5!1s0x12c9e5594c6f8699:0xbbdd5911626d562d!8m2!3d43.503956!4d5.2217453!15sChhzaG93cm9vbSBraW5nIG1hdMOpcmlhdXhaGiIYc2hvd3Jvb20ga2luZyBtYXTDqXJpYXV4kgEIaGFuZHltYW4?shorturl=1"><?php echo __( 'CD20 Les Barjaquets,', 'woocommerce' ); ?></a></td>
 							</tr>
 							<tr>
-								<td><a href="https://www.google.com/maps/@43.5160293,5.2320563,3a,75y,135.88h,83.35t/data=!3m6!1e1!3m4!1sUPY3jOLPqU7mK26NGa7PYA!2e0!7i16384!8i8192?entry=ttu"><?php echo __( '13880 Velaux', 'woocommerce' ); ?></a></td>
+								<td><a href="https://www.google.fr/maps/place/KING+MAT%C3%89RIAUX/@43.503956,5.2173679,16z/data=!4m6!3m5!1s0x12c9e5594c6f8699:0xbbdd5911626d562d!8m2!3d43.503956!4d5.2217453!15sChhzaG93cm9vbSBraW5nIG1hdMOpcmlhdXhaGiIYc2hvd3Jvb20ga2luZyBtYXTDqXJpYXV4kgEIaGFuZHltYW4?shorturl=1"><?php echo __( '13340 Rognac', 'woocommerce' ); ?></a></td>
 							</tr>
 						</table>
 					</td>
@@ -93,8 +93,8 @@ $this_theme_uri = get_stylesheet_directory_uri();
 				<a href="<?php echo get_home_url(); ?>/conditions-generales-de-vente/">Conditions Générales de Vente</a>
 			</p>
 
-			<p>Si vous avez besoin d’aide, veuillez contacter le <strong>service transport</strong><br>
-				au <a href="tel:0033442025399"><?php echo __( '(+33) 07 87 18 06 17', 'woocommerce' ); ?></a> ou par e-mail : <a href="mailto:support@kingmateriaux.com"><?php echo __( 'support@kingmateriaux.com', 'woocommerce' ); ?></a></p>
+			<p>Si vous avez besoin d’aide, veuillez contacter le <strong>service commercial</strong><br>
+				au <a href="tel:0033638586927"><?php echo __( '(+33) 06 38 58 69 27', 'woocommerce' ); ?></a> ou par e-mail : <a href="mailto:contact@kingmateriaux.com"><?php echo __( 'contact@kingmateriaux.com', 'woocommerce' ); ?></a></p>
 		</td>
 	</tr>
 </table>

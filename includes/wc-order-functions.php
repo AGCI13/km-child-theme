@@ -261,3 +261,47 @@ function km_modify_order_number_column( $column ) {
 	}
 }
 add_action( 'manage_shop_order_posts_custom_column', 'km_modify_order_number_column' );
+
+/**
+ * Desactiver l'email de commande terminée si le champ ACF 'transporteur' n'est pas défini
+ *
+ * @param bool     $enabled
+ * @param WC_Order $order
+ * @return bool
+ */
+function km_disable_completed_order_email( $enabled, $order ) {
+	// Vérifiez si l'objet $order est valide.
+	if ( ! is_a( $order, 'WC_Order' ) ) {
+		return $enabled;
+	}
+
+	// Récupérez le post meta "transporteur".
+	$transporteur = get_post_meta( $order->get_id(), 'transporteur', true );
+
+	// Si le post meta "transporteur" n'est pas défini, désactivez l'email.
+	if ( 'Non défini' === $transporteur || ! isset( $transporteur ) || empty( $transporteur ) ) {
+		$enabled = false;
+	}
+
+	return $enabled;
+}
+add_filter( 'woocommerce_email_enabled_customer_completed_order', 'km_disable_completed_order_email', 10, 2 );
+
+/**
+ * Save the transporter value from the order admin page
+ */
+function km_save_transporteur_callback() {
+	$post_id      = intval( $_POST['post_id'] );
+	$transporteur = sanitize_text_field( $_POST['transporteur'] );
+
+	if ( $post_id && $transporteur ) {
+		update_post_meta( $post_id, 'transporteur', $transporteur );
+		echo 'La valeur du transporteur a été mise à jour.';
+	} else {
+		echo 'Erreur lors de la mise à jour.';
+	}
+
+	wp_die(); // Arrête l'exécution du script.
+}
+add_action( 'wp_ajax_save_transporteur', 'km_save_transporteur_callback' );
+add_action( 'wp_ajax_nopriv_save_transporteur', 'km_save_transporteur_callback' );

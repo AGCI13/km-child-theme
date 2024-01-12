@@ -15,6 +15,7 @@
   overflow: hidden;
   font-weight: 500;
   text-overflow: ellipsis;
+  margin-right: 10px;
 }
 
 .transp-label.undefined {
@@ -153,11 +154,11 @@ th#date {
   position: relative;
 }
 
-#km-shipping-delay-wrapper .km-success-message {
+.km-success-message {
   color: #3c6c2b;
 }
 
-#km-shipping-delay-wrapper .km-error-message {
+.km-error-message {
   color: #d72f1c;
 }
 
@@ -187,4 +188,35 @@ th#date {
 .wc-shipping-zone-method-fields textarea {
   height: 80px;
   width: 100%;
+}
+
+.transporter_column {
+  position: relative;
+}
+
+.transporter-list {
+  position: absolute;
+  top: 31px;
+  z-index: 100;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  list-style-type: none;
+  width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.transporter_column {
+  position: relative;
+}
+
+.transporter-item {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.transporter-item:hover {
+  background-color: #f0f0f0;
 }

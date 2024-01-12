@@ -47,7 +47,7 @@ if ( 'drive' === $chosen_method ) {
 			<div id="shipping-method-shipping" class="woocommerce-shipping-methods <?php echo esc_html( $shipping_selected ); ?>">	
 				<div class="km-shipping-header">
 					<?php
-					// Check if shipping method has only one entry
+					// Check if shipping method has only one entry.
 					if ( count( $shipping_methods ) > 1 ) :
 						?>
 					<span class="select-shipping <?php echo esc_html( $shipping_selected ); ?>" data-shipping="shipping"></span>

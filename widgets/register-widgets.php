@@ -34,7 +34,7 @@ function km_add_elementor_widget_categories( $elements_manager ) {
 	$elements_manager->add_category(
 		'kingmateriaux',
 		array(
-			'title' => esc_html__( 'Kingmatériaux', 'textdomain' ),
+			'title' => esc_html__( 'Kingmatériaux', 'kingmateriaux' ),
 			'icon'  => 'fa fa-plug',
 		)
 	);

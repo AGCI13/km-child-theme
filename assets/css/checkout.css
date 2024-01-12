@@ -74,7 +74,7 @@
 }
 
 .woocommerce-checkout .elementor-widget-km_delivery_conditions p.validate-required label {
-    font-family: "Lato", Sans-serif;
+    font-family: Lato, Sans-serif;
     font-weight: 400;
     font-style: italic;
     cursor: pointer;
@@ -145,6 +145,10 @@
 
 .woocommerce-checkout .step-payment.active .elementor-widget-heading:nth-child(2) .elementor-heading-title {
     color: #262626 !important;
+}
+
+.woocommerce-checkout #ship-to-different-address {
+    display: none;
 }
 
 .conteneur-recapitulatif {
@@ -394,15 +398,15 @@ label[for="shipping_method_0_drive"],
 
 /** Billing adress */
 
-.woocommerce-checkout .woocommerce-billing-fields {
+.woocommerce-checkout .woocommerce-billing-fields__field-wrapper {
     display: none;
 }
 
-.woocommerce-checkout .woocommerce-billing-fields.active {
+.woocommerce-checkout .woocommerce-billing-fields__field-wrapper.active {
     display: block;
 }
 
-.woocommerce-checkout .woocommerce-billing-fields__field-wrapper h4 {
+.woocommerce-checkout .woocommerce-billing-fields h4 {
     font-size: 18px;
 }
 
@@ -470,7 +474,11 @@ label[for="shipping_method_0_drive"],
 .km-validation-info {
     color: red;
     font-weight: 500;
-    font-family: 'Lato';
+    font-family: Lato;
+}
+
+.km-validation-info {
+    line-height: 26px;
 }
 
 #drive-date-wrapper,
@@ -572,7 +580,7 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
     }
 }
 
-.redeem-coupon {
+.woocommerce-coupon-form {
     display: none;
     align-items: center;
     width: 100%;
@@ -583,7 +591,7 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
     display: none;
 }
 
-#km-coupon-label:before {
+.km-coupon-label:before {
     content: attr(data-title);
     color: #BE9E67 !important;
     font-weight: 600;
@@ -591,27 +599,40 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
     float: left;
 }
 
-#km-coupon-label {
-    cursor: pointer;
+.woocommerce-coupon-form input[type="submit"] {
+    font-size: 15px;
+    padding-left: 13px;
+    padding-right: 13px;
 }
 
-#km-coupon-label.active {
+.km-coupon-label {
+    cursor: pointer;
+    padding-right: 0;
+}
+
+.km-coupon-label.active {
     cursor: default;
 }
 
-#km-coupon-label.active .redeem-coupon {
+.km-coupon-label.active .woocommerce-coupon-form {
     display: flex;
 }
 
-#km-coupon-label.active:before {
+.km-coupon-label.active:before {
     color: #000 !important;
 }
 
-.shopengine-widget .shopengine-checkout-payment #payment .woocommerce-terms-and-conditions-wrapper input[type="checkbox"], .woocommerce form .form-row .input-checkbox {
-   border: 2px solid #7f7f7f!important;
+.shopengine-widget .shopengine-checkout-payment #payment .woocommerce-terms-and-conditions-wrapper input[type="checkbox"],
+.woocommerce form .form-row .input-checkbox {
+    border: 2px solid #7f7f7f !important;
 }
 
-.woocommerce form .form-row label.checkbox, .woocommerce-page form .form-row label.checkbox{
+.woocommerce form .form-row label.checkbox,
+.woocommerce-page form .form-row label.checkbox {
     display: flex;
     align-items: center;
+}
+
+.shopengine-steps-wrapper > :not(:first-child):not(.shopengine-active-step){
+    display: none;
 }

@@ -88,29 +88,37 @@
     margin-right: 3px !important;
 }
 
-.cart-collaterals .redeem-coupon {
+.cart-collaterals .woocommerce-coupon-form {
     display: none;
     align-items: center;
     width: 100%;
     gap: .5rem;
 }
 
-.cart-collaterals #km-coupon-label{
-    cursor: pointer;
+.cart-collaterals .woocommerce-coupon-form input[type="submit"] {
+    font-size: 15px;
+    padding-left: 13px;
+    padding-right: 13px;
 }
-.cart-collaterals #km-coupon-label:before{
+
+.cart-collaterals .km-coupon-label{
+    cursor: pointer;
+    padding-right:0;
+}
+
+.cart-collaterals .km-coupon-label:before{
 color:#BE9E67 !important;
 }
 
-.cart-collaterals #km-coupon-label.active{
+.cart-collaterals .km-coupon-label.active{
     cursor: default;
 }
 
-.cart-collaterals #km-coupon-label.active .redeem-coupon{
+.cart-collaterals .km-coupon-label.active .woocommerce-coupon-form{
     display: flex;
 }
 
-.cart-collaterals #km-coupon-label.active:before{
+.cart-collaterals .km-coupon-label.active:before{
     color:#000 !important;
 }
  
@@ -122,6 +130,11 @@ color:#BE9E67 !important;
     display: block;
     font-size: 13px;
 }
+
+#km-customer-email-marketing{
+    position: relative;
+}
+
 /* Panier */
 .shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2{color: #262626;font-family: "Arca Majora 3", Sans-serif;font-size: 32px;font-weight: 900;line-height: 1.2em;width: fit-content;position: relative;z-index: 1;}
 .shopengine-cart .e-cart__column-end .e-cart__column-inner .e-cart-section .cart-collaterals .cart_totals h2:after{content: '';width: 100%;display: block;position: absolute;height: 25px;background: #D9D9D9;transform: rotate(-0.21deg);bottom: 2px;z-index: -1;}

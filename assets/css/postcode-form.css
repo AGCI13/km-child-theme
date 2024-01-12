@@ -1,5 +1,5 @@
 .modal-postcode p {
-    font-family: 'Arca Majora 3';
+    font-family: 'Arca Majora 3', Lato, sans-serif;
     font-style: normal;
     font-weight: 700;
     font-size: 20px;
@@ -9,7 +9,7 @@
 }
 
 .header_postcode > p {
-    font-family: 'Lato';
+    font-family: Lato;
     font-style: italic;
     color: #fff;
     margin-bottom: 0;
@@ -32,12 +32,6 @@
 .modal-postcode select {
     max-width: 150px;
     margin-bottom: 9px;
-}
-
-@media only screen and (max-width: 767px) {
-    .modal-postcode {
-        width: 100%;
-    }
 }
 
 .modal_pc_close_btn {

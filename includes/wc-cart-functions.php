@@ -3,6 +3,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+function change_cart_totals_text( $translated_text, $text, $domain ) {
+	if ( is_cart() && 'Total' === $text ) {
+		$translated_text = 'Total hors livraison';
+	}
+	return $translated_text;
+}
+add_filter( 'gettext', 'change_cart_totals_text', 20, 3 );
+
 /**
  * Supprime le calcul des frais de livraison du panier contient
  *
@@ -44,7 +52,7 @@ add_action( 'woocommerce_before_cart_table', 'add_clear_cart_button', 1, 0 );
 function clear_cart_url() {
 	if ( ! is_admin() && isset( $_GET['clear-cart'] ) && 'yes' === $_GET['clear-cart'] ) {
 		WC()->cart->empty_cart();
-		wp_redirect( wc_get_cart_url() );
+		wp_safe_redirect( wc_get_cart_url() );
 		exit;
 	}
 }
@@ -57,8 +65,8 @@ add_action( 'init', 'clear_cart_url' );
  */
 function km_after_cart_coupon_content() {
 
-	// Add email to WC session
-	$email = WC()->session->get( 'wac_email' );
+	// Add email to WC session.
+	$email = WC()->session->get( 'discount_email' );
 
 	if ( is_user_logged_in() || ! empty( $email ) ) {
 		return;
@@ -69,8 +77,8 @@ function km_after_cart_coupon_content() {
 			<?php printf( esc_html__( 'Renseignez votre e-mail et bénéficiez d\'un code promo de %1$s-10%%%2$s pour valider votre panier !', 'kingmateriaux' ), '<span class="highlighted">', '</span>' ); ?>
 		</p>
 		<p class="form">
-			<input type="email" class="input-text" name="" placeholder="<?php echo esc_html__( 'Adresse e-mail', 'kingmateriaux' ); ?>"/>
-			<button class="btn btn-primary confirm-btn">	<?php echo esc_html__( 'Valider', 'kingmateriaux' ); ?></button>
+			<input type="email" class="input-text" name="discount_email" placeholder="<?php echo esc_html__( 'Adresse e-mail', 'kingmateriaux' ); ?>"/>
+			<button type="submit" id="km-send-marketing-email" class="btn btn-primary confirm-btn"> 	<?php echo esc_html__( 'Valider', 'kingmateriaux' ); ?></button>
 		</p>
 	</div>
 	<?php
@@ -151,17 +159,17 @@ add_action( 'woocommerce_cart_contents', 'km_ecotaxe_message_display', 99 );
  * @param string $value
  * @return string
  */
-function add_ecotax_to_order_total_html( $value ) {
+function add_ecotax_to_order_total_html( $html ) {
 
-	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
-	$total_ecotaxe        = $km_dynamique_pricing->get_total_ecotaxe();
+	$km_dynamic_pricing = KM_Dynamic_Pricing::get_instance();
+	$total_ecotaxe      = $km_dynamic_pricing->get_total_ecotaxe();
 
 	if ( 0 === $total_ecotaxe ) {
-		return $value;
+		return $html;
 	}
 
 	$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $total_ecotaxe ) );
-	return str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $value );
+	return str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $html );
 }
 add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_total_html', 10, 1 );
 
@@ -208,8 +216,9 @@ function display_shipping_info_text() {
  */
 function get_shipping_info_text( $km_shipping_zone ) {
 	if ( $km_shipping_zone->is_in_thirteen() ) {
-		$shipping_cost = (int) WC()->session->get( 'option1_shipping_cost' );
-		$shipping_text = $shipping_cost === 0 ? __( 'Calcul à l\'étape suivante', 'kingmateriaux' ) : __( 'À partir de ' . wc_price( $shipping_cost ), 'kingmateriaux' );
+		// $shipping_cost = (int) WC()->session->get( 'option1_shipping_cost' );
+		// $shipping_text = $shipping_cost === 0 ? __( 'Calcul à l\'étape suivante', 'kingmateriaux' ) : __( 'À partir de ' . wc_price( $shipping_cost ), 'kingmateriaux' );
+		$shipping_text = __( 'Calcul à l\'étape suivante', 'kingmateriaux' );
 	} elseif ( $km_shipping_zone->shipping_zone_id ) {
 		$shipping_text = __( 'Incluse', 'kingmateriaux' );
 	} else {
@@ -229,53 +238,35 @@ add_filter( 'woocommerce_cart_totals_before_order_total', 'display_shipping_info
  *
  * @return void
  */
-function km_add_cart_totals_after_order_total() {
-
+function km_add_redeem_coupon_in_cart_totals() {
 	if ( is_admin() ) {
 		return;
 	}
 
-	$coupon  = isset( $_GET['coupon'] ) ? esc_attr( $_GET['coupon'] ) : false;
-	$applied = false;
-	$message = '';
+	// Afficher le formulaire du coupon.
+	?>
+	<tr class="coupon">
+		<th><?php esc_html_e( 'Code Promo', 'kingmateriaux' ); ?></th>
+		<td class="km-coupon-label" data-title="<?php esc_html_e( 'Vous avez un code promo ?', 'kingmateriaux' ); ?>">
+			<form class="woocommerce-coupon-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
+				<input type="text" name="coupon_code" class="coupon_code" class="input-text" placeholder="<?php esc_attr_e( 'Code promo', 'kingmateriaux' ); ?>" />
+				<input type="submit" class="btn btn-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Appliquer', 'kingmateriaux' ); ?>" />
+			</form>
+		</td>
+	</tr>
 
-	// Vérifier si le coupon est soumis et pas déjà appliqué
-	if ( $coupon && ! WC()->cart->has_discount( $coupon ) ) {
-		$applied = WC()->cart->apply_coupon( $coupon );
-		$message = $applied ? sprintf( __( 'Code promo "%s" appliqué.' ), $coupon ) : __( 'Ce code promo est invalide' );
-
-		if ( $applied ) {
-			foreach ( WC()->cart->get_coupons() as $code => $coupon_obj ) :
-				?>
-				<tr class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
-					<th><?php wc_cart_totals_coupon_label( $coupon_obj ); ?></th>
-					<td data-title="<?php echo esc_attr( wc_cart_totals_coupon_label( $coupon_obj, false ) ); ?>"><?php wc_cart_totals_coupon_html( $coupon_obj ); ?></td>
-				</tr>
-				<?php
-			endforeach;
-		}
-	}
-
-	// Afficher le formulaire du coupon
-	if ( ! WC()->cart->has_discount( $coupon ) ) {
+	<?php
+	// Afficher les coupons déjà appliqués.
+	foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
 		?>
-			<tr class="coupon">
-				<th><?php esc_html_e( 'Code Promo', 'kingmateriaux' ); ?></th>
-				<td id="km-coupon-label" data-title="<?php esc_html_e( 'Vous avez un code promo ?', 'kingmateriaux' ); ?>">
-					<form id="coupon-redeem" class="redeem-coupon"> 
-						<input type="text" name="coupon" id="coupon" value="<?php echo esc_attr( $coupon ); ?>"/>
-						<input type="submit" class="btn btn-secondary" name="redeem-coupon" value="<?php esc_html_e( 'Valider' ); ?>" />
-					</form>
-					<?php if ( $coupon ) : ?>
-						<p class="result"><?php echo esc_html( $message ); ?></p>
-					<?php endif; ?>
-				</td>
-			</tr>
+	<tr class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
+		<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
+		<td data-title="<?php echo esc_attr( wc_cart_totals_coupon_label( $coupon, false ) ); ?>"><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
+	</tr>
 		<?php
 	}
 }
-add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_cart_totals_after_order_total', 20 );
-add_action( 'woocommerce_review_order_before_order_total', 'km_add_cart_totals_after_order_total', 80 );
+add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_in_cart_totals', 90 );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande

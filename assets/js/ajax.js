@@ -20,10 +20,10 @@ const kmAjaxCall = (action, data = null) => {
             url: km_ajax.ajaxurl,
             type: 'POST',
             data: params,
-            success: function(response) {
+            success: function (response) {
                 resolve(response);
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 reject(new Error(textStatus));
             }
         });

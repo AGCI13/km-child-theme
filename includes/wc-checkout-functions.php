@@ -4,34 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-
-/**
- * Rends le code postal non-modifiable dans le tunnel de commande
- *
- * @param $fields
- * @return array
- */
-function km_override_checkout_fields( $fields ): array {
-	$fields['billing']['billing_postcode']['km_attributes'] = array( 'readonly' => 'readonly' );
-	return $fields;
-}
-add_filter( 'woocommerce_checkout_fields', 'km_override_checkout_fields' );
-
-/**
- * Rends le code postal non modifiable dans l'adresse de livraison woocommerce
- *
- * @param $address_fields
- * @return array
- */
-function km_override_default_address_fields( $address_fields ): array {
-	// Vérifie si l'utilisateur est sur la page de livraison
-	if ( is_wc_endpoint_url( 'edit-address' ) && isset( $_GET['address'] ) && $_GET['address'] === 'shipping' ) {
-		$address_fields['postcode']['km_attributes'] = array( 'readonly' => 'readonly' );
-	}
-	return $address_fields;
-}
-add_filter( 'woocommerce_default_address_fields', 'km_override_default_address_fields' );
-
 /**
  * Remplit automatiquement le champ code postal avec le cookie
  *
@@ -39,11 +11,27 @@ add_filter( 'woocommerce_default_address_fields', 'km_override_default_address_f
  */
 function km_override_checkout_init(): void {
 	if ( isset( $_COOKIE['zip_code'] ) ) {
-		$zip_code                  = explode( '-', $_COOKIE['zip_code'] )[0];
-		$_POST['billing_postcode'] = $zip_code;
+		$zip_code                   = explode( '-', $_COOKIE['zip_code'] )[0];
+		$_POST['shipping_postcode'] = $zip_code;
 	}
 }
 add_action( 'woocommerce_checkout_init', 'km_override_checkout_init' );
+
+/**
+ * Empèche le passage de commande sans shipping method
+ *
+ * @return void
+ */
+function km_require_shipping_method() {
+	$packages = WC()->shipping->get_packages();
+
+	foreach ( $packages as $i => $package ) {
+		if ( ! isset( $package['rates'] ) || empty( $package['rates'] ) ) {
+			wc_add_notice( __( 'Veuillez sélectionner un mode de livraison.', 'woocommerce' ), 'error' );
+		}
+	}
+}
+add_action( 'woocommerce_checkout_process', 'km_require_shipping_method' );
 
 /**
  * Ajoute un champ de date et d'heure de retrait
@@ -124,6 +112,14 @@ function km_add_shipping_cost_to_cart_total() {
 
 	$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
+	$packages = WC()->shipping->get_packages();
+
+	foreach ( $packages as $i => $package ) {
+		if ( ! isset( $package['rates'] ) || empty( $package['rates'] ) ) {
+			return;
+		}
+	}
+
 	if ( ! $chosen_shipping_methods || empty( $chosen_shipping_methods ) ) {
 		return;
 	} elseif ( in_array( 'drive', $chosen_shipping_methods, true ) ) {
@@ -167,7 +163,7 @@ function km_display_shipping_delays_after_shipping() {
 		$custom_delays_ls = get_field( 'product_shipping_delays_product_shipping_delays_ls', $product_id );
 
 		// Déterminer la saison actuelle.
-		$current_month  = date( 'n' );
+		$current_month  = gmdate( 'n' );
 		$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
 
 		// Récupérer les délais de livraison en fonction de la saison et des données personnalisées.
@@ -180,11 +176,11 @@ function km_display_shipping_delays_after_shipping() {
 		}
 
 		if ( $min_shipping_days > $longest_min_delay ) {
-			$longest_min_delay = $min_shipping_days;
+			$longest_min_delay = (int) $min_shipping_days;
 		}
 
 		if ( $max_shipping_days > $longest_max_delay ) {
-			$longest_max_delay = $max_shipping_days;
+			$longest_max_delay = (int) $max_shipping_days;
 		}
 	}
 
@@ -196,7 +192,10 @@ function km_display_shipping_delays_after_shipping() {
 
 		// Si les délais minimum et maximum sont identiques, affichez une seule date.
 	if ( 0 === $longest_min_delay || 0 === $longest_max_delay || $longest_min_delay === $longest_max_delay ) {
-		$delivery_date->add( new DateInterval( 'P' . $longest_min_delay . 'D' ) );
+
+		$delay = $longest_min_delay > 0 ? $longest_min_delay : $longest_max_delay;
+
+		$delivery_date->add( new DateInterval( 'P' . $delay . 'D' ) );
 		$formatted_date = $delivery_date->format( 'd/m/Y' );
 		$html          .= '<tr><td colspan="2" class="km-cart-longest-delay">Livraison prévue le ' . $formatted_date . '</td></tr>';
 	} else {
@@ -215,6 +214,11 @@ function km_display_shipping_delays_after_shipping() {
 	return $html;
 }
 
+/**
+ * Ajoute les champs cachés pour les données de livraison.
+ *
+ * @return void
+ */
 function km_add_custom_hidden_fields_to_checkout() {
 
 	// Ajouter la condition, if is thirteen.
@@ -315,6 +319,11 @@ function km_add_shipping_rate_conditions( $chosen_method ) {
 }
 add_action( 'km_after_shipping_rate', 'km_add_shipping_rate_conditions', 10, 1 );
 
+/**
+ * Ajout une case à chocher pour s'inscrire à la newsletter sur la page de paiement
+ *
+ * @return void
+ */
 function km_add_newsletter_checkbox() {
 	woocommerce_form_field(
 		'inscription_newsletter',
@@ -330,62 +339,85 @@ function km_add_newsletter_checkbox() {
 }
 add_action( 'woocommerce_review_order_before_submit', 'km_add_newsletter_checkbox', 9 );
 
-function km_save_newsletter_choice( $order_id ) {
-	if ( ! empty( $_POST['inscription_newsletter'] ) ) {
-		update_post_meta( $order_id, '_inscription_newsletter', sanitize_text_field( $_POST['inscription_newsletter'] ) );
-	}
-	// Save as user meta
-	$user_id = get_current_user_id();
-	if ( $user_id && ! empty( $_POST['inscription_newsletter'] ) ) {
-		update_user_meta( $user_id, '_inscription_newsletter', sanitize_text_field( $_POST['inscription_newsletter'] ) );
-	}
-}
-// add_action( 'woocommerce_checkout_update_order_meta', 'km_save_newsletter_choice' );
-
-		/** --------------  DEBUG CODE START ----------------- */
-
-function km_display_shipping_info_in_footer() {
-	$km_shipping_zone = KM_Shipping_Zone::get_instance();
-	if ( is_admin() || ! is_checkout() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! $km_shipping_zone->is_in_thirteen() ) {
+/**
+ * Ajoute le champ de saisie du code promo après le total de la commande
+ *
+ * @return void
+ */
+function km_add_redeem_coupon_in_order_totals() {
+	if ( is_admin() ) {
 		return;
 	}
-	// Vérifier si sur la page de paiement
 
-		// Noms des cookies que vous pourriez avoir définis
-		$shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
+	// Afficher le formulaire du coupon.
+	?>
+	<tr class="coupon">
+		<th><?php esc_html_e( 'Code Promo', 'kingmateriaux' ); ?></th>
+		<td class="km-coupon-label" data-title="<?php esc_html_e( 'Vous avez un code promo ?', 'kingmateriaux' ); ?>">
+			<form class="woocommerce-coupon-form" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="post">
+				<input type="text" name="coupon_code" class="input-text" placeholder="<?php esc_attr_e( 'Code promo', 'kingmateriaux' ); ?>" />
+				<input type="submit" class="btn btn-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Appliquer', 'kingmateriaux' ); ?>" />
+			</form>
+		</td>
+	</tr>
 
-		echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
-		echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
-		echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
-
-	foreach ( $shipping_methods as $method ) {
-		$cookie_name = 'km_shipping_cost_' . $method;
-
-		if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
-			$shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
-
-			echo '<table>';
-			echo '<thead><tr><th colspan="2">Coûts de livraison pour ' . esc_html( $method ) . ':</th></tr></thead>';
-			echo '<tbody>';
-			foreach ( $shipping_info as $key => $value ) {
-				if ( strpos( $key, 'poids' ) !== false ) {
-					$value = esc_html( $value ) . ' Kg';
-				} elseif ( strpos( $key, 'placo' ) !== false ) {
-					$value = esc_html( $value );
-				} elseif ( strpos( $key, 'prix' ) !== false ) {
-					$value = esc_html( $value ) . ' €';
-				} else {
-					$value = esc_html( $value );
-				}
-				echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
-			}
-			echo '</tbody>';
-			echo '</table>';
-		}
+	<?php
+	// Afficher les coupons déjà appliqués.
+	foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+		?>
+	<tr class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
+		<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
+		<td data-title="<?php echo esc_attr( wc_cart_totals_coupon_label( $coupon, false ) ); ?>"><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
+	</tr>
+		<?php
 	}
-
-	echo '</div></div>';
 }
-		add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
+add_action( 'woocommerce_review_order_before_order_total', 'km_add_redeem_coupon_in_order_totals', 90 );
 
-		/** --------------  DEBUG CODE END ----------------- */
+/** --------------  DEBUG CODE START ----------------- */
+
+// function km_display_shipping_info_in_footer() {
+// $km_shipping_zone = KM_Shipping_Zone::get_instance();
+// if ( is_admin() || ! is_checkout() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! $km_shipping_zone->is_in_thirteen() ) {
+// return;
+// }
+// Vérifier si sur la page de paiement
+
+// Noms des cookies que vous pourriez avoir définis
+// $shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
+
+// echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
+// echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
+// echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
+
+// foreach ( $shipping_methods as $method ) {
+// $cookie_name = 'km_shipping_cost_' . $method;
+
+// if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
+// $shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
+
+// echo '<table>';
+// echo '<thead><tr><th colspan="2">Coûts de livraison pour ' . esc_html( $method ) . ':</th></tr></thead>';
+// echo '<tbody>';
+// foreach ( $shipping_info as $key => $value ) {
+// if ( strpos( $key, 'poids' ) !== false ) {
+// $value = esc_html( $value ) . ' Kg';
+// } elseif ( strpos( $key, 'placo' ) !== false ) {
+// $value = esc_html( $value );
+// } elseif ( strpos( $key, 'prix' ) !== false ) {
+// $value = esc_html( $value ) . ' €';
+// } else {
+// $value = esc_html( $value );
+// }
+// echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
+// }
+// echo '</tbody>';
+// echo '</table>';
+// }
+// }
+
+// echo '</div></div>';
+// }
+// add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
+
+/** --------------  DEBUG CODE END ----------------- */

@@ -172,7 +172,6 @@ if ( $saved_card ) {
 <?php
 if ( $order ) :
 	?>
-
 	<?php if ( strpos( $shipping_method, 'drive' ) !== false ) : ?>
 
 		<div class="h2_grey_back">
@@ -186,7 +185,7 @@ if ( $order ) :
 			</div>
 		<?php else : ?>
 		
-			<div class="h2_grey_back"><h2><?php esc_html_e( 'Retrait marchandise', 'kingmateriaux' ); ?></h2></div>
+		<div class="h2_grey_back"><h2><?php esc_html_e( 'Adresse de livraison', 'kingmateriaux' ); ?></h2></div>
 
 		<div class="adresse-livraison">
 		<p> <?php echo $order->get_shipping_address_1(); ?></p>

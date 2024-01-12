@@ -412,14 +412,16 @@ class KM_Dynamic_Pricing {
 	 *
 	 * @return float Le montant total de l'écotaxe dans le panier.
 	 */
-	public function get_total_ecotaxe() {
+	public function get_total_ecotaxe( $context = 'cart' ) {
 		// Calculate total ecotaxe in cart.
 		$total_ecotaxe = 0;
 
-		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+		$items = 'cart' === $context ? WC()->cart->get_cart() : WC()->order->get_items();
+
+		foreach ( $items as $item ) {
 			// Add condition to check if product is big bag or bulk.
-			if ( $this->product_is_bulk_or_bigbag( $cart_item['data']->get_name() ) ) {
-				$total_ecotaxe += $this->ecotaxe_rate_incl_taxes * $cart_item['quantity'];
+			if ( $this->product_is_bulk_or_bigbag( $item['data']->get_name() ) ) {
+				$total_ecotaxe += $this->ecotaxe_rate_incl_taxes * $item['quantity'];
 			}
 		}
 		return $total_ecotaxe;

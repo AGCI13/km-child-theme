@@ -25,7 +25,7 @@
         background: #FFFFFF;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
         border-radius: 5px;
-        font-family: 'Lato';
+        font-family: Lato;
         font-style: normal;
         font-weight: 400;
         font-size: 16px;
@@ -70,7 +70,7 @@
         padding: 0 40px;
     }
     .label_cat span{
-        font-family: 'Arca Majora 3';
+        font-family: 'Arca Majora 3', Lato, sans-serif;
         font-style: normal;
         font-weight: 700;
         font-size: 16px;
@@ -103,7 +103,7 @@
         background: #FFFFFF;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
         border-radius: 5px;
-        font-family: 'Lato';
+        font-family: Lato;
         font-style: normal;
         font-weight: 400;
         font-size: 16px;
@@ -148,7 +148,7 @@
         padding: 0 40px;
     }
     .label_cat span{
-        font-family: 'Arca Majora 3';
+        font-family: 'Arca Majora 3', Lato, sans-serif;
         font-style: normal;
         font-weight: 700;
         font-size: 16px;

@@ -1,10 +1,10 @@
 
 document.addEventListener('DOMContentLoaded', () => {
-    moveUpdateCartButton();
     attachAjaxUpdateListener();
     numberInputPlusMinus();
     movePiOverallEstimateCart();
     showCouponForm();
+    emailMarketingBox();
 });
 
 /**
@@ -13,34 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 const attachAjaxUpdateListener = () => {
     jQuery(document.body).on('updated_cart_totals', function () {
-        moveUpdateCartButton();
         numberInputPlusMinus(); // Ajoutez cette ligne
     });
-}
-
-/**
- * Move the update cart button
- * @returns {void}
- */
-const moveUpdateCartButton = () => {
-    // Sélectionner le formulaire woocommerce-cart-form
-    const cartFormActions = document.querySelector('.cart-actions');
-
-    // Sélectionner le bouton update_cart
-    const updateCartButton = document.querySelector('[name="update_cart"]');
-
-    if (cartFormActions && updateCartButton) {
-        // Insérer le bouton juste après l'ouverture du formulaire
-        updateCartButton.classList.remove('button');
-        updateCartButton.classList.add('cart-action-link', 'clear-cart');
-
-        const icon = document.createElement('img');
-        icon.src = themeObject.themeUrl + '/assets/img/reset-arrow.svg';
-        icon.alt = 'Icone flèche tournante vers le haut';
-
-        cartFormActions.appendChild(updateCartButton, cartFormActions.firstChild);
-        updateCartButton.insertBefore(icon, updateCartButton.firstChild);
-    }
 }
 
 /**
@@ -76,7 +50,7 @@ const numberInputPlusMinus = () => {
         // Mise à jour du panier
         const handleMouseOut = () => {
             setTimeout(() => {
-                updateCart();
+                jQuery("[name='update_cart']").trigger("click");
             }, 200);
         };
         minusButton.addEventListener('mouseout', handleMouseOut);
@@ -84,13 +58,7 @@ const numberInputPlusMinus = () => {
 
     });
 }
-// Mise à jour du panier
-const updateCart = () => {
-    const updateCartButton = document.querySelector('[name="update_cart"]');
-    if (updateCartButton) {
-        updateCartButton.click();
-    }
-};
+
 /**
  * Trigger change event
  * @param {HTMLElement} element
@@ -120,13 +88,51 @@ const movePiOverallEstimateCart = () => {
     }
 }
 
-const showCouponForm = () => {
-    couponLabel = document.querySelector('#km-coupon-label');
+const emailMarketingBox = () => {
+    const marketingWrapper = document.getElementById('km-customer-email-marketing');
 
-    if (couponLabel) {
-        couponLabel.addEventListener('click', () => {
-            couponLabel.classList.add('active');
-            couponLabel.attributes['data-title'].value = 'Entrez votre code promo';
+    if (marketingWrapper) {
+        confirmBtn = marketingWrapper.getElementById('km-send-marketing-email');
+
+        confirmBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const emailInput = marketingWrapper.querySelector('input[name="discount_email"]');
+            const email = emailInput ? emailInput.value : '';
+
+            if (!email) {
+                marketingWrapper.innerHTML = 'E-mail manquant.';
+                return;
+            }
+
+            confirmBtn.disabled = true;
+
+            //Create a div to display the loader
+            loaderElement = document.createElement('div');
+            loaderElement.classList.add('km-spinner');
+            marketingWrapper.appendChild(loaderElement);
+
+            kmAjaxCall('discount_cart_form', { discount_email: email })
+                .then(response => {
+                    loaderElement.remove();
+
+                    console.log(response.data);
+                    if (response.success === true) {
+                        successMessages = document.createElement('div');
+                        successMessages.classList.add('woocommerce-success');
+                        marketingWrapper.innerHTML = response.data;
+                    } else {
+                        //Create a div to display the error message
+                        errorMessages = document.createElement('div');
+                        errorMessages.classList.add('woocommerce-error');
+                        errorMessages.innerHTML = response.data;
+                        marketingWrapper.appendChild(errorMessages);
+                        setTimeout(() => {
+                            marketingWrapper.removeChild(errorMessages);
+                        }, 3000);
+                    }
+                    confirmBtn.disabled = false;
+                });
         });
     }
 }
@@ -136,14 +142,15 @@ jQuery(document).ready(function ($) {
     function removeCartItem() {
         var count = $('.cart_item td.product-remove').length;
         if (count === 1) {
-            $('.product-remove .remove').off('click').on('click', function(event) {
+            $('.product-remove .remove').off('click').on('click', function (event) {
                 event.preventDefault();
                 document.querySelector('.clear-cart').click();
             });
         }
     }
     removeCartItem();
-    $(document.body).on('updated_cart_totals', function() {
+    $(document.body).on('updated_cart_totals', function () {
         removeCartItem();
+        showCouponForm();
     });
 });

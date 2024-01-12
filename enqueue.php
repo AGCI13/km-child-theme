@@ -13,7 +13,7 @@ function km_front_scripts_enqueue() {
 	$js_path         = $stylesheet_path . '/assets/js/';
 	$css_path        = $stylesheet_path . '/assets/css/';
 
-	wp_enqueue_style( 'km-child-style', $stylesheet_uri . '/style.css', array(), filemtime( $stylesheet_path . '/style.css' ), 'all' );
+	wp_enqueue_style( 'km-common-style', $css_uri . 'common.css', array(), filemtime( $css_path . 'common.css' ), 'all' );
 
 	wp_enqueue_style( 'custom-woocommerce-style-css', get_site_url() . '/wp-content/plugins/elementor-pro/assets/css/widget-woocommerce.min.css', array(), '1.0.0' );
 
@@ -59,6 +59,7 @@ add_action( 'wp_enqueue_scripts', 'km_front_scripts_enqueue' );
  * @return void
  */
 function km_admin_scripts_enqueue( $hook ) {
+	global $post;
 	$stylesheet_uri  = get_stylesheet_directory_uri();
 	$stylesheet_path = get_stylesheet_directory();
 	$js_uri          = $stylesheet_uri . '/assets/js/';
@@ -80,12 +81,21 @@ function km_admin_scripts_enqueue( $hook ) {
 		}
 	}
 
-	if ( 'edit.php' === $hook && isset( $_GET['post_type'] ) && 'shop_order' === $_GET['post_type'] ) {
-		wp_enqueue_script( 'km-orders-script', $js_uri . 'wc-orders.js', array(), filemtime( $js_path . 'shipping-zone.js' ), true );
+	if ( 'post.php' == $hook || 'post-new.php' == $hook ) {
+		if ( 'shop_order' === $post->post_type ) {
+			wp_enqueue_script( 'km-orders-script', $js_uri . 'wc-orders.js', array(), filemtime( $js_path . 'wc-orders.js' ), true );
+		}
 	}
 
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.js', array(), filemtime( $js_path . 'ajax.js' ), false );
 	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 	wp_enqueue_script( 'km-ajax-script' );
+
+	wp_enqueue_script( 'km-transporter-script', $js_uri . 'shop-orders.js', array( 'jquery' ), filemtime( $js_path . 'shop-orders.js' ), true );
+
+	$field_object = get_field_object( 'field_6536a052fb38f' );
+	$transporters = $field_object['choices'] ?? array();
+
+	wp_localize_script( 'km-transporter-script', 'transportersData', $transporters );
 }
 add_action( 'admin_enqueue_scripts', 'km_admin_scripts_enqueue' );

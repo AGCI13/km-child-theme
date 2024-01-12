@@ -16,7 +16,6 @@ jQuery(document).ready(function ($) {
         function () {
             setTimeout(function () {
                 showCouponForm();
-                // reapplySelectedClasses();
                 loadShippingMethods();
                 handleEnterKeydown();
                 checkoutNavigation();
@@ -26,23 +25,78 @@ jQuery(document).ready(function ($) {
         });
 
     $(document.body).on('update_checkout', () => {
+        maybeChangePostcode();
+    });
+
+    const maybeChangePostcode = () => {
+
+        const shippingCountry = document.querySelector('#shipping_country');
+        if (!shippingCountry) return;
+
+        const shippingPostcode = document.querySelector('#shipping_postcode');
+        if (!shippingPostcode) return;
+
+        const cleanedShippingCountry = shippingCountry.value.trim();
+        const cleanedShippingPostcode = shippingPostcode.value.trim();
+        const shippingInputZipcode = cleanedShippingPostcode + '-' + cleanedShippingCountry;
+        const cookieZipCode = getCookie('zip_code').trim();
+
+        //If billing_postcode is equal to cookie zip_code, return
+        if (shippingInputZipcode === cookieZipCode) {
+            return;
+        }
+
+        // Get nonce_postcode
+        const nonce = document.querySelector('#nonce_postcode');
+        if (!nonce) return;
+
+        console.log(cleanedShippingCountry);
+        const data = {
+            zip: cleanedShippingPostcode,
+            country: cleanedShippingCountry,
+            nonce_postcode: nonce.value,
+        };
+
+
+        kmAjaxCall('postcode_submission_handler', data)
+            .then(response => {
+
+                console.log(response);
+                if (response.success) {
+                    setCookie('zip_code', shippingInputZipcode, 30);
+                    setCookie('shipping_zone', response.data, 30);
+                    document.querySelector('.modal_pc_open_btn').textContent = cleanedShippingPostcode;
+                } else {
+                    if (response.data.message) {
+                        // get element .validate-postcode
+                        const shippingPostcodeInput = document.getElementById('shipping_postcode');
+
+                        if (shippingPostcodeInput) {
+                            const errorMessage = document.createElement('span');
+                            errorMessage.classList.add('km-validation-info');
+
+                            // Assurez-vous que response.data.message est une chaîne. Si c'est un objet, accédez à la propriété appropriée.
+                            errorMessage.textContent = typeof response.data.message === 'string' ? response.data.message : 'Une erreur est survenue.';
+
+                            shippingPostcodeInput.insertAdjacentElement('afterend', errorMessage);
+
+                            // Remove errorMessage after 3 seconds.
+                            setTimeout(() => {
+                                errorMessage.remove();
+                            }, 3000); // Notez le placement correct de la fermeture de parenthèse et de la virgule
+                        }
+                    }
+                }
+            })
+    }
+
+    $(document.body).on('update_checkout', () => {
         showLoader('.shopengine-checkout-shipping-methods');
     });
 
     $(document.body).on('updated_checkout', () => {
         hideLoader('.shopengine-checkout-shipping-methods');
     });
-
-    const showCouponForm = () => {
-        couponLabel = document.querySelector('#km-coupon-label');
-    
-        if (couponLabel) {
-            couponLabel.addEventListener('click', () => {
-                couponLabel.classList.add('active');
-                couponLabel.attributes['data-title'].value = 'Entrez votre code promo';
-            });
-        }
-    }
 
     const showLoader = (selector) => {
         const loaderHtml = `<div class="shopengine-loader"><div class="spinner"></div></div>`;
@@ -128,8 +182,6 @@ jQuery(document).ready(function ($) {
         }
     }
 
-
-
     const handleShippingMethodClick = (shippingMethod, shippingOptions, shippingInputs, billingActions, billingFields, shippingSection) => {
         if (shippingMethod.classList.contains('selected')) return;
 
@@ -174,29 +226,10 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    // Fonction pour réappliquer les classes selected
-    const reapplySelectedClasses = () => {
-        var selectedShipping = localStorage.getItem('selectedShipping');
-        var selectedShippingOption = localStorage.getItem('selectedShippingOption');
-        var selectedShippingWrapper = document.querySelector('#' + selectedShipping);
-
-        if (!selectedShipping || !selectedShippingWrapper) return;
-
-        selectedShippingWrapper.classList.add('selected');
-
-        if (!selectedShippingOption) return;
-
-        if (selectedShipping === 'shipping-method-shipping') {
-            selectedShippingWrapper.querySelectorAll('.km-shipping-option input[value="' + selectedShippingOption + '"]').forEach(function (optionInput) {
-                optionInput.closest('.km-shipping-option').classList.add('selected');
-            });
-        }
-    }
-
     const handleBillingFields = (selectedShippingMethod) => {
         const showBillingBtn = document.querySelector('.bool-action.false');
         const hideBillingBtn = document.querySelector('.bool-action.true');
-        const billingFields = document.querySelector('.woocommerce-billing-fields');
+        const billingFields = document.querySelector('.woocommerce-billing-fields__field-wrapper');
 
         if (selectedShippingMethod === 'shipping-method-shipping') {
             billingActions.style.display = 'block';
@@ -443,6 +476,10 @@ jQuery(document).ready(function ($) {
                 deleteLocalStorage();
                 setHiddenShippingFields();
                 stepPayment.click();
+                // Scroll to #checkout-nav element smoothly
+                document.querySelector('#checkout-nav').scrollIntoView({
+                    behavior: 'smooth'
+                });
             });
         });
     }

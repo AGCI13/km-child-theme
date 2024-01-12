@@ -31,30 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    const getCookie = (cname) => {
-        let name = cname + "=";
-        let decodedCookie = decodeURIComponent(document.cookie);
-        let ca = decodedCookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) === 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-
-    const setCookie = (cname, cvalue, exdays) => {
-        const d = new Date();
-        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-        let expires = "expires=" + d.toUTCString();
-        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-    }
-
-
     const submitPostcode = (event) => {
         let country_modal = event.target.querySelector('.country').value;
         let zip_modal = event.target.querySelector('.zip_code').value;
@@ -80,12 +56,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (response.success) {
                     //Traiement de la réponse
                     label_modal_postcode.textContent = '';
-                    setCookie('zip_code', zip_modal + '-' + country_modal, 1);
-                    setCookie('shipping_zone', response.data, 1);
+                    setCookie('zip_code', zip_modal + '-' + country_modal, 30);
+                    setCookie('shipping_zone', response.data, 30);
                     setTimeout(() => {
                         modal_postcode.style.display = 'none';
                         location.reload();
-                    }, 500);
+                    }, 400);
                 } else {
                     // Gestion des erreurs
                     if (response.data && typeof response.data.message === 'string') {

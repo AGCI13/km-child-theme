@@ -81,6 +81,7 @@ class KM_Shipping_Zone {
 		add_action( 'wp_ajax_nopriv_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
 		add_action( 'wp_ajax_save_shipping_delays_handler', array( $this, 'save_shipping_delays_handler' ) );
 		add_action( 'admin_footer', array( $this, 'add_custom_shipping_zone_fields' ) );
+		add_action( 'wp_footer', array( $this, 'modal_postcode_html' ) );
 	}
 
 	/**
@@ -276,10 +277,10 @@ class KM_Shipping_Zone {
 			wp_send_json_error( array( 'message' => __( 'La vérification du nonce a échoué.' ) ) );
 		}
 
-		$form_data  = $this->validate_postcode_form_data( $_POST );
-		$found_zone = $this->get_shipping_zone_id_from_postcode( $form_data['zip_code'] );
-		if ( $found_zone ) {
-			wp_send_json_success( $found_zone );
+		$zone_id = $this->validate_postcode_form_data( $_POST );
+
+		if ( $zone_id ) {
+			wp_send_json_success( $zone_id );
 		} else {
 			wp_send_json_error( array( 'message' => 'Une erreur est survenue.' ) );
 		}
@@ -320,25 +321,13 @@ class KM_Shipping_Zone {
 		}
 
 		$zone_id = $this->get_shipping_zone_id_from_postcode( $postcode );
+		error_log( var_export( $zone_id, true ) );
 
 		if ( ! $zone_id ) {
 			wp_send_json_error( array( 'message' => __( 'Aucune zone de livraison trouvée. Si ce code postal est bien le votre, veuillez contacter le service client.', 'kingmateriaux' ) ) );
 		}
 
-		$user_id = is_user_logged_in();
-
-		if ( $user_id ) {
-			update_user_meta( $user_id, 'shipping_postcode', $postcode );
-			update_user_meta( $user_id, 'shipping_country', $country );
-		}
-
-		WC()->customer->set_shipping_postcode( wc_clean( $postcode ) );
-		WC()->customer->set_billing_postcode( wc_clean( $postcode ) );
-
-		return array(
-			'zip_code' => $postcode,
-			'country'  => $country,
-		);
+		return $zone_id;
 	}
 
 	/**
@@ -436,5 +425,16 @@ class KM_Shipping_Zone {
 		}
 
 		wp_send_json_success( array( 'message' => 'Délais de livraison sauvegardés' ) );
+	}
+
+	public function modal_postcode_html() {
+
+		$active = '';
+		if ( ! $this->shipping_zone_id && ( is_home() || is_front_page() || is_product() || is_product_category() ) ) {
+			$active = 'active';
+		}
+
+		// requiert le template.
+		require_once get_stylesheet_directory() . '/templates/modals/postcode.php';
 	}
 }

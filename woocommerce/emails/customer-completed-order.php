@@ -38,7 +38,8 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 switch ( $transp_slug ) {
 	case 'king':
 		echo '<p>' . esc_html__( 'Votre commande est en cours de préparation sur notre parc. Notre responsable transport vous contactera par téléphone sur le numéro renseigné sur votre commande 24h à 48h après la réception de ce mail pour une prise de rendez-vous.', 'woocommerce' ) . '</p>'
-			. '<p>' . esc_html__( 'Pour toute demande concernant une annulation ou un changement, merci de contacter directement le service transport au 07 87 18 06 17.', 'woocommerce' ) . '</p>';
+			. '<p>' . esc_html__( 'Pour toute demande concernant une annulation ou un changement, merci de contacter directement le service transport au 07 87 18 06 17.', 'woocommerce' ) . '</p>'
+			. '<p>' . esc_html__( 'Les bennes placées sur la voie publique doivent obligatoirement faire l’objet d’une demande d’autorisation d’occupation temporaire (AOT) auprès de votre mairie.', 'woocommerce' ) . '</p>';
 		break;
 	case 'kuehne':
 		echo '<p>' . esc_html__( 'Votre commande est sur le point d’être expédiée. Elle sera bientôt entre les mains de notre transporteur partenaire. Celui-ci vous contactera par téléphone 4 à 5 jours ouvrés avant la livraison.', 'woocommerce' ) . '</p>'
@@ -52,7 +53,21 @@ switch ( $transp_slug ) {
 		break;
 	case 'fragner':
 		echo '<p>' . esc_html__( 'Votre commande est sur le point d’être expédiée. Elle sera bientôt entre les mains de notre transporteur partenaire. Celui-ci vous contactera par téléphone 48h à 72h avant la livraison.', 'woocommerce' ) . '</p>'
-			. '<p>' . esc_html__( 'Le délai moyen de livraison sur votre zone de livraison est de 10 à 20 jours ouvrés (du lundi au vendredi, hors jours fériés).', 'woocommerce' ) . '</p>';
+			. '<p>' . esc_html__( 'Le délai moyen de livraison sur votre zone de livraison est de 10 à 20 jours ouvrés (du lundi au vendredi, hors jours fériés).', 'woocommerce' ) . '</p>'
+			. '<h5>' . esc_html__( 'Rappel des modalités de livraison :', 'woocommerce' ) . '</h5>'
+			. '<p>' . esc_html__(
+				'Livraison de big bag de 1.5T avec camion grue : Il s’agit d’une livraison avec un camion équipé d’une grue. Lors de la livraison, le chauffeur pourra déposer votre big bag directement dans votre jardin.
+				Taille du camion : 2,55m x 7m et 3,3m de hauteur avec grue de 4m de longueur.',
+				'woocommerce'
+			) . '</p>'
+			. '<p>' . esc_html__(
+				'Pour toute demande concernant une annulation ou un changement, merci de contacter directement le service transport au 07 87 18 06 17. Notez qu’une modification ou une annulation de commande peut engendrer des coûts supplémentaires. Veuillez prendre connaissance des différentes pénalités pouvant s’appliquer sur notre ',
+				'woocommerce'
+			) . '<a href="https://kingmateriaux.com/livraison-camion-grue/">page livraison</a>.</p>'
+			. '<p>' . esc_html__(
+				'A noter : Si vous avez commandé un kit terrain de pétanque ou des géotextiles avec des big bag, vous recevrez vos géotextiles par Colissimo, DPD ou GLS avant vos big bag. Vous recevrez un suivi par SMS sur le numéro communiqué dans votre commande.',
+				'woocommerce'
+			) . '</p>';
 		break;
 	case 'geotextile':
 		echo '<p>' . esc_html__( 'Votre commande est en cours de préparation chez notre fournisseur et vous sera expédiée au plus vite via GLS, Colissimo ou DPD. Vous recevrez un suivi par SMS sur le numéro communiqué dans votre commande.', 'woocommerce' ) . '</p>'
