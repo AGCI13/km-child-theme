@@ -139,14 +139,14 @@
 
 			$km_dynamic_pricing = KM_Dynamic_Pricing::get_instance();
 			$item_id            = $item['variation_id'] ? $item['variation_id'] : $item['product_id'];
+			$item_qty           = $item['quantity'];
 
 			$product_name = wc_get_product( $item_id )->get_name();
-			$has_ecotaxe  = $km_dynamic_pricing->product_is_bulk_or_bigbag( $product_name );
+			$has_ecotaxe  = $km_dynamic_pricing->product_has_ecotaxe( $product_name );
 
 			if ( $has_ecotaxe ) {
-				++$ecotaxe_qty;
+				$ecotaxe_qty += $item_qty;
 			}
-
 			endforeach;
 		?>
 	</tbody>
@@ -179,7 +179,8 @@
 
 								<td class="price"><span class="totals-price">
 								<?php
-								if ( 'order_total' === $key && $ecotaxe_qty > 0 ) : ?>
+								if ( 'order_total' === $key && $ecotaxe_qty > 0 ) :
+									?>
 										<?php
 										$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $km_dynamic_pricing->ecotaxe_rate_incl_taxes * $ecotaxe_qty ) );
 										echo str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $total['value'] );

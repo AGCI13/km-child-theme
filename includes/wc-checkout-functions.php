@@ -145,6 +145,11 @@ function km_add_shipping_cost_to_cart_total() {
 }
 add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
 
+/**
+ * Ajoute les délais de livraison après le mode de livraison
+ *
+ * @return string
+ */
 function km_display_shipping_delays_after_shipping() {
 
 	$html = '';
@@ -338,41 +343,6 @@ function km_add_newsletter_checkbox() {
 	);
 }
 add_action( 'woocommerce_review_order_before_submit', 'km_add_newsletter_checkbox', 9 );
-
-/**
- * Ajoute le champ de saisie du code promo après le total de la commande
- *
- * @return void
- */
-function km_add_redeem_coupon_in_order_totals() {
-	if ( is_admin() ) {
-		return;
-	}
-
-	// Afficher le formulaire du coupon.
-	?>
-	<tr class="coupon">
-		<th><?php esc_html_e( 'Code Promo', 'kingmateriaux' ); ?></th>
-		<td class="km-coupon-label" data-title="<?php esc_html_e( 'Vous avez un code promo ?', 'kingmateriaux' ); ?>">
-			<form class="woocommerce-coupon-form" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="post">
-				<input type="text" name="coupon_code" class="input-text" placeholder="<?php esc_attr_e( 'Code promo', 'kingmateriaux' ); ?>" />
-				<input type="submit" class="btn btn-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Appliquer', 'kingmateriaux' ); ?>" />
-			</form>
-		</td>
-	</tr>
-
-	<?php
-	// Afficher les coupons déjà appliqués.
-	foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-		?>
-	<tr class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
-		<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
-		<td data-title="<?php echo esc_attr( wc_cart_totals_coupon_label( $coupon, false ) ); ?>"><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
-	</tr>
-		<?php
-	}
-}
-add_action( 'woocommerce_review_order_before_order_total', 'km_add_redeem_coupon_in_order_totals', 90 );
 
 /** --------------  DEBUG CODE START ----------------- */
 

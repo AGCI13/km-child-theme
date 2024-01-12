@@ -14,6 +14,7 @@ jQuery(document).ready(function ($) {
     $(document.body).on(
         "updated_checkout",
         function () {
+            hideLoader('.shopengine-checkout-shipping-methods');
             setTimeout(function () {
                 showCouponForm();
                 loadShippingMethods();
@@ -26,7 +27,17 @@ jQuery(document).ready(function ($) {
 
     $(document.body).on('update_checkout', () => {
         maybeChangePostcode();
+        showLoader('.shopengine-checkout-shipping-methods');
     });
+
+    const showLoader = (selector) => {
+        const loaderHtml = `<div class="km-spinner"></div>`;
+        $(selector).append(loaderHtml);
+    }
+
+    const hideLoader = (selector) => {
+        $(selector).find('.km-spinner').remove();
+    }
 
     const maybeChangePostcode = () => {
 
@@ -50,18 +61,14 @@ jQuery(document).ready(function ($) {
         const nonce = document.querySelector('#nonce_postcode');
         if (!nonce) return;
 
-        console.log(cleanedShippingCountry);
         const data = {
             zip: cleanedShippingPostcode,
             country: cleanedShippingCountry,
             nonce_postcode: nonce.value,
         };
 
-
         kmAjaxCall('postcode_submission_handler', data)
             .then(response => {
-
-                console.log(response);
                 if (response.success) {
                     setCookie('zip_code', shippingInputZipcode, 30);
                     setCookie('shipping_zone', response.data, 30);
@@ -88,23 +95,6 @@ jQuery(document).ready(function ($) {
                     }
                 }
             })
-    }
-
-    $(document.body).on('update_checkout', () => {
-        showLoader('.shopengine-checkout-shipping-methods');
-    });
-
-    $(document.body).on('updated_checkout', () => {
-        hideLoader('.shopengine-checkout-shipping-methods');
-    });
-
-    const showLoader = (selector) => {
-        const loaderHtml = `<div class="shopengine-loader"><div class="spinner"></div></div>`;
-        $(selector).append(loaderHtml);
-    }
-
-    const hideLoader = (selector) => {
-        $(selector).find('.shopengine-loader').remove();
     }
 
     const loadShippingMethods = () => {
@@ -577,9 +567,8 @@ jQuery(document).ready(function ($) {
         checkoutForm.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                paymentButton.click();
+                // paymentButton.click();
             }
         });
     }
-
 });

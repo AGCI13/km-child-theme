@@ -64,6 +64,7 @@ add_action(
 		require_once 'includes/shipping-methods/class-shipping-method-drive.php';
 		require_once 'includes/shipping-methods/class-shipping-method-out-13.php';
 		require_once 'includes/shipping-methods/class-shipping-method-dumpster.php';
+		require_once 'includes/shipping-methods/class-shipping-method-included.php';
 
 		// Initialisation des classes.
 		KM_Shipping_Zone::get_instance();

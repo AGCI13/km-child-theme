@@ -19,21 +19,6 @@ class KM_Shipping_Methods {
 	 */
 	public $km_shipping_zone;
 
-	/**
-	 * KM_Shipping_Methods constructor.
-	 */
-	public function __construct() {
-		$this->km_shipping_zone = KM_Shipping_zone::get_instance();
-		$this->register();
-	}
-
-	/**
-	 * Register hooks.
-	 */
-	public function register() {
-		add_filter( 'woocommerce_shipping_methods', array( $this, 'add_shipping_methods' ), 10, 1 );
-		add_filter( 'woocommerce_package_rates', array( $this, 'save_option1_shipping_cost' ), 10, 2 );
-	}
 
 	/**
 	 * Weight classes.
@@ -53,6 +38,64 @@ class KM_Shipping_Methods {
 
 
 	/**
+	 * KM_Shipping_Methods constructor.
+	 */
+	public function __construct() {
+		$this->km_shipping_zone = KM_Shipping_zone::get_instance();
+		$this->register();
+	}
+
+	/**
+	 * Register hooks.
+	 */
+	public function register() {
+		add_filter( 'woocommerce_shipping_methods', array( $this, 'add_shipping_methods' ), 10, 1 );
+		add_filter( 'woocommerce_package_rates', array( $this, 'filter_shipping_methods' ), 99, 2 );
+	}
+
+	public function check_product_name( $product_name, $strings, $operation = 'or' ) {
+		$product_name = mb_strtolower( $product_name, 'UTF-8' );
+		$match_count  = 0;
+
+		foreach ( $strings as $string ) {
+			if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) !== false ) {
+				if ( $operation === 'or' ) {
+					return true;
+				}
+				++$match_count;
+			}
+		}
+
+		return ( $operation === 'and' && $match_count === count( $strings ) );
+	}
+
+	public function filter_shipping_methods( $rates, $package ) {
+		$only_geotextile_and_samples = true;
+
+		foreach ( $package['contents'] as $item ) {
+			$product = $item['data'];
+
+			if ( mb_stripos( $product->get_name(), 'géotextile', 0, 'UTF-8' ) === false &&
+			mb_stripos( $product->get_name(), 'échantillons', 0, 'UTF-8' ) === false ) {
+				$only_geotextile_and_samples = false;
+				break;
+			}
+		}
+
+		// Si tous les produits sont 'géotextile' et 'échantillon', supprimer toutes les autres méthodes sauf 'included'.
+		if ( $only_geotextile_and_samples ) {
+			foreach ( $rates as $rate_id => $rate ) {
+				if ( 'included' !== $rate->method_id ) {
+					unset( $rates[ $rate_id ] );
+				}
+			}
+		}
+
+		return $rates;
+	}
+
+
+	/**
 	 * Ajoute les options de livraison
 	 *
 	 * @param array $methods
@@ -66,6 +109,7 @@ class KM_Shipping_Methods {
 		$methods['drive']          = 'Shipping_method_drive';
 		$methods['out13']          = 'Shipping_method_out_13';
 		$methods['dumpster']       = 'Shipping_method_dumpster';
+		$methods['included']       = 'Shipping_method_included';
 		return $methods;
 	}
 
@@ -96,10 +140,11 @@ class KM_Shipping_Methods {
 			return array( 'price_excl_tax' => 0 );
 		}
 
-		$total_weight          = 0;
-		$vrac_count            = 0;
-		$other_product_count   = 0;
-		$cart_has_plasterboard = false;
+		$total_weight                = 0;
+		$vrac_count                  = 0;
+		$other_product_count         = 0;
+		$cart_has_plasterboard       = false;
+		$only_geotextile_and_samples = true;
 
 		foreach ( $cart_items as $cart_item ) {
 			$product        = $cart_item['data'];
@@ -109,6 +154,12 @@ class KM_Shipping_Methods {
 			// Vérifiez si le produit n'est pas une 'benne'.
 			if ( stripos( $product_name, 'benne' ) === false ) {
 				$total_weight += $product_weight;
+			}
+
+			// Utiliser check_product_name pour déterminer si le produit est 'géotextile' ou 'échantillon²s'.
+			if ( ! $this->check_product_name( $product_name, array( 'géotextile', 'échantillons' ) ) ) {
+				$only_geotextile_and_samples = false;
+				break;
 			}
 
 			// Comptez les produits 'vrac'.
@@ -121,6 +172,10 @@ class KM_Shipping_Methods {
 			else {
 				++$other_product_count;
 			}
+		}
+
+		if ( $only_geotextile_and_samples ) {
+			return array( 'price_excl_tax' => 0 );
 		}
 
 		// Détermination de la nécessité d'utiliser plusieurs camions.
@@ -183,12 +238,12 @@ class KM_Shipping_Methods {
 		setcookie( sanitize_title( 'km_shipping_cost_' . $shipping_method_name ), $cookie_value, time() + 60 * 60 * 24 * 30, '/' );
 	}
 
-		/**
-		 * Calcule le prix de la livraison en fonction du poids du panier.
-		 *
-		 * @param string $delivery_option_full_name Le nom du produit de livraison.
-		 * @return object le produit de livraison
-		 */
+	/**
+	 * Calcule le prix de la livraison en fonction du poids du panier.
+	 *
+	 * @param string $delivery_option_full_name Le nom du produit de livraison.
+	 * @return object le produit de livraison
+	 */
 	private function get_shipping_product( $shipping_product_name ) {
 
 		if ( ! $shipping_product_name ) {
@@ -284,22 +339,5 @@ class KM_Shipping_Methods {
 		 */
 	private function is_isolation_product( $product ) {
 		return has_term( 'isolation', 'product_cat', $product->get_id() );
-	}
-
-	public function save_option1_shipping_cost( $rates, $package ) {
-		$specific_method_id = 'option1';
-
-		foreach ( $rates as $rate_id => $rate ) {
-			if ( strpos( $rate_id, $specific_method_id ) !== false ) {
-				if ( $rate->get_cost() && $rate->get_taxes() ) {
-					$cost_including_taxes = $rate->get_cost() + array_sum( $rate->get_taxes() );
-				}
-
-				// Stocker le coût dans la session de WooCommerce.
-				WC()->session->set( 'option1_shipping_cost', $cost_including_taxes );
-				break;
-			}
-		}
-		return $rates;
 	}
 }

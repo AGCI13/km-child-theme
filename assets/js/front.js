@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const getCookie = (cname) => {
-	let name = cname + "=";
+	let name = cname.trim() + "=";
 	let decodedCookie = decodeURIComponent(document.cookie);
 	let ca = decodedCookie.split(';');
 	for (let i = 0; i < ca.length; i++) {
@@ -31,7 +31,7 @@ const setCookie = (cname, cvalue, exdays) => {
 	const d = new Date();
 	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
 	let expires = "expires=" + d.toUTCString();
-	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	document.cookie = cname.trim() + "=" + cvalue + ";" + expires + ";path=/";
 }
 
 const handleLoading = (event, show = false) => {

@@ -1,14 +1,14 @@
 <?php
 
-class Shipping_method_dumpster extends WC_Shipping_Method {
+class Shipping_method_included extends WC_Shipping_Method {
 
 	/**
 	 *  Constructor.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id                 = 'dumpster';
-		$this->method_title       = 'Bennes';
-		$this->method_description = 'Livraison bennes';
+		$this->id                 = 'included';
+		$this->method_title       = 'Incluse';
+		$this->method_description = 'Livraison incluse';
 		$this->tax_status         = 'taxable';
 
 		$this->instance_id = absint( $instance_id );
@@ -58,7 +58,7 @@ class Shipping_method_dumpster extends WC_Shipping_Method {
 			'description' => array(
 				'title'       => 'Description',
 				'type'        => 'textarea',
-				'description' => __( 'Les bennes placées sur la voie publique doivent obligatoirement faire l’objet d’une demande d’autorisation d’occupation temporaire (AOT) auprès de votre mairie', 'kingmateriaux' ),
+				'description' => __( 'Livraison à domicile en 48h-72h, informations de suivi par sms', 'kingmateriaux' ),
 				'default'     => 'Description de ' . $this->method_title,
 			),
 		);
@@ -77,16 +77,18 @@ class Shipping_method_dumpster extends WC_Shipping_Method {
 			return;
 		}
 
-		// Vérifier si tous les produits dans le panier ont 'benne' dans leur titre.
-		foreach ( $package['contents'] as $item_id => $values ) {
-			$product = $values['data'];
-			if ( stripos( $product->get_name(), 'benne' ) === false ) {
+		$km_shipping_methods         = KM_Shipping_Methods::get_instance();
+		$only_geotextile_and_samples = true;
 
-				// Si un produit ne contient pas 'benne', ne pas ajouter de tarif.
+		// Vérifier si tous les produits dans le panier ont 'benne' dans leur titre.
+		foreach ( $package['contents'] as $item ) {
+			$product = $item['data'];
+			if ( ! $km_shipping_methods->check_product_name( $product->get_name(), array( 'géotextile', 'échantillons' ) ) ) {
 				return;
 			}
 		}
 
+		// Appliquer la méthode d'expédition seulement si tous les produits correspondent.
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(

@@ -106,7 +106,7 @@ class KM_Order_Processing {
 			$tax_rate          = WC_Tax::get_rate_percent_value( array_shift( array_keys( $tax_rates ) ) );
 			$product_tax_price = $product_price_excl_tax * ( $tax_rate / 100 );
 
-			if ( $this->km_dynamic_pricing->product_is_bulk_or_bigbag( $product_id ) ) {
+			if ( $this->km_dynamic_pricing->product_has_ecotaxe( $product_id ) ) {
 				$product_price_excl_tax += $this->km_dynamic_pricing->ecotaxe_rate;
 				$product_tax_price      += $this->km_dynamic_pricing->ecotaxe_rate_incl_taxes - $this->km_dynamic_pricing->ecotaxe_rate;
 			}

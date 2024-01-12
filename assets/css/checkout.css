@@ -161,7 +161,7 @@
 }
 
 .conteneur-recapitulatif .elementor-element-populated {
-    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.15);
     width: 320px;
     padding: 24px 30px !important;
     border-radius: 3px;
@@ -437,39 +437,6 @@ label[for="shipping_method_0_drive"],
     border: 1px solid #BE9E67;
 }
 
-/* Style de base du loader - vous pouvez personnaliser ceci */
-.shopengine-loader {
-    position: absolute;
-    background: #ffffff8c;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.shopengine-loader .spinner {
-    border: 4px solid rgba(0, 0, 0, .1);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border-top: 4px solid #000;
-    animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-
 #km-checkout-errors,
 .km-validation-info {
     color: red;
@@ -635,4 +602,14 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
 
 .shopengine-steps-wrapper > :not(:first-child):not(.shopengine-active-step){
     display: none;
+}
+
+.shopengine-checkout-coupon > p:first-child, 
+.shopengine-widget .shopengine-checkout-coupon-form .woocommerce-info-toggle::before{
+display: none;
+}
+
+.shopengine-widget .shopengine-checkout-coupon-form .shopengine-checkout-coupon{
+    padding:0;
+    margin-bottom:30px;
 }

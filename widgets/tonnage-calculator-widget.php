@@ -19,7 +19,9 @@ class Tonnage_Calculator_Widget extends \Elementor\Widget_Base {
 
 	protected function render() {
 
-		if ( ! has_tonnage_calculator() ) {
+		global $post;
+
+		if ( ! has_tonnage_calculator() && 136455 !== $post->ID ) {
 			return;
 		}
 
