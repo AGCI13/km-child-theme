@@ -359,6 +359,7 @@ table.shopengine_woocommerce_shipping_methods td {
     display: block;
     width: 13px;
     height: 13px;
+    background-color:#202020;
     background-color: #BE9D68;
     border-radius: 50%;
     margin: 0 auto;
@@ -387,6 +388,11 @@ table.shopengine_woocommerce_shipping_methods td {
 
 .woocommerce-shipping-methods .km-shipping-option:hover {
     border-color: #BE9D68;
+}
+
+.km-shipping-option-content label{
+    font-family: "Arca Majora 3", Sans-serif;
+    line-height: 1.3rem;
 }
 
 .woocommerce-shipping-totals,

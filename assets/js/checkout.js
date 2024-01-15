@@ -3,11 +3,17 @@ jQuery(document).ready(function ($) {
     const billingFields = document.querySelector('.woocommerce-billing-fields');
     const shippingSection = document.querySelector('.shipping_address');
     const stepShippingElements = document.querySelectorAll('.step-shipping');
-    stepShippingElements.forEach(element => element.classList.add('active'));
+    let shippingPostcodeChanged = false;
 
+    $('#shipping_postcode').on('change', function () {
+        shippingPostcodeChanged = true;
+    });
+
+    stepShippingElements.forEach(element => element.classList.add('active'));
     $('.step-cart').on('click', function () {
         window.location.href = window.location.origin + '/panier/';
     });
+
 
     //On est obligé d'utilisé $ pour le checkout car il est chargé en AJAX et les events sont détectés par $
     //Fist load, keep loading order !!!
@@ -26,7 +32,17 @@ jQuery(document).ready(function ($) {
         });
 
     $(document.body).on('update_checkout', () => {
-        maybeChangePostcode();
+        if (shippingPostcodeChanged) {
+            shippingPostcodeChanged = false;
+            showLoader('.shopengine-checkout-shipping-methods');
+            maybeChangePostcode()
+                .then(() => {
+                    $('body').trigger('update_checkout');  // Déclencher l'événement après la fin de maybeChangePostcode
+                })
+                .catch(error => {
+                    // Gérer les erreurs si nécessaire
+                });
+        }
         showLoader('.shopengine-checkout-shipping-methods');
     });
 
@@ -66,35 +82,40 @@ jQuery(document).ready(function ($) {
             country: cleanedShippingCountry,
             nonce_postcode: nonce.value,
         };
+        return new Promise((resolve, reject) => {
+            kmAjaxCall('postcode_submission_handler', data)
+                .then(response => {
+                    if (response.success) {
+                        setCookie('zip_code', shippingInputZipcode, 30);
+                        setCookie('shipping_zone', response.data, 30);
+                        document.querySelector('.modal_pc_open_btn').textContent = cleanedShippingPostcode;
+                    } else {
+                        if (response.data.message) {
+                            // get element .validate-postcode
+                            const shippingPostcodeInput = document.getElementById('shipping_postcode');
 
-        kmAjaxCall('postcode_submission_handler', data)
-            .then(response => {
-                if (response.success) {
-                    setCookie('zip_code', shippingInputZipcode, 30);
-                    setCookie('shipping_zone', response.data, 30);
-                    document.querySelector('.modal_pc_open_btn').textContent = cleanedShippingPostcode;
-                } else {
-                    if (response.data.message) {
-                        // get element .validate-postcode
-                        const shippingPostcodeInput = document.getElementById('shipping_postcode');
+                            if (shippingPostcodeInput) {
+                                const errorMessage = document.createElement('span');
+                                errorMessage.classList.add('km-validation-info');
 
-                        if (shippingPostcodeInput) {
-                            const errorMessage = document.createElement('span');
-                            errorMessage.classList.add('km-validation-info');
+                                // Assurez-vous que response.data.message est une chaîne. Si c'est un objet, accédez à la propriété appropriée.
+                                errorMessage.textContent = typeof response.data.message === 'string' ? response.data.message : 'Une erreur est survenue.';
 
-                            // Assurez-vous que response.data.message est une chaîne. Si c'est un objet, accédez à la propriété appropriée.
-                            errorMessage.textContent = typeof response.data.message === 'string' ? response.data.message : 'Une erreur est survenue.';
+                                shippingPostcodeInput.insertAdjacentElement('afterend', errorMessage);
 
-                            shippingPostcodeInput.insertAdjacentElement('afterend', errorMessage);
-
-                            // Remove errorMessage after 3 seconds.
-                            setTimeout(() => {
-                                errorMessage.remove();
-                            }, 3000); // Notez le placement correct de la fermeture de parenthèse et de la virgule
+                                // Remove errorMessage after 3 seconds.
+                                setTimeout(() => {
+                                    errorMessage.remove();
+                                }, 3000); // Notez le placement correct de la fermeture de parenthèse et de la virgule
+                            }
                         }
                     }
-                }
-            })
+                    resolve();
+                }).catch(error => {
+                    // Gérer les erreurs si nécessaire
+                    reject(error);
+                });
+        });
     }
 
     const loadShippingMethods = () => {

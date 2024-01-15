@@ -53,48 +53,6 @@ class KM_Shipping_Methods {
 		add_filter( 'woocommerce_package_rates', array( $this, 'filter_shipping_methods' ), 99, 2 );
 	}
 
-	public function check_product_name( $product_name, $strings, $operation = 'or' ) {
-		$product_name = mb_strtolower( $product_name, 'UTF-8' );
-		$match_count  = 0;
-
-		foreach ( $strings as $string ) {
-			if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) !== false ) {
-				if ( $operation === 'or' ) {
-					return true;
-				}
-				++$match_count;
-			}
-		}
-
-		return ( $operation === 'and' && $match_count === count( $strings ) );
-	}
-
-	public function filter_shipping_methods( $rates, $package ) {
-		$only_geotextile_and_samples = true;
-
-		foreach ( $package['contents'] as $item ) {
-			$product = $item['data'];
-
-			if ( mb_stripos( $product->get_name(), 'géotextile', 0, 'UTF-8' ) === false &&
-			mb_stripos( $product->get_name(), 'échantillons', 0, 'UTF-8' ) === false ) {
-				$only_geotextile_and_samples = false;
-				break;
-			}
-		}
-
-		// Si tous les produits sont 'géotextile' et 'échantillon', supprimer toutes les autres méthodes sauf 'included'.
-		if ( $only_geotextile_and_samples ) {
-			foreach ( $rates as $rate_id => $rate ) {
-				if ( 'included' !== $rate->method_id ) {
-					unset( $rates[ $rate_id ] );
-				}
-			}
-		}
-
-		return $rates;
-	}
-
-
 	/**
 	 * Ajoute les options de livraison
 	 *
@@ -339,5 +297,61 @@ class KM_Shipping_Methods {
 		 */
 	private function is_isolation_product( $product ) {
 		return has_term( 'isolation', 'product_cat', $product->get_id() );
+	}
+
+	/**
+	 * Vérifie si un le nom d'un produit contient une des chaînes de caractères données.
+	 *
+	 * @param string $product_name Le nom du produit.
+	 * @param array  $strings Les chaînes de caractères à vérifier.
+	 * @param string $operation L'opération à effectuer. 'or' ou 'and'.
+	 * @return bool Vrai si le nom du produit contient une des chaînes de caractères données, faux sinon.
+	 */
+	public function check_product_name( $product_name, $strings, $operation = 'or' ) {
+		$product_name = mb_strtolower( $product_name, 'UTF-8' );
+		$match_count  = 0;
+
+		foreach ( $strings as $string ) {
+			if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) !== false ) {
+				if ( $operation === 'or' ) {
+					return true;
+				}
+				++$match_count;
+			}
+		}
+
+		return ( $operation === 'and' && $match_count === count( $strings ) );
+	}
+
+	/**
+	 * Filtre les méthodes d'expédition en fonction des produits dans le panier.
+	 *
+	 * @param array $rates
+	 * @param array $package
+	 * @return array
+	 */
+	public function filter_shipping_methods( $rates, $package ) {
+		$only_geotextile_and_samples = true;
+
+		foreach ( $package['contents'] as $item ) {
+			$product = $item['data'];
+
+			if ( mb_stripos( $product->get_name(), 'géotextile', 0, 'UTF-8' ) === false &&
+			mb_stripos( $product->get_name(), 'échantillons', 0, 'UTF-8' ) === false ) {
+				$only_geotextile_and_samples = false;
+				break;
+			}
+		}
+
+		// Si tous les produits sont 'géotextile' et 'échantillon', supprimer toutes les autres méthodes sauf 'included'.
+		if ( $only_geotextile_and_samples ) {
+			foreach ( $rates as $rate_id => $rate ) {
+				if ( 'included' !== $rate->method_id ) {
+					unset( $rates[ $rate_id ] );
+				}
+			}
+		}
+
+		return $rates;
 	}
 }

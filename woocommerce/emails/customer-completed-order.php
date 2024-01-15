@@ -79,7 +79,15 @@ switch ( $transp_slug ) {
 			. '<h3>' . esc_html__( 'Rappel des modalités de livraison :', 'woocommerce' ) . '</h3>'
 			. '<p>' . esc_html__( 'Les big bag 1.5T seront livrés par un camion semi-remorque avec chariot embarqué motorisé. Attention : ils seront déposés au pas de porte*, sans manutention supplémentaire. Il n’y aura pas de grue sur le camion.', 'woocommerce' ) . '</p>'
 			. '<p>' . esc_html__( 'Taille du camion : 2,55m x 12m et 3,3m de hauteur.', 'woocommerce' ) . '</p>'
-			. '<p>' . esc_html__( 'Pour toute demande concernant une annulation ou un changement, merci de contacter directement le service transport au 07 87 18 06 17. Notez qu’une modification ou une annulation de commande peut engendrer des coûts supplémentaires. Veuillez prendre connaissance des différentes pénalités pouvant s’appliquer sur notre page livraison :', 'woocommerce' ) . '<br>https://kingmateriaux.com/livraison-big-bag-sur-palette/</p>';
+			. '<p>' . esc_html__( 'Pour toute demande concernant une annulation ou un changement, merci de contacter directement le service transport au 07 87 18 06 17. Notez qu’une modification ou une annulation de commande peut engendrer des coûts supplémentaires. Veuillez prendre connaissance des différentes pénalités pouvant s’appliquer sur notre ', 'woocommerce' ) . '<a href="https://kingmateriaux.com/livraison-big-bag-sur-palette/">page livraison.</a></p>';
+			echo '<br><p>' . esc_html__( 'A noter : Si vous avez commandé un kit terrain de pétanque ou des géotextiles avec des big bag, vous recevrez vos géotextiles par Colissimo, DPD ou GLS avant vos big bag. Vous recevrez un suivi par SMS sur le numéro communiqué dans votre commande.', 'woocommerce' ) . '</p>';
+			echo '<p><small><i>' . esc_html__(
+				'*pas de porte : Livraison qui s’effectue en bas de votre immeuble ou à l’entrée de votre habitation
+			(suivant l’accès). La livraison s’entend en limite de propriété (« pas de porte »), au plein air et sans
+			manutention supplémentaire. Vous devez donc prendre vos dispositions pour pouvoir réceptionner
+			votre colis et le transporter par vos propres moyens.',
+				'woocommerce'
+			) . '</i></small></p><br>';
 		break;
 	default:
 		echo '<p>' . esc_html__( 'We have finished processing your order.', 'woocommerce' ) . '</p>';
