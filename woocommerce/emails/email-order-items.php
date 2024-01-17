@@ -18,8 +18,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$text_align  = is_rtl() ? 'right' : 'left';
-$margin_side = is_rtl() ? 'left' : 'right';
+$text_align   = is_rtl() ? 'right' : 'left';
+$margin_side  = is_rtl() ? 'left' : 'right';
 $has_dumpster = false;
 
 foreach ( $items as $item_id => $item ) :
@@ -77,7 +77,6 @@ foreach ( $items as $item_id => $item ) :
 			?>
 		</td>
 		<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align:middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;">
-			x
 			<?php
 				$qty          = $item->get_quantity();
 				$refunded_qty = $order->get_qty_refunded_for_item( $item_id );

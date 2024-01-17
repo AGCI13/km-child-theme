@@ -144,7 +144,7 @@
 			$product_name = wc_get_product( $item_id )->get_name();
 			$has_ecotaxe  = $km_dynamic_pricing->product_has_ecotaxe( $product_name );
 
-			if ( $has_ecotaxe ) {
+			if ( $has_ecotaxe || ( isset( $item['item'] ) && $item['item']->get_meta( '_has_ecotax', true ) ) ) {
 				$ecotaxe_qty += $item_qty;
 			}
 			endforeach;

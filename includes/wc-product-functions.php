@@ -144,6 +144,10 @@ function has_tonnage_calculator() {
 	if ( is_product() ) {
 		global $product;
 
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+
 		// Obtenir les catégories de produits.
 		$categories = wp_get_post_terms( $product->get_id(), 'product_cat' );
 		if ( empty( $categories ) ) {
@@ -197,6 +201,15 @@ function km_add_body_class_for_products_with_tonnage_calculator( $classes ) {
  * @return void
  */
 function km_add_custom_field_to_variations( $loop, $variation_data, $variation ) {
+		// Eco-taxe.
+		woocommerce_wp_checkbox(
+			array(
+				'id'      => '_has_ecotax[' . $loop . ']',
+				'label'   => 'Cette variation de produit a une éco-taxe',
+				'value'   => get_post_meta( $variation->ID, '_has_ecotax', true ),
+				'cbvalue' => '1',
+			)
+		);
 	// Créer une case à cocher
 	woocommerce_wp_checkbox(
 		array(
@@ -215,6 +228,10 @@ add_action( 'woocommerce_variation_options', 'km_add_custom_field_to_variations'
  * @return void
  */
 function km_save_custom_field_variations( $variation_id, $i ) {
+	// Eco-taxe.
+	$ecotax_checkbox_value = isset( $_POST['_has_ecotax'][ $i ] );
+	update_post_meta( $variation_id, '_has_ecotax', $ecotax_checkbox_value );
+
 	$checkbox_value = isset( $_POST['_disable_variation_in_13'][ $i ] ) ? 'yes' : 'no';
 	update_post_meta( $variation_id, '_disable_variation_in_13', $checkbox_value );
 }

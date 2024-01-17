@@ -44,17 +44,9 @@ class KM_Order_Processing {
 	}
 
 	private function register() {
-		add_action( 'woocommerce_checkout_create_order', array( $this, 'add_custom_data_to_order' ), 10, 2 );
-		add_action( 'woocommerce_checkout_order_processed', array( $this, 'add_custom_order_item_meta' ), 50, 3 );
 		add_action( 'woocommerce_checkout_create_order', array( $this, 'save_drive_checkout_fields' ), 10, 2 );
-	}
-
-	public function add_custom_data_to_order( $order, $data ) {
-		// Définir la valeur personnalisée.
-		$ugs_product_shipping = 7640;
-
-		// Ajouter la donnée personnalisée à la commande.
-		$order->update_meta_data( '_ugs_product_shipping', $ugs_product_shipping );
+		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_ecotax_to_order_items' ), 10, 4 );
+		add_action( 'woocommerce_checkout_order_processed', array( $this, 'add_custom_order_item_meta' ), 50, 3 );
 	}
 
 	/**
@@ -75,6 +67,21 @@ class KM_Order_Processing {
 	}
 
 	/**
+	 * Add ecotax to order items
+	 *
+	 * @param WC_Order_Item_Product $item
+	 * @param string                $cart_item_key
+	 * @param array                 $values
+	 * @param WC_Order              $order
+	 * @return void
+	 */
+	public function add_ecotax_to_order_items( $item, $cart_item_key, $values, $order ) {
+		if ( isset( $values['_has_ecotax'] ) && $values['_has_ecotax'] ) {
+			$item->add_meta_data( '_has_ecotax', true );
+		}
+	}
+
+	/**
 	 *  Add custom order meta
 	 *
 	 * @param int      $order_id
@@ -91,14 +98,14 @@ class KM_Order_Processing {
 
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$item_data  = $item->get_data();
-			$product_id = $item_data['variation_id'] ?: $item_data['product_id'];
+			$product_id = $item_data['variation_id'] ? $item_data['variation_id'] : $item_data['product_id'];
 			$product    = wc_get_product( $product_id );
 
 			if ( ! $product ) {
 				continue;
 			}
 
-			// Utiliser get_price('edit') pour obtenir le prix en mode édition.
+			// Utiliser get_price('edit') pour obtenir le prix de base du produit.
 			$product_price_excl_tax = $product->get_price( 'edit' );
 
 			// Calculer le prix TTC en ajoutant la TVA.
@@ -106,7 +113,7 @@ class KM_Order_Processing {
 			$tax_rate          = WC_Tax::get_rate_percent_value( array_shift( array_keys( $tax_rates ) ) );
 			$product_tax_price = $product_price_excl_tax * ( $tax_rate / 100 );
 
-			if ( $this->km_dynamic_pricing->product_has_ecotaxe( $product_id ) ) {
+			if ( $item->get_meta( '_has_ecotax', true ) || $this->km_dynamic_pricing->product_has_ecotaxe( $product_id ) ) {
 				$product_price_excl_tax += $this->km_dynamic_pricing->ecotaxe_rate;
 				$product_tax_price      += $this->km_dynamic_pricing->ecotaxe_rate_incl_taxes - $this->km_dynamic_pricing->ecotaxe_rate;
 			}

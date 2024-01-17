@@ -39,13 +39,18 @@ function km_front_scripts_enqueue() {
 	wp_enqueue_style( 'km-archive-product-style', $css_uri . 'product-archive.css', array(), filemtime( $css_path . 'product-archive.css' ), 'all' );
 	wp_enqueue_script( 'km-archive-product-script', $js_uri . 'product-archive.js', array( 'jquery' ), filemtime( $js_path . 'product-archive.js' ), false );
 
+	if ( is_page( 'se-connecter' ) ) {
+		wp_enqueue_script( 'km-registration-script', $js_uri . 'registration.js', array( 'jquery' ), filemtime( $js_path . 'registration.js' ), true );
+	}
+
 	wp_register_script( 'add-to-cart-confirmation', $js_uri . 'add-to-cart-confirmation.js', array(), filemtime( $js_path . 'add-to-cart-confirmation.js' ), false );
 
 	if ( is_product_category() ) {
-		wp_enqueue_style( 'km-product-cat-style', '/wp-content/plugins/elementor-pro/assets/css/frontend.min.css', array(), filemtime( 'https://km.agci.dev/wp-content/plugins/elementor-pro/assets/css/frontend.min.css' ), 'all' );
+		wp_enqueue_style( 'km-product-cat-style', '/wp-content/plugins/elementor-pro/assets/css/frontend.min.css', array(), filemtime( '/wp-content/plugins/elementor-pro/assets/css/frontend.min.css' ), 'all' );
 	}
 
 	if ( is_checkout() ) {
+		wp_enqueue_script( 'km-registration-script', $js_uri . 'registration.js', array( 'jquery' ), filemtime( $js_path . 'registration.js' ), true );
 		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.css', array(), filemtime( $css_path . 'checkout.css' ), 'all' );
 		wp_enqueue_style( 'km-datetimepicker-style', $css_uri . 'datetimepicker.css', array(), filemtime( $css_path . 'datetimepicker.css' ), 'all' );
 		wp_enqueue_script( 'km-checkout-script', $js_uri . 'checkout.js', array( 'jquery' ), filemtime( $js_path . 'checkout.js' ), false );

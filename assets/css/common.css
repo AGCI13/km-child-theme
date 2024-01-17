@@ -796,6 +796,19 @@ Provisoire
   background: linear-gradient(180deg, #8C703F 0%, #8C703F 100%) !important;
 }
 
+.uael-registration-form .km-registration-notice{
+  white-space: nowrap;
+  font-family: 'Lato', sans-serif;
+  font-size: 15px;
+  line-height: 1.3em;
+  font-weight: 600;
+  color: rgb(217, 83, 79);
+}
+
+.uael-registration-form button:disabled{
+  opacity: 0.5;
+}
+
 .btn-primary:focus,
 .btn-primary:hover,
 .btn-primary:active {

@@ -102,7 +102,7 @@ function km_display_ecotaxe_with_unit_price( $price_html, $cart_item, $cart_item
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
-	if ( $km_dynamique_pricing->product_has_ecotaxe( $cart_item['data']->get_name() ) ) {
+	if ( $cart_item['_has_ecotax'] || $km_dynamique_pricing->product_has_ecotaxe( $cart_item['data']->get_name() ) ) {
 		$price_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->ecotaxe_rate_incl_taxes ) ) . '</small>';
 	}
 	return $price_html;
@@ -123,7 +123,7 @@ function km_display_ecotaxe_with_subtotal( $subtotal_html, $cart_item, $cart_ite
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
-	if ( $km_dynamique_pricing->product_has_ecotaxe( $cart_item['data']->get_name() ) ) {
+	if ( $cart_item['_has_ecotax'] || $km_dynamique_pricing->product_has_ecotaxe( $cart_item['data']->get_name() ) ) {
 		$ecotaxe_total  = $km_dynamique_pricing->ecotaxe_rate_incl_taxes * $cart_item['quantity'];
 		$subtotal_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotaxe_total ) ) . '</small>';
 	}
@@ -302,3 +302,27 @@ function km_check_cart_weight_before_adding( $passed, $product_id, $quantity ) {
 	return $passed;
 }
 add_filter( 'woocommerce_add_to_cart_validation', 'km_check_cart_weight_before_adding', 10, 3 );
+
+/**
+ * Ajoute ecotaxe au produit dans le panier
+ *
+ * @param array $cart_item_data
+ * @param int   $product_id
+ * @param int   $variation_id
+ * @return array
+ */
+function km_add_ecotax_to_cart_item( $cart_item_data, $product_id, $variation_id ) {
+
+	$has_ecotax = get_post_meta( $product_id, '_has_ecotax', true );
+
+	if ( ! $has_ecotax && $variation_id ) {
+		$has_ecotax = get_post_meta( $variation_id, '_has_ecotax', true );
+	}
+
+	if ( $has_ecotax ) {
+		$cart_item_data['_has_ecotax'] = true;
+	}
+
+	return $cart_item_data;
+}
+add_filter( 'woocommerce_add_cart_item_data', 'km_add_ecotax_to_cart_item', 10, 3 );

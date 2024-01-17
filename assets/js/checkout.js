@@ -3,6 +3,7 @@ jQuery(document).ready(function ($) {
     const billingFields = document.querySelector('.woocommerce-billing-fields');
     const shippingSection = document.querySelector('.shipping_address');
     const stepShippingElements = document.querySelectorAll('.step-shipping');
+    const placeOrderButton = document.querySelector('#custom_paiement_btn');
     let shippingPostcodeChanged = false;
 
     $('#shipping_postcode').on('change', function () {
@@ -13,7 +14,6 @@ jQuery(document).ready(function ($) {
     $('.step-cart').on('click', function () {
         window.location.href = window.location.origin + '/panier/';
     });
-
 
     //On est obligé d'utilisé $ pour le checkout car il est chargé en AJAX et les events sont détectés par $
     //Fist load, keep loading order !!!
@@ -28,13 +28,19 @@ jQuery(document).ready(function ($) {
                 checkoutNavigation();
                 handleBillingFields();
                 handleSelectedShippingMethod();
+                validateCustomFields();
+                $('form.woocommerce-checkout').on('input change', function () {
+                    validateCustomFields();
+                });
             }, 200);
         });
 
     $(document.body).on('update_checkout', () => {
+        placeOrderButton.classList.add('disabled');
         if (shippingPostcodeChanged) {
             shippingPostcodeChanged = false;
             showLoader('.shopengine-checkout-shipping-methods');
+            validateCustomFields();
             maybeChangePostcode()
                 .then(() => {
                     $('body').trigger('update_checkout');  // Déclencher l'événement après la fin de maybeChangePostcode
@@ -56,33 +62,40 @@ jQuery(document).ready(function ($) {
     }
 
     const maybeChangePostcode = () => {
-
-        const shippingCountry = document.querySelector('#shipping_country');
-        if (!shippingCountry) return;
-
-        const shippingPostcode = document.querySelector('#shipping_postcode');
-        if (!shippingPostcode) return;
-
-        const cleanedShippingCountry = shippingCountry.value.trim();
-        const cleanedShippingPostcode = shippingPostcode.value.trim();
-        const shippingInputZipcode = cleanedShippingPostcode + '-' + cleanedShippingCountry;
-        const cookieZipCode = getCookie('zip_code').trim();
-
-        //If billing_postcode is equal to cookie zip_code, return
-        if (shippingInputZipcode === cookieZipCode) {
-            return;
-        }
-
-        // Get nonce_postcode
-        const nonce = document.querySelector('#nonce_postcode');
-        if (!nonce) return;
-
-        const data = {
-            zip: cleanedShippingPostcode,
-            country: cleanedShippingCountry,
-            nonce_postcode: nonce.value,
-        };
         return new Promise((resolve, reject) => {
+            const shippingCountry = document.querySelector('#shipping_country');
+
+            if (!shippingCountry) {
+                resolve();
+                return;
+            }
+
+            const shippingPostcode = document.querySelector('#shipping_postcode');
+
+            if (!shippingPostcode) {
+                resolve();
+                return;
+            }
+
+            const cleanedShippingCountry = shippingCountry.value.trim();
+            const cleanedShippingPostcode = shippingPostcode.value.trim();
+            const shippingInputZipcode = cleanedShippingPostcode + '-' + cleanedShippingCountry;
+            const cookieZipCode = getCookie('zip_code').trim();
+            const shippingPostcodeInput = document.getElementById('shipping_postcode');
+            const nonce = document.querySelector('#nonce_postcode');
+
+            //If billing_postcode is equal to cookie zip_code, return
+            if (!nonce || shippingInputZipcode === cookieZipCode) {
+                resolve();
+                return;
+            }
+
+            const data = {
+                zip: cleanedShippingPostcode,
+                country: cleanedShippingCountry,
+                nonce_postcode: nonce.value,
+            };
+
             kmAjaxCall('postcode_submission_handler', data)
                 .then(response => {
                     if (response.success) {
@@ -91,22 +104,11 @@ jQuery(document).ready(function ($) {
                         document.querySelector('.modal_pc_open_btn').textContent = cleanedShippingPostcode;
                     } else {
                         if (response.data.message) {
-                            // get element .validate-postcode
-                            const shippingPostcodeInput = document.getElementById('shipping_postcode');
-
                             if (shippingPostcodeInput) {
-                                const errorMessage = document.createElement('span');
-                                errorMessage.classList.add('km-validation-info');
-
                                 // Assurez-vous que response.data.message est une chaîne. Si c'est un objet, accédez à la propriété appropriée.
-                                errorMessage.textContent = typeof response.data.message === 'string' ? response.data.message : 'Une erreur est survenue.';
-
-                                shippingPostcodeInput.insertAdjacentElement('afterend', errorMessage);
-
-                                // Remove errorMessage after 3 seconds.
-                                setTimeout(() => {
-                                    errorMessage.remove();
-                                }, 3000); // Notez le placement correct de la fermeture de parenthèse et de la virgule
+                                errorMessage = typeof response.data.message === 'string' ? response.data.message : 'Une erreur est survenue.';
+                                //Get closest .km-validation-info element and change textContent with errorMessage
+                                shippingPostcodeInput.closest('.form-row').find('.km-validation-info').textContent = errorMessage;
                             }
                         }
                     }
@@ -233,6 +235,11 @@ jQuery(document).ready(function ($) {
                     selectedOption.click()
 
                 }
+            }
+        } else {
+            const firstShippingOption = document.querySelector('.km-shipping-option');
+            if (firstShippingOption) {
+                firstShippingOption.click();
             }
         }
     }
@@ -366,6 +373,7 @@ jQuery(document).ready(function ($) {
                 else {
                     document.querySelector('.time-slot.afternoon').classList.remove('disabled');
                 }
+                validateCustomFields();
             };
 
             const handleSlotClick = (slot) => {
@@ -377,6 +385,7 @@ jQuery(document).ready(function ($) {
                 dateTimePicker.querySelector('#drive-time-wrapper').classList.add('woocommerce-validated');
                 localStorage.setItem('driveTime', chosenTime);
                 setDriveTotalsInfo();
+                validateCustomFields();
             };
 
             dayInputs.forEach((day) => {
@@ -459,7 +468,6 @@ jQuery(document).ready(function ($) {
         const elementorCheckoutNavbar = document.querySelector('.shopengine-multistep-navbar');
         const step0Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="0"]');
         const step1Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="1"]');
-        const placeOrderButton = document.querySelector('#custom_paiement_btn');
 
         multistepNavbars.forEach(navbar => {
             let stepShipping = navbar.querySelector('.step-shipping');
@@ -482,15 +490,17 @@ jQuery(document).ready(function ($) {
                 }
             });
             placeOrderButton.addEventListener('click', () => {
-                validateCustomFields();
-                copyShippingAddressToBillingAdress();
                 deleteLocalStorage();
-                setHiddenShippingFields();
-                stepPayment.click();
-                // Scroll to #checkout-nav element smoothly
-                document.querySelector('#checkout-nav').scrollIntoView({
-                    behavior: 'smooth'
-                });
+                isValid = validateCustomFields();
+                const checkoutNavigation = document.querySelector('#checkout-nav');
+                if (checkoutNavigation) {
+                    document.querySelector('#checkout-nav').scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                }
+                if (isValid) {
+                    setHiddenShippingFields();
+                    copyShippingAddressToBillingAdress();
+                    stepPayment.click();
+                }
             });
         });
     }
@@ -531,7 +541,7 @@ jQuery(document).ready(function ($) {
 
     const validateCustomFields = () => {
         const checkoutErrorsContainer = $('#km-checkout-errors');
-        const multistepWrapper = $('.shopengine-steps-wrapper');
+        const multistepWrapper = $('.shopengine-active-step');
         let isValid = true;
         let errorMessages = {};
 
@@ -562,7 +572,21 @@ jQuery(document).ready(function ($) {
             const fieldKey = fieldWrapper.attr('id') || inputField.attr('name'); // Use ID or name as a key
             const errorMessage = `Le champ "${fieldLabel}" n'est pas correctement rempli.`;
 
-            if ((inputField.is(':checkbox') && !inputField.is(':checked')) || (inputField.val() === '')) {
+            //chec if iknput field is shipping_postcode 
+            if (inputField.attr('id') === 'shipping_postcode') {
+                if (inputField.val().length !== 5) {
+                    isValid = false;
+                    fieldWrapper.append('<span class="km-validation-info">Le code postal doit contenir 5 chiffres</span>');
+                    errorMessages[fieldKey] = errorMessage;
+                }
+                // Event listener to remove specific error message
+                inputField.on('input change', function () {
+                    fieldWrapper.find('.km-validation-info').remove();
+                    delete errorMessages[fieldKey];
+                    updateErrorMessage();
+                });
+            }
+            else if ((inputField.is(':checkbox') && !inputField.is(':checked')) || (inputField.val() === '')) {
                 isValid = false;
                 fieldWrapper.append('<span class="km-validation-info">Ce champ est requis</span>');
                 errorMessages[fieldKey] = errorMessage;
@@ -574,7 +598,12 @@ jQuery(document).ready(function ($) {
                     updateErrorMessage();
                 });
             }
+
         });
+
+        if (isValid === true) {
+            placeOrderButton.classList.remove('disabled');
+        }
 
         updateErrorMessage();
         return isValid;
@@ -583,12 +612,10 @@ jQuery(document).ready(function ($) {
 
     const handleEnterKeydown = () => {
         const checkoutForm = document.querySelector('form.checkout');
-        const paymentButton = document.querySelector('#custom_paiement_btn');
 
         checkoutForm.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                // paymentButton.click();
             }
         });
     }

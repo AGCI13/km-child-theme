@@ -11,12 +11,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="km-modal modal-postcode <?php echo esc_html( $active ); ?>">
 			<div class="km-modal-dialog" role="document">
 				<form class="form-postcode" method="POST"> 
-					<img class="modal-postcode-close km-modal-close" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ); ?>" alt="close modal"></span>
+					<?php
+					if ( $shipping_zone_id ) :
+						?>
+						<img class="modal-postcode-close km-modal-close" src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ); ?>" alt="close modal"></span>
+					<?php endif; ?>
 					<p>
 				<?php
 					printf(
 						esc_html__(
-							'Pour voir les tarifs de nos produits, renseignez votre %1$s code postal à 5 chiffres. %2$s',
+							'Pour voir les tarifs de nos produits, renseignez votre %1$s code postal de livraison à 5 chiffres. %2$s',
 							'kingmateriaux'
 						),
 						'<span class="btn-link">',

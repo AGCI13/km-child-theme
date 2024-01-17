@@ -2,7 +2,7 @@
     font-family: 'Arca Majora 3', Lato, sans-serif;
     font-style: normal;
     font-weight: 700;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 24px;
     text-align: center;
     margin-bottom: 24px;
@@ -30,7 +30,7 @@
 
 .modal-postcode input,
 .modal-postcode select {
-    max-width: 150px;
+    max-width: 180px;
     margin-bottom: 9px;
 }
 

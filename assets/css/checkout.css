@@ -185,6 +185,11 @@
     background-color: #BE9E67;
 }
 
+.conteneur-recapitulatif #custom_paiement_btn.disabled{
+    opacity: .4;
+    pointer-events: none;
+}
+
 .conteneur-recapitulatif #place_order:hover {
     background-color: #BE9E67;
 }

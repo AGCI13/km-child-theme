@@ -433,6 +433,8 @@ class KM_Shipping_Zone {
 			$active = 'active';
 		}
 
+		$shipping_zone_id = $this->shipping_zone_id ?: $this->get_shipping_zone_id_from_cookie();
+
 		// requiert le template.
 		require_once get_stylesheet_directory() . '/templates/modals/postcode.php';
 	}

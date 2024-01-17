@@ -273,6 +273,7 @@ add_action( 'woocommerce_after_checkout_billing_form', 'km_add_custom_hidden_fie
  * @return void
  */
 function km_add_shipping_rate_conditions( $chosen_method ) {
+
 	if ( WC()->cart->is_empty() ) {
 		return;
 	}

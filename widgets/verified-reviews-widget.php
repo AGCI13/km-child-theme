@@ -19,11 +19,15 @@ class Verified_Reviews_Widget extends \Elementor\Widget_Base {
 
 	protected function render() {
 
-		if ( ! is_product() ) {
-			return;
+		global $product;
+
+		if ( ! $product ) {
+			$product = wc_get_product( get_the_ID() );
+			if ( ! $product instanceof WC_Product ) {
+				return;
+			}
 		}
 
-		global $product;
 		$my_current_lang = '';
 		$average         = ntav_get_netreviews_average( $product->get_id(), $my_current_lang );
 		$note            = round( $average, 1 );
