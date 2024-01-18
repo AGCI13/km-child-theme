@@ -290,7 +290,7 @@ class KM_Dynamic_Pricing {
 	 */
 	public function display_unavailable_message( string $price, WC_Product $product ): string {
 		if ( in_array( $product->get_id(), $this->unpurchasable_products ) ) {
-			return __( 'Ce produit n\'est pas disponible dans votre zone de livraison', 'kingmateriaux' );
+			return '<span class="km-unavailable-in-zone">' . __( 'Indisponible dans votre zone de livraison', 'kingmateriaux' ) . '<span>';
 		}
 		return $price;
 	}

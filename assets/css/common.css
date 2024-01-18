@@ -1,6 +1,6 @@
 :root {
   --primary-color: #BE9D68;
-  ;
+  --red-color: #d9534f;
 }
 
 /* Start Style Elementor Theme */
@@ -543,7 +543,10 @@ textarea {
 }
 
 select {
+  -webkit-appearance: none; /* Désactive le style par défaut de Safari */
   display: block;
+  appearance: none;
+  color: #343434 !important;
 }
 
 /**
@@ -728,6 +731,10 @@ Provisoire
   display: none;
 }
 
+.woocommerce form .form-row .required{
+  color: var(--red-color)
+}
+
 .km-spinner {
   position: absolute;
   height: 100%;
@@ -796,16 +803,16 @@ Provisoire
   background: linear-gradient(180deg, #8C703F 0%, #8C703F 100%) !important;
 }
 
-.uael-registration-form .km-registration-notice{
+.uael-registration-form .km-registration-notice {
   white-space: nowrap;
   font-family: 'Lato', sans-serif;
   font-size: 15px;
   line-height: 1.3em;
   font-weight: 600;
-  color: rgb(217, 83, 79);
+  color: var(--red-color);
 }
 
-.uael-registration-form button:disabled{
+.uael-registration-form button:disabled {
   opacity: 0.5;
 }
 
@@ -841,7 +848,7 @@ Provisoire
 }
 
 .woocommerce div.product .price.out-of-stock {
-  color: red !important;
+  color: var(--red-color) !important;
 }
 
 .km-ecotaxe-message {
@@ -860,6 +867,10 @@ Provisoire
 
 .woocommerce div.product form.cart .variations select option:disabled {
   display: none;
+}
+
+.uael-mc .uael-mc-offcanvas {
+  z-index: 9999;
 }
 
 #uael-mc__btn {
@@ -1191,18 +1202,6 @@ ul#menu-2-bc4d358 .menu-item-121571>a {
 
 .grille-produit .products.columns-5 {
   padding: 0px !important;
-}
-
-/* ancien code agence */
-.grille-produit a.woocommerce-LoopProduct-link.woocommerce-loop-product__link:after {
-  content: '';
-  width: 100%;
-  display: block;
-  position: absolute;
-  height: 50%;
-  background: linear-gradient(360deg, #474747 0%, rgba(71, 71, 71, 0) 100%);
-  border-radius: 0 0 5px 5px;
-  bottom: 0;
 }
 
 .grille-produit .uael-woocommerce .woocommerce-LoopProduct-link {
@@ -2178,268 +2177,100 @@ ul#menu-2-bc4d358 .menu-item-121571>a {
   grid-template-columns: repeat(4, 1fr) !important;
 }
 
-.archive .grille-categorie li.product a.button {
-  display: none;
+li.product a.button {
+  display: none !important;
 }
 
-.archive .grille-categorie li.product img {
-  border-radius: 4px;
-  opacity: 0.7;
+li.product,
+.product-list-grid .shopengine-single-product-item {
+  border-radius: 7px;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.archive .grille-categorie li.product:hover img {
-  opacity: 1;
+.product-list-grid .shopengine-single-product-item {
+  padding: 0 !important;
 }
 
-.archive .grille-categorie h2.woocommerce-loop-product__title {
+li.product:hover,
+.product-list-grid .shopengine-single-product-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.15);
+
+}
+
+li.product img,
+.product-list-grid .shopengine-single-product-item img {
+  border-radius: 4px;
+  transition: scale 0.3s ease !important;
+}
+
+li.product:hover img,
+.product-list-grid .shopengine-single-product-item:hover img {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  scale: 1.05;
+}
+
+h2.woocommerce-loop-product__title,
+.product-list-grid .shopengine-single-product-item .product-title {
   text-align: center;
+  font-size: 1.1rem !important;
+  line-height: 1.4rem !important;
+  font-family: 'Arca Majora 3', Lato, sans-s erif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  margin-left:10px !important;
+  margin-right: 10px !important;
 }
 
-.archive .grille-categorie h2.woocommerce-loop-product__title:hover {
-  color: #BE9D68 !important;
+.shopengine-single-product-item .product-title {
+  color: initial !important;
 }
 
-.archive .grille-categorie li.product span.price {
-  font-weight: 700;
+li.product span.price,
+.product-list-grid .shopengine-single-product-item .price {
+  font-weight: 900 !important;
+  font-size: 18px !important;
   color: #262626;
   text-align: center;
+  margin-left: 12px;
+  margin-right: 12px;
+  justify-content: center !important;
 }
 
-.archive .grille-categorie li.product span.price span.woocommerce-Price-amount {
-  color: #BE9D68;
+.km-unavailable-in-zone {
+  font-size: .97rem;
+  line-height: .9rem;
+  color: var(--red-color);
+  text-align: center;
+  font-weight: 600;
+}
+
+li.product span.price span.woocommerce-Price-amount,
+.product-list-grid .shopengine-single-product-item .product-price :is(.price, .amount, bdi) {
+  font-family: "Lato", sans-serif !important;
+  font-size: 19px !important;
+  color: #BE9D68 !important;
+  line-height: 1.5rem;
+  font-weight: 700!important;
+}
+
+li.product span.price .km-product-ecotaxe,
+li.product span.price .km-product-ecotaxe span.woocommerce-Price-amount,
+.product-list-grid .shopengine-single-product-item .km-product-ecotaxe,
+.product-list-grid .shopengine-single-product-item .km-product-ecotaxe :is(.price, .amount, bdi) {
+  font-size: .78rem !important;
+  font-style: italic;
+  font-weight: 600 !important;
+  color: #606060;
+  text-align: center;
 }
 
 .archive .elementor-widget-text-editor .elementor-widget-container p a,
 .archive .elementor-widget-text-editor .elementor-widget-container h2 a {
   color: #BE9D68;
   text-align: center;
-}
-
-/* Single Produit */
-.single-product:not(.has-tonnage-calculator) .lien-calcul-tonnage {
-  display: none;
-}
-
-.single-product #pa_variation-conditionnement {
-  width: inherit;
-}
-
-.single-product .verified-review {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  width: fit-content;
-}
-
-.single-product .verified-review>img {
-  width: 40px;
-}
-
-.single-product .verified-review .headerStars {
-  margin-left: 5px;
-}
-
-.single-product .verified-review .headerStars>div {
-  display: flex;
-  align-items: center;
-}
-
-.single-product .verified-review .netreviews_bg_stars_big.headerStars {
-  height: 100%;
-  max-height: 100%;
-  min-height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.single-product p.price .woocommerce-Price-amount {
-  font-size: 30px !important;
-  font-weight: 900 !important;
-  line-height: 40px;
-  color: #4D4D4D;
-}
-
-.single-product .single_variation_wrap .woocommerce-Price-amount.amount {
-  font-size: 30px !important;
-  font-weight: 900 !important;
-  line-height: 40px;
-  color: #4D4D4D;
-}
-
-.single-product .elementor-widget-woocommerce-product-price .price {
-  margin-bottom: 0 !important;
-}
-
-.single-product .km-product-ecotaxe {
-  font-size: 13px;
-  color: #4D4D4D;
-  margin-bottom: 10px;
-  font-style: italic;
-  font-weight: 400;
-}
-
-.single-product .km-product-ecotaxe .woocommerce-Price-amount.amount {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  line-height: 1em;
-}
-
-.single-product .product .header_postcode p {
-  color: #4D4D4D;
-  font-family: Lato;
-  font-weight: 400;
-  font-size: 16px;
-}
-
-.single-product .elementor-add-to-cart table tbody tr td {
-  background-color: transparent;
-}
-
-.single-product .elementor-add-to-cart table tbody tr th.label,
-.single-product .elementor-add-to-cart table tbody tr label {
-  display: none;
-}
-
-.single-product .informations-livraison .elementor-accordion-item {
-  border-left: inherit;
-  border-right: inherit;
-}
-
-.single-product .informations-livraison .elementor-accordion-item .elementor-tab-content {
-  border: inherit;
-}
-
-.single-product table.variations a.reset_variations {
-  color: #BE9D68;
-}
-
-.single-product .woocommerce-variation-add-to-cart .quantity .qty,
-.woocommerce div.product.elementor .quantity .qty {
-  width: 70px;
-  padding: .5rem;
-}
-
-.single-product .woocommerce-variation-add-to-cart button[type="submit"].single_add_to_cart_button {
-  background-color: #BE9D68 !important;
-}
-
-.single-product .produits-similaires form.woocommerce-ordering select {
-  border: inherit;
-  width: 150px;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item:hover {
-  box-shadow: inherit;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-thumb img {
-  border-radius: 4px;
-  opacity: 0.7;
-  transition: all 0.3s ease;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-thumb:hover img {
-  opacity: 1;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item h3.product-title {
-  font-size: 18px;
-  display: block;
-  text-align: center;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item h3.product-title:hover {
-  color: #BE9D68 !important;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item h3.product-title:hover a {
-  color: #BE9D68 !important;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-price p.price {
-  justify-content: center;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-price p.price .woocommerce-Price-amount {
-  font-size: 18px !important;
-}
-
-.single-product .elementor-location-single.product .shopengine-product-list .product-list-grid .shopengine-single-product-item .product-price .km-product-ecotaxe {
-  text-align: center;
-}
-
-.single-product .produits-similaires li.product a span.onsale {
-  background-color: #BE9D68;
-}
-
-.single-product .produits-similaires li.product a.button {
-  display: none;
-}
-
-.single-product .produits-similaires li.product img {
-  border-radius: 4px;
-  opacity: 0.7;
-  transition: all 0.3s ease;
-}
-
-.single-product .produits-similaires li.product:hover img {
-  opacity: 1;
-}
-
-.single-product .produits-similaires h2.woocommerce-loop-product__title {
-  text-align: inherit;
-}
-
-.single-product .produits-similaires h2.woocommerce-loop-product__title:hover {
-  color: #BE9D68 !important;
-}
-
-.single-product .produits-similaires li.product span.price {
-  font-weight: 700;
-  color: #262626;
-}
-
-.single-product .produits-similaires li.product span.price span.woocommerce-Price-amount {
-  font-weight: 600;
-  color: #262626;
-}
-
-.single-product .produits-similaires li.product span.price ins {
-  font-weight: 400;
-  text-decoration: inherit;
-}
-
-.single-product .produits-similaires li.product span.price ins span.woocommerce-Price-amount {
-  color: #BE9D68 !important;
-}
-
-.single-product .elementor-widget-theme-post-content h2 {
-  color: #262626;
-}
-
-.single-product .elementor-widget-theme-post-content p,
-.single-product .elementor-widget-theme-post-content ol li,
-.single-product .elementor-widget-theme-post-content ul li {
-  color: #262626;
-  font-family: Lato, Sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.single-product .elementor-widget-theme-post-content a {
-  color: #BE9D68;
-}
-
-.single-product .tonnage-calculator-wrapper {
-  background-attachment: fixed;
-  background-image: url(/wp-content/uploads/2023/10/background-tonnage.jpg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  transition: background 0.3s, border 0.3s, border-radius 0.3s, box-shadow 0.3s;
-  padding: 60px 0px 60px 0px;
 }
 
 /* Mentions légales */
@@ -2470,41 +2301,6 @@ ul#menu-2-bc4d358 .menu-item-121571>a {
 .search-results .grille-produits li.product a.button {
   display: none;
 }
-
-.search-results .grille-produits li.product img {
-  border-radius: 4px;
-  opacity: 0.7;
-  transition: all 0.3s ease;
-}
-
-.search-results .grille-produits li.product:hover img {
-  opacity: 1;
-}
-
-.search-results .grille-produits h2.woocommerce-loop-product__title {
-  text-align: center;
-}
-
-.search-results .grille-produits h2.woocommerce-loop-product__title:hover {
-  color: #BE9D68 !important;
-}
-
-.search-results .grille-produits li.product span.price {
-  font-weight: 700;
-  color: #262626;
-  text-align: center;
-}
-
-.search-results .grille-produits li.product span.price span.woocommerce-Price-amount {
-  color: #BE9D68;
-}
-
-.search-results .elementor-widget-text-editor .elementor-widget-container p a,
-.search-results .elementor-widget-text-editor .elementor-widget-container h2 a {
-  color: #BE9D68;
-  text-align: center;
-}
-
 
 .btn-confirm-loader,
 .btn-confirm-loader:before,

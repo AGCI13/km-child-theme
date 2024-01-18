@@ -1,4 +1,8 @@
 
+.wct-categories {
+    box-shadow: 0 4px 30px rgb(0 0 0 / 14%);
+}
+
 @media only screen and (max-width: 767px) {
     .wct-sub-categories.wct--visible {
         display: flex;
@@ -155,9 +159,4 @@
         line-height: 24px;
         color: #262626;
     }
-}
-
-.archive .grille-categorie li.product span.price .km-product-ecotaxe {
-    font-size: .8em;
-    font-style: italic;
 }

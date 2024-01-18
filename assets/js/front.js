@@ -1,15 +1,28 @@
 let span = document.getElementsByClassName('uael-product-actions');
 span.innerHTML += 'Voir le produit >';
 
-document.addEventListener('DOMContentLoaded', () => {
-	setTimeout(() => {
-		const tidioIframe = document.getElementById('tidio-chat-iframe');
-		if(tidioIframe){
-			tidioIframe.style.zIndex = '98';
-		}
-	}, 1500);
-	setDebugClosable(); 
+// document.addEventListener('DOMContentLoaded', () => {
+// 	setTimeout(() => {
+// 		const tidioIframe = document.getElementById('tidio-chat-iframe');
+// 		if(tidioIframe){
+// 			tidioIframe.style.zIndex = '98';
+// 		}
+// 	}, 1500);
+// 	setDebugClosable();
+// });
+
+document.addEventListener('DOMContentLoaded', function () {
+    var element = document.querySelector('.uael-mc-offcanvas');
+    if (element) {
+        var stopPropagationFunction = function (event) {
+            event.stopPropagation();
+        };
+
+        element.addEventListener('click', stopPropagationFunction);
+        element.addEventListener('touchstart', stopPropagationFunction);
+    }
 });
+
 
 const getCookie = (cname) => {
 	let name = cname.trim() + "=";

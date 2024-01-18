@@ -53,9 +53,6 @@
     margin-top: 40px;
 }
 
-
-
-
 .woocommerce-checkout .elementor-widget-km_delivery_conditions h4 {
     font-size: 18px;
     font-family: "Arca Majora 3", Sans-serif;
@@ -163,8 +160,8 @@
 .conteneur-recapitulatif .elementor-element-populated {
     box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.15);
     width: 320px;
-    padding: 24px 30px !important;
-    border-radius: 3px;
+    padding: 25px !important;
+    border-radius: 5px;
     height: auto;
     display: block;
 }
@@ -450,7 +447,7 @@ label[for="shipping_method_0_drive"],
 
 #km-checkout-errors,
 .km-validation-info {
-    color: red;
+    color: var(--red-color);
     font-weight: 500;
     font-family: Lato;
 }
@@ -623,4 +620,9 @@ display: none;
 .shopengine-widget .shopengine-checkout-coupon-form .shopengine-checkout-coupon{
     padding:0;
     margin-bottom:30px;
+}
+
+.woocommerce .elementor-91739 .elementor-element.elementor-element-d4ba92e .shopengine-checkout-review-order .woocommerce-checkout-review-order-table:not(.shipping__table--multiple) > tbody > tr {
+    padding: 10px 0px 10px 0px !important;
+    gap:.75rem;
 }
