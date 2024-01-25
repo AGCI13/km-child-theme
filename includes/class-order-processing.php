@@ -113,7 +113,7 @@ class KM_Order_Processing {
 			$tax_rate          = WC_Tax::get_rate_percent_value( array_shift( array_keys( $tax_rates ) ) );
 			$product_tax_price = $product_price_excl_tax * ( $tax_rate / 100 );
 
-			if ( $item->get_meta( '_has_ecotax', true ) || $this->km_dynamic_pricing->product_has_ecotaxe( $product_id ) ) {
+			if ( $item->get_meta( '_has_ecotax', true ) ) {
 				$product_price_excl_tax += $this->km_dynamic_pricing->ecotaxe_rate;
 				$product_tax_price      += $this->km_dynamic_pricing->ecotaxe_rate_incl_taxes - $this->km_dynamic_pricing->ecotaxe_rate;
 			}

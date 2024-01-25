@@ -6,20 +6,19 @@ jQuery(document).ready(function ($) {
     const placeOrderButton = document.querySelector('#custom_paiement_btn');
     let shippingPostcodeChanged = false;
 
-    $('#shipping_postcode').on('change', function () {
-        shippingPostcodeChanged = true;
-    });
-
     stepShippingElements.forEach(element => element.classList.add('active'));
     $('.step-cart').on('click', function () {
         window.location.href = window.location.origin + '/panier/';
     });
+
+
 
     //On est obligé d'utilisé $ pour le checkout car il est chargé en AJAX et les events sont détectés par $
     //Fist load, keep loading order !!!
     $(document.body).on(
         "updated_checkout",
         function () {
+
             hideLoader('.shopengine-checkout-shipping-methods');
             setTimeout(function () {
                 showCouponForm();
@@ -28,27 +27,24 @@ jQuery(document).ready(function ($) {
                 checkoutNavigation();
                 handleBillingFields();
                 handleSelectedShippingMethod();
-                validateCustomFields();
-                $('form.woocommerce-checkout').on('input change', function () {
-                    validateCustomFields();
+                $(document.body).on('change', '#shipping_postcode', function () {
+                    maybeChangePostcode()
+                        .then(() => {
+                            $('body').trigger('update_checkout');  // Déclencher l'événement après la fin de maybeChangePostcode
+                        })
+                        .catch(error => {
+                            // Gérer les erreurs si nécessaire
+                        });
                 });
+                $('input, select').on('input change', function (e) {
+                    validateCustomFields($(this).closest('.validate-required, .validate-phone, .validate-email'));
+                });
+                $('#custom_paiement_btn').prop('disabled', false).removeClass('disabled');
             }, 200);
         });
 
     $(document.body).on('update_checkout', () => {
-        placeOrderButton.classList.add('disabled');
-        if (shippingPostcodeChanged) {
-            shippingPostcodeChanged = false;
-            showLoader('.shopengine-checkout-shipping-methods');
-            validateCustomFields();
-            maybeChangePostcode()
-                .then(() => {
-                    $('body').trigger('update_checkout');  // Déclencher l'événement après la fin de maybeChangePostcode
-                })
-                .catch(error => {
-                    // Gérer les erreurs si nécessaire
-                });
-        }
+        $('#custom_paiement_btn').prop('disabled', true).addClass('disabled');
         showLoader('.shopengine-checkout-shipping-methods');
     });
 
@@ -107,8 +103,13 @@ jQuery(document).ready(function ($) {
                             if (shippingPostcodeInput) {
                                 // Assurez-vous que response.data.message est une chaîne. Si c'est un objet, accédez à la propriété appropriée.
                                 errorMessage = typeof response.data.message === 'string' ? response.data.message : 'Une erreur est survenue.';
-                                //Get closest .km-validation-info element and change textContent with errorMessage
-                                shippingPostcodeInput.closest('.form-row').find('.km-validation-info').textContent = errorMessage;
+                                const validationInfoElement = shippingPostcodeInput.closest('.form-row').querySelector('.km-validation-info');
+                                if (!validationInfoElement) {
+                                    shippingPostcodeInput.closest('.form-row').insertAdjacentHTML('beforeend', `<span class="km-validation-info">${errorMessage}</span>`);
+                                }
+                                else {
+                                    validationInfoElement.textContent = errorMessage;
+                                }
                             }
                         }
                     }
@@ -373,7 +374,7 @@ jQuery(document).ready(function ($) {
                 else {
                     document.querySelector('.time-slot.afternoon').classList.remove('disabled');
                 }
-                validateCustomFields();
+                validateCustomFields($('[name="drive_date"]'));
             };
 
             const handleSlotClick = (slot) => {
@@ -385,7 +386,7 @@ jQuery(document).ready(function ($) {
                 dateTimePicker.querySelector('#drive-time-wrapper').classList.add('woocommerce-validated');
                 localStorage.setItem('driveTime', chosenTime);
                 setDriveTotalsInfo();
-                validateCustomFields();
+                validateCustomFields($('[name="drive_time"]'));
             };
 
             dayInputs.forEach((day) => {
@@ -468,6 +469,7 @@ jQuery(document).ready(function ($) {
         const elementorCheckoutNavbar = document.querySelector('.shopengine-multistep-navbar');
         const step0Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="0"]');
         const step1Btn = elementorCheckoutNavbar.querySelector('.shopengine-multistep-button[data-item="1"]');
+        const backToShippingBtn = document.querySelector('#back-to-shipping');
 
         multistepNavbars.forEach(navbar => {
             let stepShipping = navbar.querySelector('.step-shipping');
@@ -503,6 +505,16 @@ jQuery(document).ready(function ($) {
                 }
             });
         });
+
+        if(!backToShippingBtn) return;
+
+        backToShippingBtn.addEventListener('click', () => {
+            step0Btn.click();
+            if (step0Btn.parentElement.classList.contains('active')) {
+                stepShipping.classList.add('active');
+                stepPayment.classList.remove('active');
+            }
+        });
     }
 
 
@@ -518,17 +530,27 @@ jQuery(document).ready(function ($) {
         shipping_tax = selectedShippingOption.getAttribute('data-shipping-tax');
 
         if (shipping_price) {
+            const km_shipping_price = document.getElementById('km_shipping_price');
             //set value of km-shipping-price input field 
-            document.getElementById('km_shipping_price').value = shipping_price;
+            if (km_shipping_price) {
+                km_shipping_price.value = shipping_price;
+            }
         }
+
         if (shipping_sku) {
             //set value of km-shipping-sku input field 
-            document.getElementById('km_shipping_sku').value = shipping_sku;
+            const km_shipping_sku = document.getElementById('km_shipping_sku');
+            if (km_shipping_sku) {
+                km_shipping_sku.value = shipping_sku;
+            }
         }
 
         if (shipping_tax) {
             //set value of km-shipping-tax input field
-            document.getElementById('km_shipping_tax').value = shipping_tax;
+            const km_shipping_tax = document.getElementById('km_shipping_tax');
+            if (km_shipping_tax) {
+                km_shipping_tax.value = shipping_tax;
+            }
         }
     }
 
@@ -539,7 +561,7 @@ jQuery(document).ready(function ($) {
         localStorage.removeItem('selectedShippingOption');
     }
 
-    const validateCustomFields = () => {
+    const validateCustomFields = (specificElement = null) => {
         const checkoutErrorsContainer = $('#km-checkout-errors');
         const multistepWrapper = $('.shopengine-active-step');
         let isValid = true;
@@ -564,13 +586,17 @@ jQuery(document).ready(function ($) {
             }
         };
 
-        // Validate required fields
-        multistepWrapper.find('.validate-required, .validate-phone, .validate-email').each(function () {
-            const fieldWrapper = $(this);
-            const inputField = fieldWrapper.find('input');
+        // Déterminez les éléments à valider
+        const elementsToValidate = specificElement ? specificElement : multistepWrapper.find('.validate-required, .validate-phone, .validate-email');
+
+        // Logique de validation pour chaque élément
+        elementsToValidate.each(function () {
+            const fieldWrapper = $(this).closest('.validate-required, .validate-phone, .validate-email');
+            const inputField = fieldWrapper.find('input, select, textarea');
             const fieldLabel = fieldWrapper.find('label').text().replace('*', '').trim();
             const fieldKey = fieldWrapper.attr('id') || inputField.attr('name'); // Use ID or name as a key
             const errorMessage = `Le champ "${fieldLabel}" n'est pas correctement rempli.`;
+
 
             //chec if iknput field is shipping_postcode 
             if (inputField.attr('id') === 'shipping_postcode') {
@@ -600,10 +626,6 @@ jQuery(document).ready(function ($) {
             }
 
         });
-
-        if (isValid === true) {
-            placeOrderButton.classList.remove('disabled');
-        }
 
         updateErrorMessage();
         return isValid;

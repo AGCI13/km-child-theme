@@ -21,7 +21,7 @@ class Tonnage_Calculator_Widget extends \Elementor\Widget_Base {
 
 		global $post;
 
-		if ( ! has_tonnage_calculator() && 136455 !== $post->ID ) {
+		if ( ! km_has_tonnage_calculator() && 136455 !== $post->ID ) {
 			return;
 		}
 

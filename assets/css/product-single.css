@@ -1,150 +1,157 @@
-.single-product .slick-track{
-    margin-left:unset;
-    margin-right: unset;
+.single-product .slick-track {
+  margin-left: unset;
+  margin-right: unset;
 }
 
-.single-product .wpgs-nav .slick-slide{
-border:none;
+.single-product .wpgs-nav .slick-slide {
+  border: none;
 }
 
 
 /* Single Produit */
 .single-product:not(.has-tonnage-calculator) .lien-calcul-tonnage {
+  display: none;
+}
+
+.single-product #pa_variation-conditionnement {
+  width: inherit;
+}
+
+.single-product .verified-review {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: fit-content;
+}
+
+.single-product .verified-review>img {
+  width: 40px;
+}
+
+.single-product .verified-review .headerStars {
+  margin-left: 5px;
+}
+
+.single-product .verified-review .headerStars>div {
+  display: flex;
+  align-items: center;
+}
+
+.single-product .verified-review .netreviews_bg_stars_big.headerStars {
+  height: 100%;
+  max-height: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.single-product p.price .woocommerce-Price-amount {
+  font-size: 30px !important;
+  font-weight: 900 !important;
+  line-height: 40px;
+  color: #4D4D4D;
+}
+
+.single-product .single_variation_wrap .woocommerce-Price-amount.amount {
+  font-size: 30px !important;
+  font-weight: 900 !important;
+  line-height: 40px;
+  color: #4D4D4D;
+}
+
+.single-product .elementor-widget-woocommerce-product-price .price {
+  margin-bottom: 0 !important;
+}
+
+.single-product .km-product-ecotaxe {
+  font-size: 13px;
+  color: #4D4D4D;
+  margin-bottom: 10px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.single-product .km-product-ecotaxe .woocommerce-Price-amount.amount {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1em;
+}
+
+.single-product .product .header_postcode p {
+  color: #4D4D4D;
+  font-family: Lato;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.single-product .elementor-add-to-cart table tbody tr td {
+  background-color: transparent;
+}
+
+.single-product .elementor-add-to-cart table tbody tr th.label,
+.single-product .elementor-add-to-cart table tbody tr label {
+  display: none;
+}
+
+.single-product .informations-livraison .elementor-accordion-item {
+  border-left: inherit;
+  border-right: inherit;
+}
+
+.single-product .informations-livraison .elementor-accordion-item .elementor-tab-content {
+  border: inherit;
+}
+
+.single-product table.variations a.reset_variations {
+  color: #BE9D68;
+}
+
+.single-product .woocommerce-variation-add-to-cart .quantity .qty,
+.woocommerce div.product.elementor .quantity .qty {
+  width: 70px;
+  padding: .5rem;
+}
+
+.single-product .woocommerce-variation-add-to-cart button[type="submit"].single_add_to_cart_button {
+  background-color: #BE9D68 !important;
+}
+
+.single-product .produits-similaires form.woocommerce-ordering select {
+  border: inherit;
+  width: 150px;
+}
+
+.single-product .elementor-widget-theme-post-content h2 {
+  color: #262626;
+}
+
+.single-product .elementor-widget-theme-post-content p,
+.single-product .elementor-widget-theme-post-content ol li,
+.single-product .elementor-widget-theme-post-content ul li {
+  color: #262626;
+  font-family: Lato, Sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.single-product .elementor-widget-theme-post-content a {
+  color: #BE9D68;
+}
+
+.single-product .tonnage-calculator-wrapper {
+  background-attachment: fixed;
+  background-image: url(/wp-content/uploads/2023/10/background-tonnage.jpg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transition: background 0.3s, border 0.3s, border-radius 0.3s, box-shadow 0.3s;
+  padding: 60px 0px 60px 0px;
+}
+
+/*Badge Avis vérifiés */
+@media screen and (max-width: 767px) {
+  #c840c452-4bc7-434b-a8ae-65de371acd17 {
     display: none;
   }
-  
-  .single-product #pa_variation-conditionnement {
-    width: inherit;
-  }
-  
-  .single-product .verified-review {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    width: fit-content;
-  }
-  
-  .single-product .verified-review>img {
-    width: 40px;
-  }
-  
-  .single-product .verified-review .headerStars {
-    margin-left: 5px;
-  }
-  
-  .single-product .verified-review .headerStars>div {
-    display: flex;
-    align-items: center;
-  }
-  
-  .single-product .verified-review .netreviews_bg_stars_big.headerStars {
-    height: 100%;
-    max-height: 100%;
-    min-height: 100%;
-    display: flex;
-    align-items: center;
-  }
-  
-  .single-product p.price .woocommerce-Price-amount {
-    font-size: 30px !important;
-    font-weight: 900 !important;
-    line-height: 40px;
-    color: #4D4D4D;
-  }
-  
-  .single-product .single_variation_wrap .woocommerce-Price-amount.amount {
-    font-size: 30px !important;
-    font-weight: 900 !important;
-    line-height: 40px;
-    color: #4D4D4D;
-  }
-  
-  .single-product .elementor-widget-woocommerce-product-price .price {
-    margin-bottom: 0 !important;
-  }
-  
-  .single-product .km-product-ecotaxe {
-    font-size: 13px;
-    color: #4D4D4D;
-    margin-bottom: 10px;
-    font-style: italic;
-    font-weight: 400;
-  }
-  
-  .single-product .km-product-ecotaxe .woocommerce-Price-amount.amount {
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    line-height: 1em;
-  }
-  
-  .single-product .product .header_postcode p {
-    color: #4D4D4D;
-    font-family: Lato;
-    font-weight: 400;
-    font-size: 16px;
-  }
-  
-  .single-product .elementor-add-to-cart table tbody tr td {
-    background-color: transparent;
-  }
-  
-  .single-product .elementor-add-to-cart table tbody tr th.label,
-  .single-product .elementor-add-to-cart table tbody tr label {
-    display: none;
-  }
-  
-  .single-product .informations-livraison .elementor-accordion-item {
-    border-left: inherit;
-    border-right: inherit;
-  }
-  
-  .single-product .informations-livraison .elementor-accordion-item .elementor-tab-content {
-    border: inherit;
-  }
-  
-  .single-product table.variations a.reset_variations {
-    color: #BE9D68;
-  }
-  
-  .single-product .woocommerce-variation-add-to-cart .quantity .qty,
-  .woocommerce div.product.elementor .quantity .qty {
-    width: 70px;
-    padding: .5rem;
-  }
-  
-  .single-product .woocommerce-variation-add-to-cart button[type="submit"].single_add_to_cart_button {
-    background-color: #BE9D68 !important;
-  }
-  
-  .single-product .produits-similaires form.woocommerce-ordering select {
-    border: inherit;
-    width: 150px;
-  }
-  
-  .single-product .elementor-widget-theme-post-content h2 {
-    color: #262626;
-  }
-  
-  .single-product .elementor-widget-theme-post-content p,
-  .single-product .elementor-widget-theme-post-content ol li,
-  .single-product .elementor-widget-theme-post-content ul li {
-    color: #262626;
-    font-family: Lato, Sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-  }
-  
-  .single-product .elementor-widget-theme-post-content a {
-    color: #BE9D68;
-  }
-  
-  .single-product .tonnage-calculator-wrapper {
-    background-attachment: fixed;
-    background-image: url(/wp-content/uploads/2023/10/background-tonnage.jpg);
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    transition: background 0.3s, border 0.3s, border-radius 0.3s, box-shadow 0.3s;
-    padding: 60px 0px 60px 0px;
-  }
+}

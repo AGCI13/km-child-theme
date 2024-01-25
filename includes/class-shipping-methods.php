@@ -117,17 +117,13 @@ class KM_Shipping_Methods {
 			// Utiliser check_product_name pour déterminer si le produit est 'géotextile' ou 'échantillon²s'.
 			if ( ! $this->check_product_name( $product_name, array( 'géotextile', 'échantillons' ) ) ) {
 				$only_geotextile_and_samples = false;
-				break;
 			}
 
-			// Comptez les produits 'vrac'.
 			if ( stripos( $product_name, 'vrac' ) !== false ) {
 				++$vrac_count;
-			} // Vérifiez si le panier contient une 'Plaque de plâtre'.
-			elseif ( stripos( $product_name, 'Plaque de plâtre' ) !== false ) {
+			} elseif ( stripos( $product_name, 'Plaque de plâtre' ) !== false ) {
 				$cart_has_plasterboard = true;
-			} // Comptez d'autres types de produits.
-			else {
+			} else {
 				++$other_product_count;
 			}
 		}
@@ -182,18 +178,17 @@ class KM_Shipping_Methods {
 		* For degugging purposes only.
 		*/
 		$detailed_shipping_cost = array(
-			'poids_total'         => $total_weight,
-			'multiple_camions'    => $multiple_trucks ? 'Oui' : 'Non',
-			'placo_present'       => $cart_has_plasterboard ? 'Oui' : 'Non',
-			'total_livraison_ht'  => $shipping_price_excluding_taxes,
-			'total_livraison_ttc' => $shipping_price_including_taxes,
+			'----------------------' => '-----------------------',
+			'poids_total'            => $total_weight,
+			'multiple_camions'       => $multiple_trucks ? 'Oui' : 'Non',
+			'placo_present'          => $cart_has_plasterboard ? 'Oui' : 'Non',
+			'total_livraison_ht'     => $shipping_price_excluding_taxes,
+			'total_livraison_ttc'    => $shipping_price_including_taxes,
 		);
 
-		// Convertir le tableau en chaîne JSON pour le stockage dans le cookie.
-		$cookie_value = wp_json_encode( $detailed_shipping_cost );
-
-		// Enregistrer le cookie avec la durée de vie correcte (24 heures à partir de maintenant).
-		setcookie( sanitize_title( 'km_shipping_cost_' . $shipping_method_name ), $cookie_value, time() + 60 * 60 * 24 * 30, '/' );
+		foreach ( $detailed_shipping_cost as $key => $value ) {
+			// error_log( $key . ' : ' . var_export( $value, true ) );
+		}
 	}
 
 	/**
@@ -312,7 +307,7 @@ class KM_Shipping_Methods {
 		$match_count  = 0;
 
 		foreach ( $strings as $string ) {
-			if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) !== false ) {
+			if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) === 0 ) {
 				if ( $operation === 'or' ) {
 					return true;
 				}
@@ -336,8 +331,8 @@ class KM_Shipping_Methods {
 		foreach ( $package['contents'] as $item ) {
 			$product = $item['data'];
 
-			if ( mb_stripos( $product->get_name(), 'géotextile', 0, 'UTF-8' ) === false &&
-			mb_stripos( $product->get_name(), 'échantillons', 0, 'UTF-8' ) === false ) {
+			if ( mb_stripos( $product->get_name(), 'géotextile', 0, 'UTF-8' ) !== 0 &&
+			mb_stripos( $product->get_name(), 'échantillons', 0, 'UTF-8' ) !== 0 ) {
 				$only_geotextile_and_samples = false;
 				break;
 			}

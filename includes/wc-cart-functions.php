@@ -102,7 +102,7 @@ function km_display_ecotaxe_with_unit_price( $price_html, $cart_item, $cart_item
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
-	if ( $cart_item['_has_ecotax'] || $km_dynamique_pricing->product_has_ecotaxe( $cart_item['data']->get_name() ) ) {
+	if ( $cart_item['_has_ecotax'] ) {
 		$price_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->ecotaxe_rate_incl_taxes ) ) . '</small>';
 	}
 	return $price_html;
@@ -123,7 +123,7 @@ function km_display_ecotaxe_with_subtotal( $subtotal_html, $cart_item, $cart_ite
 	}
 	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
-	if ( $cart_item['_has_ecotax'] || $km_dynamique_pricing->product_has_ecotaxe( $cart_item['data']->get_name() ) ) {
+	if ( $cart_item['_has_ecotax'] ) {
 		$ecotaxe_total  = $km_dynamique_pricing->ecotaxe_rate_incl_taxes * $cart_item['quantity'];
 		$subtotal_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotaxe_total ) ) . '</small>';
 	}
@@ -159,19 +159,19 @@ add_action( 'woocommerce_cart_contents', 'km_ecotaxe_message_display', 99 );
  * @param string $value
  * @return string
  */
-function add_ecotax_to_order_total_html( $html ) {
+function km_add_ecotax_to_order_total_html( $html ) {
 
 	$km_dynamic_pricing = KM_Dynamic_Pricing::get_instance();
 	$total_ecotaxe      = $km_dynamic_pricing->get_total_ecotaxe();
 
-	if ( 0 === $total_ecotaxe ) {
+	if ( ! $total_ecotaxe ) {
 		return $html;
 	}
 
 	$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $total_ecotaxe ) );
 	return str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $html );
 }
-add_filter( 'woocommerce_cart_totals_order_total_html', 'add_ecotax_to_order_total_html', 10, 1 );
+add_filter( 'woocommerce_cart_totals_order_total_html', 'km_add_ecotax_to_order_total_html', 10, 1 );
 
 /**
  *  --------------- END ECO-TAX ----------------------

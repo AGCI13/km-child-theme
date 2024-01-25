@@ -4,6 +4,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ *  Disable WooCommerce Admin New Order Notification
+ */
+function km_disable_new_user_notification_to_admin( $wp_new_user_notification_email_admin, $user, $blogname ) {
+	return false;
+}
+add_filter( 'wp_new_user_notification_email_admin', 'km_disable_new_user_notification_to_admin', 10, 3 );
+
+/**
+ * Disable WooCommerce Admin password change Notification
+ */
+add_filter( 'send_password_change_email', '__return_false' );
+add_filter( 'woocommerce_disable_password_change_notification', '__return_true' );
+
+/**
+ * Enable WooCommerce customer session if not already set
+ */
 function km_wc_customer_session_enabler() {
 	if ( ! is_admin() && isset( WC()->session ) && ! WC()->session->has_session() ) {
 		WC()->session->set_customer_session_cookie( true );
@@ -11,8 +28,40 @@ function km_wc_customer_session_enabler() {
 }
 add_action( 'woocommerce_init', 'km_wc_customer_session_enabler' );
 
+/**
+ * Envoyer l'email de nouveau compte client de WooCommerce lorsqu'un utilisateur s'inscrit.
+ *
+ * @param array   $wp_new_user_notification_email Array contenant les informations de l'email.
+ * @param WP_User $user                           Utilisateur qui vient de s'inscrire.
+ * @param string  $blogname                       Nom du site.
+ *
+ * @return array
+ */
+function km_set_new_customer_notification_email( $wp_new_user_notification_email, $user, $blogname ) {
+	// Vérifier si l'utilisateur a le rôle de "customer".
+	if ( in_array( 'customer', (array) $user->roles ) ) {
+		// Assurez-vous que WooCommerce est actif.
+		if ( function_exists( 'WC' ) ) {
+			// Récupérer l'instance de l'envoyeur d'email de WooCommerce.
+			$mailer = WC()->mailer();
+			// Récupérer l'email de nouveau compte client.
+			$email = $mailer->emails['WC_Email_Customer_New_Account'];
+			// Déclencher l'envoi de l'email.
+			$email->trigger( $user->ID, null, false );
 
-// Utility function, to display BACS accounts details
+			// Retourner un tableau vide pour désactiver l'email par défaut de WordPress.
+			return array();
+		}
+	}
+
+	// Pour les autres rôles, utiliser l'email par défaut de WordPress.
+	return $wp_new_user_notification_email;
+}
+add_filter( 'wp_new_user_notification_email', 'km_set_new_customer_notification_email', 10, 3 );
+
+/**
+ * Utility function to display BACS accounts details
+ */
 function km_get_bacs_account_details_html() {
 
 	$gateway = new WC_Gateway_BACS();
@@ -39,33 +88,26 @@ function km_get_bacs_account_details_html() {
 	return $output;
 }
 
-add_filter( 'wp_new_user_notification_email', 'set_new_customer_notification_email', 10, 3 );
-/**
- * Envoyer l'email de nouveau compte client de WooCommerce lorsqu'un utilisateur s'inscrit.
- *
- * @param array   $wp_new_user_notification_email Array contenant les informations de l'email.
- * @param WP_User $user                           Utilisateur qui vient de s'inscrire.
- * @param string  $blogname                       Nom du site.
- *
- * @return array
- */
-function set_new_customer_notification_email( $wp_new_user_notification_email, $user, $blogname ) {
-	// Vérifier si l'utilisateur a le rôle de "customer".
-	if ( in_array( 'customer', (array) $user->roles ) ) {
-		// Assurez-vous que WooCommerce est actif.
-		if ( function_exists( 'WC' ) ) {
-			// Récupérer l'instance de l'envoyeur d'email de WooCommerce.
-			$mailer = WC()->mailer();
-			// Récupérer l'email de nouveau compte client.
-			$email = $mailer->emails['WC_Email_Customer_New_Account'];
-			// Déclencher l'envoi de l'email.
-			$email->trigger( $user->ID, null, false );
 
-			// Retourner un tableau vide pour désactiver l'email par défaut de WordPress.
-			return array();
-		}
-	}
 
-	// Pour les autres rôles, utiliser l'email par défaut de WordPress.
-	return $wp_new_user_notification_email;
+
+// add_action( 'woocommerce_thankyou', 'plausible_revenue_tracking' );
+
+function plausible_revenue_tracking( $order_id ) {
+	$order = wc_get_order( $order_id );
+	?>
+	<script data-domain="kingmateriaux.com" src="https://plausible.io/js/script.manual.revenue.pageview-props.js"></script>
+	<script>
+	const amount = "<?php echo $order->get_total(); ?>"
+	const currency = "<?php echo $order->get_currency(); ?>"
+
+	const orderId = "<?php echo $order->get_id(); ?>"
+	const itemCount = <?php echo $order->get_item_count(); ?>
+
+	window.plausible("Achat", {
+		revenue: {amount: amount, currency: currency},
+		props: {orderId: orderId, itemCount: itemCount}
+	})
+	</script>
+	<?php
 }

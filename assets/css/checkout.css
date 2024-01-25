@@ -182,7 +182,7 @@
     background-color: #BE9E67;
 }
 
-.conteneur-recapitulatif #custom_paiement_btn.disabled{
+.conteneur-recapitulatif #custom_paiement_btn.disabled {
     opacity: .4;
     pointer-events: none;
 }
@@ -361,7 +361,7 @@ table.shopengine_woocommerce_shipping_methods td {
     display: block;
     width: 13px;
     height: 13px;
-    background-color:#202020;
+    background-color: #202020;
     background-color: #BE9D68;
     border-radius: 50%;
     margin: 0 auto;
@@ -392,7 +392,7 @@ table.shopengine_woocommerce_shipping_methods td {
     border-color: #BE9D68;
 }
 
-.km-shipping-option-content label{
+.km-shipping-option-content label {
     font-family: "Arca Majora 3", Sans-serif;
     line-height: 1.3rem;
 }
@@ -608,21 +608,25 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
     align-items: center;
 }
 
-.shopengine-steps-wrapper > :not(:first-child):not(.shopengine-active-step){
+.shopengine-steps-wrapper> :not(:first-child):not(.shopengine-active-step) {
     display: none;
 }
 
-.shopengine-checkout-coupon > p:first-child, 
-.shopengine-widget .shopengine-checkout-coupon-form .woocommerce-info-toggle::before{
-display: none;
+.shopengine-checkout-coupon>p:first-child,
+.shopengine-widget .shopengine-checkout-coupon-form .woocommerce-info-toggle::before {
+    display: none;
 }
 
-.shopengine-widget .shopengine-checkout-coupon-form .shopengine-checkout-coupon{
-    padding:0;
-    margin-bottom:30px;
+.shopengine-widget .shopengine-checkout-coupon-form .shopengine-checkout-coupon {
+    padding: 0;
+    margin-bottom: 30px;
 }
 
-.woocommerce .elementor-91739 .elementor-element.elementor-element-d4ba92e .shopengine-checkout-review-order .woocommerce-checkout-review-order-table:not(.shipping__table--multiple) > tbody > tr {
+.woocommerce .elementor-91739 .elementor-element.elementor-element-d4ba92e .shopengine-checkout-review-order .woocommerce-checkout-review-order-table:not(.shipping__table--multiple)>tbody>tr {
     padding: 10px 0px 10px 0px !important;
-    gap:.75rem;
+    gap: .75rem;
+}
+
+.shopengine-widget .shopengine-checkout-review-order .woocommerce-checkout-review-order-table tr:last-child .includes_tax .woocommerce-Price-amount.amount {
+    font-size:13px!important;
 }
