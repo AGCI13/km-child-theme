@@ -265,8 +265,12 @@ line-height: 1.8em;
 margin-bottom: 0 !important;
 }
 
+table{
+	border-collapse: collapse;
+}
+
 .order_item td{
-border:none !important;
+border:1px solid #C6C6C6;
 }
 
 .order_item img {

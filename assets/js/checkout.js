@@ -4,14 +4,11 @@ jQuery(document).ready(function ($) {
     const shippingSection = document.querySelector('.shipping_address');
     const stepShippingElements = document.querySelectorAll('.step-shipping');
     const placeOrderButton = document.querySelector('#custom_paiement_btn');
-    let shippingPostcodeChanged = false;
 
     stepShippingElements.forEach(element => element.classList.add('active'));
     $('.step-cart').on('click', function () {
         window.location.href = window.location.origin + '/panier/';
     });
-
-
 
     //On est obligé d'utilisé $ pour le checkout car il est chargé en AJAX et les events sont détectés par $
     //Fist load, keep loading order !!!
@@ -156,6 +153,7 @@ jQuery(document).ready(function ($) {
     }
 
     const copyShippingAddressToBillingAdress = () => {
+
         const shippingFirstName = document.querySelector('#shipping_first_name');
         const billingFirstName = document.querySelector('#billing_first_name');
         const shippingLastName = document.querySelector('#shipping_last_name');
@@ -171,28 +169,53 @@ jQuery(document).ready(function ($) {
         const shippingCountry = document.querySelector('#shipping_country');
         const billingCountry = document.querySelector('#billing_country');
 
-        if (shippingFirstName && billingFirstName && billingFirstName.value === '') {
-            billingFirstName.value = shippingFirstName.value;
-        }
+        const selectedShippingMethod = document.querySelector('.woocommerce-shipping-methods.selected');
 
-        if (shippingLastName && billingLastName && billingLastName.value === '') {
-            billingLastName.value = shippingLastName.value;
-        }
+        if (!selectedShippingMethod || !selectedShippingMethod.id) return;
 
-        if (shippingAddress && billingAddress && billingAddress.value === '') {
-            billingAddress.value = shippingAddress.value;
+        if (selectedShippingMethod.id === 'shipping-method-drive') {
+            if (billingFirstName && shippingFirstName && shippingFirstName.value === '') {
+                shippingFirstName.value = billingFirstName.value;
+            }
+
+            if (billingLastName && shippingLastName && shippingLastName.value === '') {
+                shippingLastName.value = billingLastName.value;
+            }
+
+            if ( billingAddress &&  shippingAddress && shippingAddress.value === '') {
+                shippingAddress.value = billingAddress.value;
+            }
+            if (billingAddress2 && shippingAddress2 && shippingAddress2.value === '') {
+                shippingAddress2.value = billingAddress2.value;
+            }
+            if (billingCity && shippingCity && shippingCity.value === '') {
+                shippingCity.value = billingCity.value;
+            }
         }
-        if (shippingAddress2 && billingAddress2 && billingAddress2.value === '') {
-            billingAddress2.value = shippingAddress2.value;
-        }
-        if (shippingCity && billingCity && billingCity.value === '') {
-            billingCity.value = shippingCity.value;
-        }
-        if (shippingPostcode && billingPostcode && billingPostcode.value === '') {
-            billingPostcode.value = shippingPostcode.value;
-        }
-        if (shippingCountry && billingCountry && billingCountry.value === '') {
-            billingCountry.value = shippingCountry.value;
+        else {
+            if (shippingFirstName && billingFirstName && billingFirstName.value === '') {
+                billingFirstName.value = shippingFirstName.value;
+            }
+
+            if (shippingLastName && billingLastName && billingLastName.value === '') {
+                billingLastName.value = shippingLastName.value;
+            }
+
+            if (shippingAddress && billingAddress && billingAddress.value === '') {
+                billingAddress.value = shippingAddress.value;
+            }
+            if (shippingAddress2 && billingAddress2 && billingAddress2.value === '') {
+                billingAddress2.value = shippingAddress2.value;
+            }
+            if (shippingCity && billingCity && billingCity.value === '') {
+                billingCity.value = shippingCity.value;
+            }
+            if (shippingPostcode && billingPostcode && billingPostcode.value === '') {
+                billingPostcode.value = shippingPostcode.value;
+            }
+            if (shippingCountry && billingCountry && billingCountry.value === '') {
+                billingCountry.value = shippingCountry.value;
+            }
         }
     }
 
@@ -494,10 +517,13 @@ jQuery(document).ready(function ($) {
             placeOrderButton.addEventListener('click', () => {
                 deleteLocalStorage();
                 isValid = validateCustomFields();
+
                 const checkoutNavigation = document.querySelector('#checkout-nav');
+
                 if (checkoutNavigation) {
                     document.querySelector('#checkout-nav').scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
                 }
+
                 if (isValid) {
                     setHiddenShippingFields();
                     copyShippingAddressToBillingAdress();
@@ -506,7 +532,7 @@ jQuery(document).ready(function ($) {
             });
         });
 
-        if(!backToShippingBtn) return;
+        if (!backToShippingBtn) return;
 
         backToShippingBtn.addEventListener('click', () => {
             step0Btn.click();

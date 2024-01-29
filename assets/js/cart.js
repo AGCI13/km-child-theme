@@ -91,50 +91,58 @@ const movePiOverallEstimateCart = () => {
 const emailMarketingBox = () => {
     const marketingWrapper = document.getElementById('km-customer-email-marketing');
 
-    if (marketingWrapper) {
-        confirmBtn = marketingWrapper.getElementById('km-send-marketing-email');
-
-        confirmBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            const emailInput = marketingWrapper.querySelector('input[name="discount_email"]');
-            const email = emailInput ? emailInput.value : '';
-
-            if (!email) {
-                marketingWrapper.innerHTML = 'E-mail manquant.';
-                return;
-            }
-
-            confirmBtn.disabled = true;
-
-            //Create a div to display the loader
-            loaderElement = document.createElement('div');
-            loaderElement.classList.add('km-spinner');
-            marketingWrapper.appendChild(loaderElement);
-
-            kmAjaxCall('discount_cart_form', { discount_email: email })
-                .then(response => {
-                    loaderElement.remove();
-
-                    console.log(response.data);
-                    if (response.success === true) {
-                        successMessages = document.createElement('div');
-                        successMessages.classList.add('woocommerce-success');
-                        marketingWrapper.innerHTML = response.data;
-                    } else {
-                        //Create a div to display the error message
-                        errorMessages = document.createElement('div');
-                        errorMessages.classList.add('woocommerce-error');
-                        errorMessages.innerHTML = response.data;
-                        marketingWrapper.appendChild(errorMessages);
-                        setTimeout(() => {
-                            marketingWrapper.removeChild(errorMessages);
-                        }, 3000);
-                    }
-                    confirmBtn.disabled = false;
-                });
-        });
+    if (!marketingWrapper) {
+        return;
     }
+
+    confirmBtn = marketingWrapper.querySelector('#km-send-marketing-email');
+    if (!confirmBtn) {
+        return;
+    }
+
+    confirmBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        console.log('click');
+
+        const emailInput = marketingWrapper.querySelector('input[name="km_cart_discount_email"]');
+        const email = emailInput ? emailInput.value : '';
+
+        if (!email) {
+            marketingWrapper.innerHTML = 'E-mail manquant.';
+            return;
+        }
+
+        const nonce = marketingWrapper.querySelector('input[name="km_cart_discount_email_nonce"]').value;
+        confirmBtn.disabled = true;
+
+        //Create a div to display the loader
+        loaderElement = document.createElement('div');
+        loaderElement.classList.add('km-spinner');
+        marketingWrapper.appendChild(loaderElement);
+
+        kmAjaxCall('discount_cart_form', { discount_email: email, discount_cart_nonce: nonce })
+            .then(response => {
+                loaderElement.remove();
+
+                console.log(response.data);
+                if (response.success === true) {
+                    successMessages = document.createElement('div');
+                    successMessages.classList.add('woocommerce-success');
+                    marketingWrapper.innerHTML = response.data;
+                } else {
+                    //Create a div to display the error message
+                    errorMessages = document.createElement('div');
+                    errorMessages.classList.add('woocommerce-error');
+                    errorMessages.innerHTML = response.data;
+                    marketingWrapper.appendChild(errorMessages);
+                    setTimeout(() => {
+                        marketingWrapper.removeChild(errorMessages);
+                    }, 3000);
+                }
+                confirmBtn.disabled = false;
+            });
+    });
 }
 
 jQuery(document).ready(function ($) {

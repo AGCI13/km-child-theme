@@ -77,6 +77,7 @@ foreach ( $items as $item_id => $item ) :
 			?>
 		</td>
 		<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align:middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;">
+			x
 			<?php
 				$qty          = $item->get_quantity();
 				$refunded_qty = $order->get_qty_refunded_for_item( $item_id );

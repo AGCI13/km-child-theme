@@ -105,6 +105,28 @@ class KM_Dynamic_Pricing {
 	}
 
 	/**
+	 * Désactive la variation si aucun produit de livraison n'est disponible.
+	 *
+	 * @param array                $variation_data Les données de la variation.
+	 * @param WC_Product           $product Le produit.
+	 * @param WC_Product_Variation $variation La variation.
+	 * @return array Les données de la variation.
+	 */
+	public function disable_variation_if_no_shipping_product( $variation_data, $product, $variation ) {
+
+		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $this->km_shipping_zone->is_in_thirteen )
+		|| ( $this->km_shipping_zone->is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
+		|| ( $this->km_shipping_zone->is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', $this->km_shipping_zone->shipping_zone_name ) ) ) ) {
+
+			// Désactiver la variation si aucun produit de livraison n'est disponible ou si le prix est 0.
+			$variation_data['is_purchasable']      = false;
+			$variation_data['variation_is_active'] = false;
+		}
+
+		return $variation_data;
+	}
+
+	/**
 	 * Change le prix du produit en fonction de la zone de livraison.
 	 *
 	 * @param float      $price Le prix du produit.
@@ -231,12 +253,15 @@ class KM_Dynamic_Pricing {
 
 		if ( $this->km_shipping_zone->is_in_thirteen && $disable_in_thirteen ) {
 			$this->modify_product_status( $product_id, 'unpurchasable' );
+			return false;
 		}
 
-		if ( $product->is_type( 'simple' ) && ! $this->is_product_shippable_out_13( $product ) ) {
+		if ( $product->is_type( 'simple' ) && ! $this->km_shipping_zone->is_in_thirteen && ! $this->is_product_shippable_out_13( $product ) ) {
 			$this->modify_product_status( $product_id, 'unpurchasable' );
 			return false;
-		} elseif ( $product->is_type( 'variable' ) ) {
+		}
+
+		if ( $product->is_type( 'variable' ) ) {
 			return $this->handle_variable_product( $product );
 		}
 
@@ -272,14 +297,14 @@ class KM_Dynamic_Pricing {
 		foreach ( $product->get_children() as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
-			// Intégration de la logique de 'disable_variation_if_no_shipping_product'
+			// Intégration de la logique de 'disable_variation_if_no_shipping_product'.
 			$is_variation_purchasable = $this->is_variation_purchasable( $variation );
 
 			if ( $variation->is_in_stock() ) {
 				$all_variations_out_of_stock = false;
 			}
 
-			if ( $is_variation_purchasable ) {
+			if ( $is_variation_purchasable && ! get_field( 'dont_sell_in_thirteen', $variation_id ) ) {
 				$all_variations_unpurchasable = false;
 			}
 		}
@@ -351,11 +376,7 @@ class KM_Dynamic_Pricing {
 
 		if ( in_array( $product_id, $this->out_of_stock_products ) ) {
 			// Si le produit est uniquement en rupture de stock (et pas non achetable), affichez le prix avec le message de rupture de stock.
-			if ( empty( $messages ) ) {
-				return $price . ' <p class="km-price-info">' . __( 'En rupture de stock', 'kingmateriaux' ) . '</p>';
-			} else {
-				$messages[] = '<p class="km-price-info">' . __( 'En rupture de stock', 'kingmateriaux' ) . '</p>';
-			}
+			$messages[] = '<p class="km-price-info">' . __( 'En rupture de stock', 'kingmateriaux' ) . '</p>';
 		}
 
 		if ( ! empty( $messages ) ) {

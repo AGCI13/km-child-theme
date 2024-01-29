@@ -20,41 +20,130 @@ function km_front_scripts_enqueue() {
 	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 	wp_enqueue_script( 'km-ajax-script' );
 
-	wp_enqueue_script( 'km-front-scripts', $js_uri . 'front.min.js', array( 'jquery' ), filemtime( $js_path . 'front.min.js' ), false );
+	wp_enqueue_script(
+		'km-front-scripts',
+		$js_uri . 'front.min.js',
+		array( 'jquery' ),
+		filemtime( $js_path . 'front.min.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
 
 	wp_enqueue_style( 'km-postcode-form-style', $css_uri . 'postcode-form.min.css', array(), filemtime( $css_path . 'postcode-form.min.css' ), 'all' );
-	wp_enqueue_script( 'km-postcode-form-script', $js_uri . 'postcode-form.min.js', array(), filemtime( $js_path . 'postcode-form.min.js' ), true );
+	wp_enqueue_script(
+		'km-postcode-form-script',
+		$js_uri . 'postcode-form.min.js',
+		array(),
+		filemtime( $js_path . 'postcode-form.min.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
 
 	if ( is_page( 'se-connecter' ) ) {
-		wp_enqueue_script( 'km-registration-script', $js_uri . 'registration.min.js', array( 'jquery' ), filemtime( $js_path . 'registration.min.js' ), true );
+		wp_enqueue_script(
+			'km-registration-script',
+			$js_uri . 'registration.min.js',
+			array( 'jquery' ),
+			filemtime( $js_path . 'registration.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 	}
 
 	if ( is_product() ) {
 		wp_enqueue_style( 'km-product-single-style', $css_uri . 'product-single.min.css', array(), filemtime( $css_path . 'product-single.min.css' ), 'all' );
-		wp_register_script( 'add-to-cart-confirmation', $js_uri . 'add-to-cart-confirmation.min.js', array(), filemtime( $js_path . 'add-to-cart-confirmation.min.js' ), true );
+		wp_register_script(
+			'add-to-cart-confirmation',
+			$js_uri . 'add-to-cart-confirmation.min.js',
+			array(),
+			filemtime( $js_path . 'add-to-cart-confirmation.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 		wp_register_style( 'km-tonnage-calculator-style', $css_uri . 'tonnage-calculator.min.css', array(), filemtime( $css_path . 'tonnage-calculator.min.css' ), 'all' );
-		wp_register_script( 'km-tonnage-calculator-script', $js_uri . 'tonnage-calculator.min.js', array( 'jquery' ), filemtime( $js_path . 'tonnage-calculator.min.js' ), true );
+		wp_register_script(
+			'km-tonnage-calculator-script',
+			$js_uri . 'tonnage-calculator.min.js',
+			array( 'jquery' ),
+			filemtime( $js_path . 'tonnage-calculator.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 	}
 
 	if ( is_product_category() ) {
 		wp_register_style( 'km-product-filters-style', $css_uri . 'product-filters.min.css', array(), filemtime( $css_path . 'product-filters.min.css' ), 'all' );
-		wp_register_script( 'km-product-filters-script', $js_uri . 'product-filters.min.js', array(), filemtime( $js_path . 'product-filters.min.js' ), true );
+		wp_register_script(
+			'km-product-filters-script',
+			$js_uri . 'product-filters.min.js',
+			array(),
+			filemtime( $js_path . 'product-filters.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 		wp_enqueue_style( 'km-archive-product-style', $css_uri . 'product-archive.min.css', array(), filemtime( $css_path . 'product-archive.min.css' ), 'all' );
-		wp_enqueue_script( 'km-archive-product-script', $js_uri . 'product-archive.min.js', array( 'jquery' ), filemtime( $js_path . 'product-archive.min.js' ), true );
-		// wp_enqueue_style( 'km-product-cat-style', '/wp-content/plugins/elementor-pro/assets/css/frontend.min.css', array(), filemtime( '/wp-content/plugins/elementor-pro/assets/css/frontend.min.css' ), 'all' );
+		wp_enqueue_script(
+			'km-archive-product-script',
+			$js_uri . 'product-archive.min.js',
+			array( 'jquery' ),
+			filemtime( $js_path . 'product-archive.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 	}
 
 	if ( is_cart() || is_checkout() ) {
 		wp_enqueue_style( 'km-cart-style', $css_uri . 'cart.min.css', array(), filemtime( $css_path . 'cart.min.css' ), 'all' );
-		wp_enqueue_script( 'km-cart-script', $js_uri . 'cart.min.js', array(), filemtime( $js_path . 'cart.min.js' ), true );
+		wp_enqueue_script(
+			'km-cart-script',
+			$js_uri . 'cart.min.js',
+			array(),
+			filemtime( $js_path . 'cart.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 		wp_localize_script( 'km-cart-script', 'themeObject', array( 'themeUrl' => get_stylesheet_directory_uri() ) );
 	}
 
 	if ( is_checkout() ) {
-		wp_enqueue_script( 'km-registration-script', $js_uri . 'registration.min.js', array( 'jquery' ), filemtime( $js_path . 'registration.min.js' ), true );
+		wp_enqueue_script(
+			'km-registration-script',
+			$js_uri . 'registration.min.js',
+			array( 'jquery' ),
+			filemtime( $js_path . 'registration.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.min.css', array(), filemtime( $css_path . 'checkout.min.css' ), 'all' );
 		wp_enqueue_style( 'km-datetimepicker-style', $css_uri . 'datetimepicker.min.css', array(), filemtime( $css_path . 'datetimepicker.min.css' ), 'all' );
-		wp_enqueue_script( 'km-checkout-script', $js_uri . 'checkout.min.js', array( 'jquery' ), filemtime( $js_path . 'checkout.min.js' ), true );
+		wp_enqueue_script(
+			'km-checkout-script',
+			$js_uri . 'checkout.min.js',
+			array( 'jquery' ),
+			filemtime( $js_path . 'checkout.min.js' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 	}
 }
 add_action( 'wp_enqueue_scripts', 'km_front_scripts_enqueue' );

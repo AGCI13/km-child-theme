@@ -40,44 +40,60 @@ function km_handle_discount_newsletter_form( $record, $handler ) {
 }
 add_action( 'elementor_pro/forms/new_record', 'km_handle_discount_newsletter_form', 10, 2 );
 
-// CASE EMAIL INPUT CART PAGE
-add_action( 'wp_ajax_discount_cart_form', 'km_handle_discount_cart_form' );
-add_action( 'wp_ajax_nopriv_discount_cart_form', 'km_handle_discount_cart_form' );
+/**
+ * Handles cart email discount form.
+ *
+ * @return void
+ */
 function km_handle_discount_cart_form() {
 
-	if ( isset( $_POST['discount_email'] ) && ! empty( $_POST['discount_email'] ) ) {
+	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		return;
+	}
 
-		$email = filter_var( trim( $_POST['discount_email'] ), FILTER_SANITIZE_EMAIL );
+	$nonce_value = isset( $_POST['discount_cart_nonce'] ) && ! empty( $_POST['discount_cart_nonce'] ) ? wp_unslash( $_POST['discount_cart_nonce'] ) : '';
+	$nonce_value = sanitize_text_field( $nonce_value );
+
+	if ( ! wp_verify_nonce( $nonce_value, 'discount_cart_form' ) ) {
+		wp_send_json_error( array( 'message' => __( 'La vérification du nonce a échoué.' ) ) );
+	}
+
+	if ( ! isset( $_POST['discount_email'] ) || empty( $_POST['discount_email'] ) ) {
+		wp_send_json_error( __( 'Veuillez renseigner un e-mail.', 'kingmateriaux' ) );
+	}
+
+	$email = filter_var( trim( $_POST['discount_email'] ), FILTER_SANITIZE_EMAIL );
 
 		// Check if email is valid.
-		if ( is_email( $email ) === false ) {
-			wp_send_json_error( __( 'L_e-mail renseigné n \'est pas valide.', 'kingmateriaux' ) );
-		}
+	if ( is_email( $email ) === false ) {
+		wp_send_json_error( __( 'L_e-mail renseigné n \'est pas valide.', 'kingmateriaux' ) );
+	}
 
 		// Get current user id if user is connected, else leave empty.
-		if ( is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$name         = esc_html( $current_user->user_login );
-		} else {
-			$name = '';
-		}
-
-		$opt    = 'true';
-		$source = 'panier';
-
-		// Add session data wac-email to hide the email field on cart page.
-		WC()->session->set( 'discount_email', $email );
-
-		// Do the magic.
-		km_send_data_to_cloudops( $name, $email, $opt, $source );
-
-		// Unset vars.
-		unset( $_POST['discount_email'], $name, $email, $opt, $source );
-
-		// Send success message.
-		wp_send_json_success( __( 'Votre email à bien été transmis. Vous allez recevoir votre code promo sur celui-ci.', 'kingmateriaux' ) );
+	if ( is_user_logged_in() ) {
+		$current_user = wp_get_current_user();
+		$name         = esc_html( $current_user->user_login );
+	} else {
+		$name = '';
 	}
+
+	$opt    = 'true';
+	$source = 'panier';
+
+	// Add session data wac-email to hide the email field on cart page.
+	WC()->session->set( 'km_cart_discount_email', $email );
+
+	// Do the magic.
+	km_send_data_to_cloudops( $name, $email, $opt, $source );
+
+	// Unset vars.
+	unset( $_POST['km_cart_discount_email'], $name, $email, $opt, $source );
+
+	// Send success message.
+	wp_send_json_success( __( 'Votre email à bien été transmis. Vous allez recevoir votre code promo sur celui-ci.', 'kingmateriaux' ) );
 }
+add_action( 'wp_ajax_discount_cart_form', 'km_handle_discount_cart_form' );
+add_action( 'wp_ajax_nopriv_discount_cart_form', 'km_handle_discount_cart_form' );
 
 // CASE ORDER CHECKOUT FORM
 add_action( 'woocommerce_before_checkout_process', 'km_get_checkout_form_data' );
@@ -96,24 +112,24 @@ function km_get_checkout_form_data() {
 }
 
 // REACH CLOUD OPS ENDPOINT WITH DATA AS URL PARAMS
-function km_send_data_to_cloudops( $name, $email, $opt, $source ) {
+function km_send_data_to_cloudops( $name = '', $email, $opt, $source ) {
 
 	// Get current user id if user is connected, else leave empty
 	$user_id = get_current_user_id() ?: '';
 
-	// create a new cURL resource
+	// create a new cURL resource.
 	$ch = curl_init();
 
 	// error_log( var_export( "https://cloud.web.kingmateriaux.com/woo-subscriptions?woo=$user_id&email=$email&name=$name&opt=$opt&source=$source", true ) );
 
-	// set URL and other appropriate options
+	// set URL and other appropriate options.
 	curl_setopt( $ch, CURLOPT_URL, "https://cloud.web.kingmateriaux.com/woo-subscriptions?woo=$user_id&email=$email&name=$name&opt=$opt&source=$source" );
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	curl_setopt( $ch, CURLOPT_ENCODING, '' );
 
-	// grab URL and pass it to the browser
+	// grab URL and pass it to the browser.
 	$response = curl_exec( $ch );
 
-	// close cURL resource, and free up system resources
+	// close cURL resource, and free up system resources.
 	curl_close( $ch );
 }

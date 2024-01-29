@@ -3,13 +3,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-function change_cart_totals_text( $translated_text, $text, $domain ) {
+/**
+ * Change le labelTotal dans le récapitulatif panier
+ *
+ * @param string $translated_text
+ * @param string $text
+ * @param string $domain
+ * @return string
+ */
+function km_change_cart_totals_text( $translated_text, $text, $domain ) {
 	if ( is_cart() && 'Total' === $text ) {
 		$translated_text = 'Total hors livraison';
 	}
 	return $translated_text;
 }
-add_filter( 'gettext', 'change_cart_totals_text', 20, 3 );
+add_filter( 'gettext', 'km_change_cart_totals_text', 20, 3 );
 
 /**
  * Supprime le calcul des frais de livraison du panier contient
@@ -31,7 +39,7 @@ add_filter( 'woocommerce_cart_needs_shipping', 'filter_cart_needs_shipping' );
  * @param array $available_methods
  * @return array
  */
-function add_clear_cart_button() {
+function km_add_clear_cart_button() {
 	?>
 	<div class="cart-actions">
 		<a class="cart-action-link clear-cart" href="<?php echo esc_url( add_query_arg( 'clear-cart', 'yes' ) ); ?>">
@@ -41,7 +49,7 @@ function add_clear_cart_button() {
 	</div>
 	<?php
 }
-add_action( 'woocommerce_before_cart_table', 'add_clear_cart_button', 1, 0 );
+add_action( 'woocommerce_before_cart_table', 'km_add_clear_cart_button', 1, 0 );
 
 /**
  * Vide le panier si l'URL contient le paramètre clear-cart=yes
@@ -49,14 +57,14 @@ add_action( 'woocommerce_before_cart_table', 'add_clear_cart_button', 1, 0 );
  * @param array $available_methods
  * @return array
  */
-function clear_cart_url() {
+function km_clear_cart_url() {
 	if ( ! is_admin() && isset( $_GET['clear-cart'] ) && 'yes' === $_GET['clear-cart'] ) {
 		WC()->cart->empty_cart();
 		wp_safe_redirect( wc_get_cart_url() );
 		exit;
 	}
 }
-add_action( 'init', 'clear_cart_url' );
+add_action( 'init', 'km_clear_cart_url' );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande
@@ -66,7 +74,7 @@ add_action( 'init', 'clear_cart_url' );
 function km_after_cart_coupon_content() {
 
 	// Add email to WC session.
-	$email = WC()->session->get( 'discount_email' );
+	$email = WC()->session->get( 'km_cart_discount_email' );
 
 	if ( is_user_logged_in() || ! empty( $email ) ) {
 		return;
@@ -77,8 +85,9 @@ function km_after_cart_coupon_content() {
 			<?php printf( esc_html__( 'Renseignez votre e-mail et bénéficiez d\'un code promo de %1$s-10%%%2$s pour valider votre panier !', 'kingmateriaux' ), '<span class="highlighted">', '</span>' ); ?>
 		</p>
 		<p class="form">
-			<input type="email" class="input-text" name="discount_email" placeholder="<?php echo esc_html__( 'Adresse e-mail', 'kingmateriaux' ); ?>"/>
-			<button type="submit" id="km-send-marketing-email" class="btn btn-primary confirm-btn"> 	<?php echo esc_html__( 'Valider', 'kingmateriaux' ); ?></button>
+			<input type="email" class="input-text" name="km_cart_discount_email" placeholder="<?php echo esc_html__( 'Adresse e-mail', 'kingmateriaux' ); ?>"/>
+			<?php wp_nonce_field( 'discount_cart_form', 'km_cart_discount_email_nonce' ); ?>
+			<button id="km-send-marketing-email" class="btn btn-primary confirm-btn"> 	<?php echo esc_html__( 'Valider', 'kingmateriaux' ); ?></button>
 		</p>
 	</div>
 	<?php
@@ -182,7 +191,7 @@ add_filter( 'woocommerce_cart_totals_order_total_html', 'km_add_ecotax_to_order_
  * --------------- START RECAP ----------------------
  */
 
-function display_shipping_info_text() {
+function km_display_shipping_info_text() {
 	// Vérifiez si WC_Cart est initialisé
 	if ( is_admin() || ! is_a( WC()->cart, 'WC_Cart' ) ) {
 		return;
@@ -195,7 +204,7 @@ function display_shipping_info_text() {
 		return;
 	}
 
-	$shipping_html = get_shipping_info_text( $km_shipping_zone );
+	$shipping_html = km_get_shipping_info_text( $km_shipping_zone );
 
 	?>
 	<tr class="shipping-info">
@@ -214,10 +223,8 @@ function display_shipping_info_text() {
  * @param KM_Shipping_Zone $km_shipping_zone
  * @return string
  */
-function get_shipping_info_text( $km_shipping_zone ) {
+function km_get_shipping_info_text( $km_shipping_zone ) {
 	if ( $km_shipping_zone->is_in_thirteen() ) {
-		// $shipping_cost = (int) WC()->session->get( 'option1_shipping_cost' );
-		// $shipping_text = $shipping_cost === 0 ? __( 'Calcul à l\'étape suivante', 'kingmateriaux' ) : __( 'À partir de ' . wc_price( $shipping_cost ), 'kingmateriaux' );
 		$shipping_text = __( 'Calcul à l\'étape suivante', 'kingmateriaux' );
 	} elseif ( $km_shipping_zone->shipping_zone_id ) {
 		$shipping_text = __( 'Incluse', 'kingmateriaux' );
@@ -231,7 +238,7 @@ function get_shipping_info_text( $km_shipping_zone ) {
 	return $shipping_text;
 }
 
-add_filter( 'woocommerce_cart_totals_before_order_total', 'display_shipping_info_text', 10 );
+add_filter( 'woocommerce_cart_totals_before_order_total', 'km_display_shipping_info_text', 10 );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande
@@ -278,12 +285,20 @@ add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_
 function km_add_pallet_description_under_product_name( $cart_item, $cart_item_key ) {
 	$product_name = $cart_item['data']->get_name();
 	if ( strpos( $product_name, 'Palette' ) !== false ) {
-		echo '<small class="cart-item-meta">⚠ Les palettes de parpaings sont consignées au prix de 28,80 € TTC la palette. Nous vous invitons à retourner la ou les palettes dans nos locaux, nous vous rembourserons 20,40 € TTC par palette. ⚠</small>';
+		echo '<small class="cart-item-meta">' . esc_html__( '⚠ Les palettes de parpaings sont consignées au prix de 28,80 € TTC la palette. Nous vous invitons à retourner la ou les palettes dans nos locaux, nous vous rembourserons 20,40 € TTC par palette. ⚠', 'kingmateriaux' ) . '</small>';
 	}
 }
 add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
 
 
+/**
+ * Vérifie le poids du panier avant d'ajouter un produit
+ *
+ * @param bool $passed
+ * @param int  $product_id
+ * @param int  $quantity
+ * @return bool
+ */
 function km_check_cart_weight_before_adding( $passed, $product_id, $quantity ) {
 	$max_weight     = 59999; // Le poids maximum du panier en kg.
 	$product        = wc_get_product( $product_id );

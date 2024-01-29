@@ -4,13 +4,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ * Affiche un message d'erreur admin si une dépendance est manquante et ne charge pas les fichiers du thème.
+ *
+ * @param string $dependency Le nom de la dépendance requise.
+ */
+function display_admin_dependency_error( $dependency ) {
+	$message = sprintf(
+		'<div class="error"><p><strong>%s</strong>: %s</p></div>',
+		esc_html__( 'Attention', 'kingmateriaux' ),
+		esc_html__( sprintf( '%s est requis pour que ce thème personnalisé fonctionne.', $dependency ), 'kingmateriaux' )
+	);
+
+	echo wp_kses(
+		$message,
+		array(
+			'div'    => array( 'class' => array() ),
+			'p'      => array(),
+			'strong' => array(),
+		)
+	);
+}
+
 if ( ! class_exists( 'WooCommerce' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div class="error">'
-			. '<p><strong>Attention</strong>:'
-			. ' WooCommerce est requis pour que ce <strong>thème personnalisé fonctionne.</strong></p></div>';
+			display_admin_dependency_error( 'WooCommerce' );
 		}
 	);
 	return;
@@ -20,9 +40,7 @@ if ( ! class_exists( 'ACF' ) ) {
 	add_action(
 		'admin_notices',
 		function () {
-			echo '<div class="error">'
-			. '<p><strong>Attention</strong>:'
-			. ' Advanced Custom Field PRO (ACF) est requis pour que ce <strong>thème personnalisé fonctionne.</strong></p></div>';
+			display_admin_dependency_error( 'Advanced Custom Field PRO (ACF)' );
 		}
 	);
 	return;

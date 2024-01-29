@@ -88,11 +88,45 @@ function km_get_bacs_account_details_html() {
 	return $output;
 }
 
+/**
+ * Filtrer les éléments de menus en fonction de la zone de livraison.
+ *
+ * @param array    $items Les éléments de menu.
+ * @param stdClass $args  Les arguments de wp_nav_menu().
+ *
+ * @return array
+ */
+function km_filter_menu_items( $items, $args ) {
+	// Obtenez l'instance de KM_Shipping_Zone.
+	$shipping_zone = KM_Shipping_Zone::get_instance();
+
+	// Si on est pas dans la zone 13, masquez certaines catégories et leurs enfants.
+	if ( ! $shipping_zone->is_in_thirteen ) {
+		$menu_to_remove = array();
+
+		foreach ( $items as $key => $item ) {
+			// Identifiez les éléments de menu "Matériaux" et "Locations".
+			if ( false !== strpos( $item->url, 'materiaux-de-construction' ) || false !== strpos( $item->url, 'location' ) ) {
+				$menu_to_remove[] = $item->ID;
+				unset( $items[ $key ] );
+			}
+		}
+
+		// Parcourez à nouveau pour supprimer les enfants de ces éléments de menu.
+		foreach ( $items as $key => $item ) {
+			if ( in_array( $item->menu_item_parent, $menu_to_remove ) ) {
+				unset( $items[ $key ] );
+			}
+		}
+	}
+
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'km_filter_menu_items', 10, 2 );
 
 
 
 // add_action( 'woocommerce_thankyou', 'plausible_revenue_tracking' );
-
 function plausible_revenue_tracking( $order_id ) {
 	$order = wc_get_order( $order_id );
 	?>
