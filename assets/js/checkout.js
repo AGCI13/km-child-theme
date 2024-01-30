@@ -6,6 +6,7 @@ jQuery(document).ready(function ($) {
     const placeOrderButton = document.querySelector('#custom_paiement_btn');
 
     stepShippingElements.forEach(element => element.classList.add('active'));
+
     $('.step-cart').on('click', function () {
         window.location.href = window.location.origin + '/panier/';
     });
@@ -44,6 +45,7 @@ jQuery(document).ready(function ($) {
         $('#custom_paiement_btn').prop('disabled', true).addClass('disabled');
         showLoader('.shopengine-checkout-shipping-methods');
     });
+
 
     const showLoader = (selector) => {
         const loaderHtml = `<div class="km-spinner"></div>`;
@@ -182,7 +184,7 @@ jQuery(document).ready(function ($) {
                 shippingLastName.value = billingLastName.value;
             }
 
-            if ( billingAddress &&  shippingAddress && shippingAddress.value === '') {
+            if (billingAddress && shippingAddress && shippingAddress.value === '') {
                 shippingAddress.value = billingAddress.value;
             }
             if (billingAddress2 && shippingAddress2 && shippingAddress2.value === '') {
@@ -528,6 +530,17 @@ jQuery(document).ready(function ($) {
                     setHiddenShippingFields();
                     copyShippingAddressToBillingAdress();
                     stepPayment.click();
+
+                    var paymentMethods = document.querySelectorAll('.wc_payment_method');
+
+                    paymentMethods.forEach(function(paymentMethod) {
+                        paymentMethod.addEventListener('click', function() {
+                            var radioButton = this.querySelector('input[name="payment_method"]');
+                            if (radioButton) {
+                                radioButton.click();
+                            }
+                        });
+                    });
                 }
             });
         });

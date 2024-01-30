@@ -465,10 +465,15 @@ label[for="shipping_method_0_drive"],
     position: relative;
     min-height: 80px;
     border-radius: 5px;
-    box-shadow: 0 0px 10px 0 #ebebeb;
+    box-shadow: 0 0px 10px 0 #e2e2e2;
     padding: 18px 20px;
     margin-bottom: 18px;
     transition: box-shadow .2s ease-in-out;
+}
+
+.woocommerce-checkout .moyen-paiement #payment li.wc_payment_method:hover {
+    box-shadow: 0 0 10px 0 #aaaaaa;
+    cursor:pointer;
 }
 
 .woocommerce-checkout .moyen-paiement #payment li.wc_payment_method:before {
