@@ -461,90 +461,82 @@ label[for="shipping_method_0_drive"],
     display: none;
 }
 
-
-/* Moyen de paiement */
-/*
-4* : /wp-content/uploads/2023/12/rassurance-paiement-4-fois.jpg
-CB : /wp-content/uploads/2023/12/rassurance-paiment-carte-bancaire.jpg
-Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
-*/
-
-
-
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs {
+.woocommerce-checkout .moyen-paiement #payment li.wc_payment_method {
     position: relative;
     min-height: 80px;
+    border-radius: 5px;
+    box-shadow: 0 0px 10px 0 #ebebeb;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    transition: box-shadow .2s ease-in-out;
 }
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs:after {
+.woocommerce-checkout .moyen-paiement #payment li.wc_payment_method:before {
     content: "";
-    background: url('/wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg');
-    position: absolute;
-    background-size: 160px 31px;
-    width: 160px;
-    height: 31px;
-    top: 35px;
-    left: 0px;
-    border-radius: 4px;
-    border: 1px solid black;
-}
-
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs div.payment_method_bacs p {
-    margin-top: 30px;
-}
-
-
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma {
     position: relative;
-    min-height: 80px;
+    background-size: 100% auto!important;
+    width: 94px;
+    height: 35px;
 }
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma:after {
-    content: "";
-    background: url('/wp-content/uploads/2023/12/rassurance-paiement-4-fois.jpg');
-    position: absolute;
-    background-size: 160px 31px;
-    width: 160px;
-    height: 31px;
-    top: 35px;
-    left: 0px;
-    border-radius: 4px;
-    border: 1px solid black;
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_stripe .payment_box{
+display: inline-flex;
 }
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma div.payment_method_alma>div {
-    margin-top: 30px;
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_stripe:before {
+    background: url('../img/logo-stripe-couleur-120.jpg') no-repeat;
 }
 
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_ppcp-gateway:before {
+    background: url('../img/logo-paypal-couleur-120.jpg') no-repeat;
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 {
-    position: relative;
-    min-height: 80px;
 }
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1:after {
-    content: "";
-    background: url('/wp-content/uploads/2023/12/rassurance-paiment-carte-bancaire.jpg');
-    position: absolute;
-    background-size: 160px 31px;
-    width: 160px;
-    height: 31px;
-    top: 35px;
-    left: 0px;
-    border-radius: 4px;
-    border: 1px solid black;
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_alma:before {
+    background: url('../img/logo-alma-couleur-120.jpg') no-repeat;
 }
 
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 img {
-    display: none;
-}
-
-.woocommerce-checkout .moyen-paiement #payment li.payment_method_etransactions_std_card_1 div.payment_method_etransactions_std_card_1 p {
-    margin-top: 30px;
+.woocommerce-checkout .moyen-paiement #payment li.payment_method_bacs:before {
+    background: url('../img/logo-virement-bancaire-120.jpg') no-repeat;
 }
 
 .woocommerce-checkout-review-order-table th {
     margin-right: 10px;
+}
+
+.woocommerce-checkout #payment div.payment_box {
+    background-color: #f5f5f5!important;
+    border-radius: 5px;
+    padding: 1rem !important;
+    font-size: 14px;
+    top: 10px!important;
+    color: #656565 !important;
+    position: relative;
+}
+
+.woocommerce-checkout #payment #wc-stripe-cc-form div.form-row {
+    padding: 0;
+}
+
+#stripe-payment-data fieldset:last-child {
+    padding: 0;
+    border: none;
+}
+
+#stripe-payment-data .woocommerce-SavedPaymentMethods-saveNew {
+    display: flex !important;
+    gap: 0.5rem;
+}
+
+#stripe-payment-data .woocommerce-SavedPaymentMethods-saveNew input {
+    border: 2px solid #505050 !important;
+}
+
+#payment .newsletter label.checkbox{
+    color: #3A3A3A !important;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 17px;
 }
 
 @media (max-width: 768px) {
@@ -628,5 +620,5 @@ Virement : /wp-content/uploads/2023/12/rassurance-paiement-virement-bancaire.jpg
 }
 
 .shopengine-widget .shopengine-checkout-review-order .woocommerce-checkout-review-order-table tr:last-child .includes_tax .woocommerce-Price-amount.amount {
-    font-size:13px!important;
+    font-size: 13px !important;
 }

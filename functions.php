@@ -4,6 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// function f( $x ) {
+// return 125.84 + 87.26 * $x;
+// }
+
+// for ( $i = 1; $i < 6; $i++ ) {
+// echo '<ul>';
+// echo f( $i ) . '<br>';
+// echo '</ul>';
+// }
+
 /**
  * Affiche un message d'erreur admin si une dépendance est manquante et ne charge pas les fichiers du thème.
  *
