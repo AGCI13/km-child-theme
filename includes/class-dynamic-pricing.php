@@ -88,6 +88,7 @@ class KM_Dynamic_Pricing {
 		add_filter( 'woocommerce_variation_prices_price', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 80, 3 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 99, 2 );
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
+		add_filter( 'woocommerce_available_variation', array( $this, 'disable_variation_if_no_shipping_product' ), 10, 3 );
 		add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
 	}
 
@@ -362,7 +363,8 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Affiche un message au lieu du prix du produit.
 	 *
-	 * @param string     $price Le prix du produit.
+	 * @param string     $price Le prix du produi
+	 *      t.
 	 * @param WC_Product $product Le produit.
 	 * @return string Le prix du produit.
 	 */

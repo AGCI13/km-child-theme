@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-// Enregistrer le statut de commande : "Prévue"
+// Enregistrer le statut de commande : "Prévue".
 function km_register_scheduled_order_status() {
 	register_post_status(
 		'wc-scheduled',
@@ -20,7 +20,7 @@ function km_register_scheduled_order_status() {
 }
 add_action( 'init', 'km_register_scheduled_order_status' );
 
-// Enregistrer le statut de commande : "En cours de SAV"
+// Enregistrer le statut de commande : "En cours de SAV".
 function km_register_sav_order_status() {
 	register_post_status(
 		'wc-sav',
@@ -70,97 +70,6 @@ function km_add_sav_to_order_statuses( $order_statuses ): array {
 	return $new_order_statuses;
 }
 add_filter( 'wc_order_statuses', 'km_add_sav_to_order_statuses' );
-
-// Ajouter la colonne 'Transporteur' à la liste des commandes
-function km_add_transporter_column( $columns ) {
-	$columns['transporter_column'] = __( 'Transporteur', 'kingmateriaux' );
-	return $columns;
-}
-add_filter( 'manage_edit-shop_order_columns', 'km_add_transporter_column' );
-
-// Afficher les données du champ ACF 'transporteur' dans la colonne 'Transporter'
-function km_show_transporter_data( $column ) {
-	global $post;
-
-	if ( 'transporter_column' === $column ) {
-
-		// Récupérer les données du champ ACF 'transporteur'
-		$transp_name = get_post_meta( $post->ID, 'transporteur', true );
-		$transp_slug = sanitize_title( $transp_name );
-
-		switch ( $transp_slug ) {
-			case 'king':
-				echo '<mark class="transp-label ' . esc_html( $transp_slug ) . '">' . esc_html( $transp_name ) . '</mark>';
-				break;
-			case 'kuehne':
-				echo '<mark class="transp-label ' . esc_html( $transp_slug ) . '">' . esc_html( $transp_name ) . '</mark>';
-				break;
-			case 'fragner':
-				echo '<mark class="transp-label ' . esc_html( $transp_slug ) . '">' . esc_html( $transp_name ) . '</mark>';
-				break;
-			case 'geotextile':
-				echo '<mark class="transp-label ' . esc_html( $transp_slug ) . '">' . esc_html( $transp_name ) . '</mark>';
-				break;
-			case 'tred':
-				echo '<mark class="transp-label ' . esc_html( $transp_slug ) . '">' . esc_html( $transp_name ) . '</mark>';
-				break;
-			default:
-				echo '<mark class="transp-label undefined">' . __( 'Non défini', 'kingmateriaux' ) . '</mark>';
-				break;
-		}
-	}
-}
-add_action( 'manage_shop_order_posts_custom_column', 'km_show_transporter_data' );
-
-// Changer le sujet de l'email de commande terminée en fonction de la valeur du champ ACF 'transporteur'
-function km_custom_completed_order_email_subject( $subject, $order ) {
-	// Obtenez la valeur du champ ACF 'transporteur' pour cette commande.
-	$transporter = get_post_meta( $order->get_id(), 'transporteur', true );
-
-	// Modifiez l'objet de l'email en fonction de la valeur du champ 'transporteur'.
-	if ( $transporter ) {
-		$subject = sprintf( 'Votre a été expédié avec %s.', $transporter );
-	}
-	return $subject;
-}
-// TODO: Usage à confirmer
-// add_filter('woocommerce_email_subject_customer_completed_order', 'km_custom_completed_order_email_subject', 10, 2);
-
-function km_add_transporter_to_order_status_column( $column ) {
-	global $post;
-
-	// Récupérer la commande actuelle.
-	$order = wc_get_order( $post->ID );
-	if ( ! $order ) {
-		return;
-	}
-
-	// Afficher le nombre d'articles pour la colonne 'order_items'.
-	if ( 'order_items' === $column ) {
-		$items_count = $order->get_item_count();
-		echo $items_count;
-	}
-
-	// Personnaliser l'affichage pour la colonne 'order_status'.
-	if ( 'order_status' === $column ) {
-		// Si la commande est en attente et payée par virement bancaire (bacs).
-		if ( 'on-hold' === $order->get_status() && 'bacs' === $order->get_payment_method() ) {
-			echo '<style>.order-status.status-on-hold { background:#f9e466!important; }</style>';
-		}
-
-		// Si la commande est terminée.
-		if ( 'completed' === $order->get_status() ) {
-			// Récupérer la valeur du champ 'transporteur'.
-			$transporter = get_post_meta( $order->get_id(), 'transporteur', true );
-
-			// Afficher le transporteur si défini.
-			if ( $transporter ) {
-				echo '<mark class="order-status status-completed"><span>' . esc_html( $transporter ) . '</span></mark>';
-			}
-		}
-	}
-}
-add_action( 'manage_shop_order_posts_custom_column', 'km_add_transporter_to_order_status_column' );
 
 /**
  * Ajoute les données du calendrier du drive à la commande
@@ -286,22 +195,3 @@ function km_disable_completed_order_email( $enabled, $order ) {
 	return $enabled;
 }
 add_filter( 'woocommerce_email_enabled_customer_completed_order', 'km_disable_completed_order_email', 10, 2 );
-
-/**
- * Save the transporter value from the order admin page
- */
-function km_save_transporteur_callback() {
-	$post_id      = intval( $_POST['post_id'] );
-	$transporteur = sanitize_text_field( $_POST['transporteur'] );
-
-	if ( $post_id && $transporteur ) {
-		update_post_meta( $post_id, 'transporteur', $transporteur );
-		echo 'La valeur du transporteur a été mise à jour.';
-	} else {
-		echo 'Erreur lors de la mise à jour.';
-	}
-
-	wp_die(); // Arrête l'exécution du script.
-}
-add_action( 'wp_ajax_save_transporteur', 'km_save_transporteur_callback' );
-add_action( 'wp_ajax_nopriv_save_transporteur', 'km_save_transporteur_callback' );

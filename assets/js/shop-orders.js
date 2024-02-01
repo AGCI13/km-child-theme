@@ -50,7 +50,7 @@ jQuery(document).ready(function ($) {
         var transporterSlug = slugifyTransporterName(transporterName);
 
         // Appel AJAX pour mettre à jour le transporteur
-        kmAjaxCall('save_transporteur', { transporteur: transporterId, post_id: postId })
+        kmAjaxCall('save_transporter', { transporteur: transporterId, post_id: postId })
             .then(response => {
                 var markElement = $('#post-' + postId).find('.transporter_column mark');
                 updateMarkElement(markElement, transporterSlug, transporterName);

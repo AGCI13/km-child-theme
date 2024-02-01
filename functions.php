@@ -4,16 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-// function f( $x ) {
-// return 125.84 + 87.26 * $x;
-// }
-
-// for ( $i = 1; $i < 6; $i++ ) {
-// echo '<ul>';
-// echo f( $i ) . '<br>';
-// echo '</ul>';
-// }
-
 /**
  * Affiche un message d'erreur admin si une dépendance est manquante et ne charge pas les fichiers du thème.
  *
@@ -83,6 +73,7 @@ add_action(
 		require_once 'includes/class-shipping-zone.php';
 		require_once 'includes/class-order-processing.php';
 		require_once 'includes/class-palletization-manager.php';
+		require_once 'includes/class-transporter-manager.php';
 
 		require_once 'includes/class-shipping-methods.php';
 		require_once 'includes/shipping-methods/class-shipping-method-1.php';
@@ -100,5 +91,6 @@ add_action(
 		KM_Shipping_Methods::get_instance();
 		KM_Order_Processing::get_instance();
 		KM_Palletization_Manager::get_instance();
+		KM_Transporter_Manager::get_instance();
 	}
 );

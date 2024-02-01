@@ -12,7 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function km_change_cart_totals_text( $translated_text, $text, $domain ) {
-	if ( is_cart() && 'Total' === $text ) {
+	$km_shipping_zone = KM_Shipping_Zone::get_instance();
+	if ( $km_shipping_zone->is_in_thirteen && is_cart() && 'Total' === $text ) {
 		$translated_text = 'Total hors livraison';
 	}
 	return $translated_text;

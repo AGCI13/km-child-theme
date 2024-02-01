@@ -18,37 +18,41 @@
   margin-right: 10px;
 }
 
+.transp-label{
+  text-transform: uppercase;
+}
+
 .transp-label.undefined {
   color: #776261;
   background-color: #e5e5e5;
 }
 
+.transp-label.cargomatic {
+  color: white;
+  background-color: #014617;
+}
+
 .transp-label.fragner {
-  text-transform: uppercase;
   color: #420c0a;
   background-color: #dc5f51;
 }
 
 .transp-label.king {
-  text-transform: uppercase;
   color: #282525;
   background-color: #a98851;
 }
 
 .transp-label.kuehne {
-  text-transform: uppercase;
   color: #b7beec;
   background-color: #1a2461;
 }
 
 .transp-label.geotextile {
-  text-transform: uppercase;
   color: #f9f9ed;
   background-color: #8a6e2c;
 }
 
 .transp-label.tred {
-  text-transform: uppercase;
   color: #e1e2e3;
   background-color: #4b4a4d;
 }

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('ready!');
+
     const noteLinks = document.querySelectorAll('.km-note-preview');
 
     function closeAllModals() {
@@ -52,10 +52,15 @@ jQuery(document).ready(function ($) {
 
             transporterField.insertAdjacentHTML('beforeend', '<p class="km-loading-message">Chargement...</p>');
 
-            kmAjaxCall('save_transporteur', { transporteur: transporteur, post_id: post_id })
+            kmAjaxCall('save_transporter', { transporteur: transporteur, post_id: post_id })
                 .then(response => {
                     removeMessages();
-                    transporterField.insertAdjacentHTML('beforeend', '<p class="km-success-message">Transporteur mis à jour !</p>');
+                    if (response.success) {
+                        transporterField.insertAdjacentHTML('beforeend', '<p class="km-success-message">' + response.data + '</p>');
+                    }
+                    else {
+                        transporterField.insertAdjacentHTML('beforeend', '<p class="km-error-message">Une erreur est survenue: ' + error + '</p>');
+                    }
                     removeMessagesAfterDelay();
                 })
                 .catch(error => {
@@ -69,14 +74,14 @@ jQuery(document).ready(function ($) {
     function removeMessages() {
         const messages = document.querySelectorAll('.km-success-message, .km-error-message');
         const loadingMessages = document.querySelectorAll('.km-loading-message');
-      
+
         messages.forEach(function (message) {
-           $(message).fadeOut();
+            $(message).fadeOut();
         });
 
         loadingMessages.forEach(function (loadingMessage) {
             loadingMessage.remove();
-         });
+        });
     }
 
     function removeMessagesAfterDelay() {
