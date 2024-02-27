@@ -32,20 +32,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const submitPostcode = (event) => {
-        let country_modal = event.target.querySelector('.country').value;
-        let zip_modal = event.target.querySelector('.zip_code').value;
+        let country_value = event.target.querySelector('.country').value;
+        let postcode_input = event.target.querySelector('.zip_code');
+        let postcode_value = postcode_input.value;
         let label_modal_postcode = event.target.querySelector('.zip_code_label');
         let nonce = event.target.querySelector('#nonce_postcode');
 
         //Front simple validation
-        if (zip_modal.length < 5 && country_modal === 'FR' || zip_modal.length < 4 && country_modal === 'BE') {
+        if (postcode_value.length < 5 && country_value === 'FR' || postcode_value.length < 4 && country_value === 'BE') {
             label_modal_postcode.textContent = 'Veuillez rentrez un code postal valide';
             return;
         }
+        
+        //Disable postcode_input
+        postcode_input.setAttribute('disabled', 'disabled');
 
         const data = {
-            zip: zip_modal,
-            country: country_modal,
+            zip: postcode_value,
+            country: country_value,
             nonce_postcode: nonce.value,
         };
 
@@ -54,9 +58,9 @@ document.addEventListener('DOMContentLoaded', function () {
         kmAjaxCall('postcode_submission_handler', data)
             .then(response => {
                 if (response.success) {
-                    //Traiement de la réponse
+           
                     label_modal_postcode.textContent = '';
-                    setCookie('zip_code', zip_modal + '-' + country_modal, 30);
+                    setCookie('zip_code', postcode_value + '-' + country_value, 30);
                     setCookie('shipping_zone', response.data, 30);
                     setTimeout(() => {
                         modal_postcode.style.display = 'none';
@@ -69,11 +73,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         label_modal_postcode.textContent = 'Une erreur inattendue est survenue. Veuillez réessayer.';
                     }
+                    //Enable postcode_value input and submit button
+                    postcode_input.removeAttribute('disabled');
                 }
                 handleLoading(event, false);
             })
             .catch(error => {
-                label_modal_postcode.textContent = error.message;
+                console.log(error.message);
                 handleLoading(event, false);
             });
     }

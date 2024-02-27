@@ -30,6 +30,7 @@ class KM_Transporter_Manager {
 		$this->transporters = $transporter_field['choices'];
 
 		add_filter( 'manage_edit-shop_order_columns', array( $this, 'add_transporter_column' ) );
+		add_filter( 'woocommerce_email_enabled_customer_completed_order', array( $this, 'block_completed_order_email_if_transporter_undefined' ), 10, 2 );
 		add_filter( 'woocommerce_email_subject_customer_completed_order', array( $this, 'modify_completed_order_email_subject' ), 10, 2 );
 
 		add_action( 'manage_shop_order_posts_custom_column', array( $this, 'add_transporter_to_order_status_column' ), 10, 2 );
@@ -52,6 +53,31 @@ class KM_Transporter_Manager {
 		return $columns;
 	}
 
+	/**
+	 * Bloque l'envoi de l'email de commande terminée si le transporteur est 'non-defini'.
+	 *
+	 * @param bool     $enabled Indique si l'email doit être envoyé.
+	 * @param WC_Order $order L'objet commande concerné.
+	 * @return bool Le statut modifié indiquant si l'email doit être envoyé.
+	 */
+	public function block_completed_order_email_if_transporter_undefined( $enabled, $order ) {
+
+		if ( ! $order ) {
+			return $enabled;
+		}
+
+		// Récupérer la valeur du champ 'transporteur' pour cette commande.
+		$transporter_slug = get_post_meta( $order->get_id(), 'transporteur', true );
+
+		// Si le transporteur est 'non-defini', ne pas envoyer l'email.
+		if ( 'non-defini' === $transporter_slug ) {
+			return false; // Désactive l'envoi de l'email.
+		}
+
+		// Sinon, ne change rien (l'email peut être envoyé).
+		return $enabled;
+	}
+
 	/** Changer le sujet de l'email de commande terminée en fonction de la valeur du champ ACF 'transporteur'
 	 *
 	 * @param $subject
@@ -63,26 +89,29 @@ class KM_Transporter_Manager {
 		$transporter_slug = get_post_meta( $order->get_id(), 'transporteur', true );
 
 		// Modifiez l'objet de l'email en fonction de la valeur du champ 'transporteur'.
-		if ( $transporter_slug ) {
+		if ( $transporter_slug && 'non-defini' !== $transporter_slug ) {
 			/* translators: %s the selected transporter */
 			$subject = sprintf( __( 'Votre commande a été expédié avec %s.', 'kingmateriaux' ), $this->transporters[ $transporter_slug ] );
 		}
+
 		return $subject;
 	}
 
 	/**
 	 * Afficher le contenu de l'email de commande terminée en fonction de la valeur du champ ACF 'transporteur'
 	 *
-	 * @param $order_id
-	 * @return void
+	 * @param $order_id L'ID de la commande.
+	 * @return void | string
 	 */
 	public function set_email_transporter_content( $order_id ) {
 
 		$transp_slug = get_post_meta( $order_id, 'transporteur', true );
 
+		$file = get_stylesheet_directory() . '/templates/emails/transporters/' . $transp_slug . '.php';
+
 		// Vérifie si le transporteur est dans le tableau $transporters.
-		if ( array_key_exists( $transp_slug, $this->transporters ) ) {
-			require_once get_stylesheet_directory() . '/templates/emails/transporters/' . $transp_slug . '.php';
+		if ( array_key_exists( $transp_slug, $this->transporters ) && file_exists( $file ) ) {
+			require_once $file;
 		} else {
 			return '<p>' . esc_html__( 'We have finished processing your order.', 'woocommerce' ) . '</p>';
 		}

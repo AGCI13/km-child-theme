@@ -124,14 +124,10 @@ function km_add_shipping_cost_to_cart_total() {
 		return;
 	} elseif ( in_array( 'drive', $chosen_shipping_methods, true ) ) {
 		$shipping_label = __( 'À récupérer au King Drive', 'kingmateriaux' );
-	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) ) {
+	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) || in_array( 'included', $chosen_shipping_methods, true ) ) {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
 		$shipping_cost  = __( 'Inclus', 'kingmateriaux' );
 		$shiping_date   = km_display_shipping_delays_after_shipping();
-	} elseif ( in_array( 'included', $chosen_shipping_methods, true ) ) {
-		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
-		$shipping_cost  = __( 'Inclus', 'kingmateriaux' );
-		$shiping_date   = km_display_shipping_delays_after_shipping( 2, 3 );
 	} else {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
 		$shiping_date   = km_display_shipping_delays_after_shipping();
@@ -161,25 +157,37 @@ function km_display_shipping_delays_after_shipping( $longest_min_delay = 0, $lon
 	// Récupérer l'ID de la zone de livraison.
 	$shipping_zone_id = KM_Shipping_Zone::get_instance()->shipping_zone_id;
 
+	// Déterminer la saison actuelle.
+	$current_month  = gmdate( 'n' );
+	$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
+
+	$season = $is_high_season ? 'hs' : 'ls'; // 'hs' pour 'high season' et 'ls' pour 'low season
+
+	$shipping_zone_min_delays = get_option( 'min_shipping_days_' . $season . '_' . $shipping_zone_id );
+	$shipping_zone_min_delays = $shipping_zone_min_delays ? (int) $shipping_zone_min_delays : 0;
+
+	$shipping_zone_max_delays = get_option( 'max_shipping_days_' . $season . '_' . $shipping_zone_id );
+	$shipping_zone_max_delays = $shipping_zone_max_delays ? (int) $shipping_zone_max_delays : 0;
+
 	if ( 0 === $longest_min_delay && 0 === $longest_max_delay ) {
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
-			$product_id = $cart_item['product_id'];
 
 			// Vérifier si des délais de livraison personnalisés sont définis via ACF.
-			$custom_delays_hs = get_field( 'product_shipping_delays_product_shipping_delays_hs', $product_id );
-			$custom_delays_ls = get_field( 'product_shipping_delays_product_shipping_delays_ls', $product_id );
+			$custom_product_delays = get_field( 'product_shipping_delays_product_shipping_delays_' . $season, $cart_item['product_id'] );
 
-			// Déterminer la saison actuelle.
-			$current_month  = gmdate( 'n' );
-			$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
-
-			// Récupérer les délais de livraison en fonction de la saison et des données personnalisées.
-			$min_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['min_shipping_days_hs'] ) ?? get_option( 'min_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['min_shipping_days_ls'] ) ? get_option( 'min_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['min_shipping_days_ls'] );
-			$max_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['max_shipping_days_hs'] ) ?? get_option( 'max_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['max_shipping_days_ls'] ) ? get_option( 'max_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['max_shipping_days_ls'] );
+			if ( is_array( $custom_product_delays )
+			&& ( isset( $custom_product_delays[ 'min_shipping_days_' . $season ] ) || isset( $custom_product_delays[ 'max_shipping_days_' . $season ] ) )
+			&& ( $custom_product_delays[ 'min_shipping_days_' . $season ] || $custom_product_delays[ 'max_shipping_days_' . $season ] ) ) {
+				$min_shipping_days = $custom_product_delays[ 'min_shipping_days_' . $season ] ? $custom_product_delays[ 'min_shipping_days_' . $season ] : 0;
+				$max_shipping_days = $custom_product_delays[ 'max_shipping_days_' . $season ] ? $custom_product_delays[ 'max_shipping_days_' . $season ] : 0;
+			} else {
+				$min_shipping_days = $shipping_zone_min_delays;
+				$max_shipping_days = $shipping_zone_max_delays;
+			}
 
 			// Vérifier si les informations sont disponibles.
-			if ( empty( $min_shipping_days ) && empty( $max_shipping_days ) ) {
-				return; // Si les deux sont manquants, ne rien afficher.
+			if ( 0 === $min_shipping_days && 0 === $max_shipping_days ) {
+				continue; // Si les deux sont manquants, ne rien afficher.
 			}
 
 			if ( $min_shipping_days > $longest_min_delay ) {
@@ -196,30 +204,25 @@ function km_display_shipping_delays_after_shipping( $longest_min_delay = 0, $lon
 		return; // Si les deux sont manquants, ne rien afficher.
 	}
 
-	$current_date  = new DateTime(); // Date actuelle.
-	$delivery_date = clone $current_date;
+	$truly_longest_min_delay = min( $longest_min_delay, $longest_max_delay );
+	$truly_longest_max_delay = max( $longest_min_delay, $longest_max_delay );
 
-		// Si les délais minimum et maximum sont identiques, affichez une seule date.
-	if ( 0 === $longest_min_delay || 0 === $longest_max_delay || $longest_min_delay === $longest_max_delay ) {
+	$current_date = new DateTime(); // Date actuelle.
 
-		$delay = $longest_min_delay > 0 ? $longest_min_delay : $longest_max_delay;
-
-		$delivery_date->add( new DateInterval( 'P' . $delay . 'D' ) );
+	if ( $truly_longest_min_delay === $truly_longest_max_delay ) {
+		$delay          = $truly_longest_min_delay;
+		$delivery_date  = ( clone $current_date )->add( new DateInterval( 'P' . $delay . 'D' ) );
 		$formatted_date = $delivery_date->format( 'd/m/Y' );
-		$html          .= '<tr><td colspan="2" class="km-cart-longest-delay">Livraison prévue le ' . $formatted_date . '</td></tr>';
+		$html          .= '<tr><td colspan="2" class="km-cart-longest-delay">' . esc_html__( 'Livraison estimée le ', 'kingmateriaux' ) . $formatted_date . '</td></tr>';
 	} else {
-		// Calculer et afficher une plage de dates si les délais sont différents.
-		$min_delivery_date = clone $delivery_date;
-		$min_delivery_date->add( new DateInterval( 'P' . $longest_min_delay . 'D' ) );
+		$min_delivery_date  = ( clone $current_date )->add( new DateInterval( 'P' . $truly_longest_min_delay . 'D' ) );
 		$formatted_min_date = $min_delivery_date->format( 'd/m/Y' );
 
-		$max_delivery_date = clone $delivery_date;
-		$max_delivery_date->add( new DateInterval( 'P' . $longest_max_delay . 'D' ) );
+		$max_delivery_date  = ( clone $current_date )->add( new DateInterval( 'P' . $truly_longest_max_delay . 'D' ) );
 		$formatted_max_date = $max_delivery_date->format( 'd/m/Y' );
 
-		$html .= '<tr><td colspan="2" class="km-cart-longest-delay">Livraison prévue entre le ' . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
+		$html .= '<tr><td colspan="2" class="km-cart-longest-delay">' . esc_html__( 'Livraison estimée entre le ', 'kingmateriaux' ) . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
 	}
-
 	return $html;
 }
 
@@ -348,6 +351,31 @@ function km_add_newsletter_checkbox() {
 	);
 }
 add_action( 'woocommerce_review_order_before_submit', 'km_add_newsletter_checkbox', 9 );
+
+
+/**
+ * Autoriser les utilisateurs non connectés à payer pour une commande.
+ *
+ * @param array $allcaps Les capacités de l'utilisateur.
+ * @param array $caps    Les capacités demandées.
+ * @param array $args    Arguments supplémentaires.
+ *
+ * @return array
+ */
+function km_order_pay_without_login( $allcaps, $caps, $args ) {
+	if ( isset( $caps[0], $_GET['key'] ) ) {
+		if ( 'pay_for_order' === $caps[0] ) {
+			$order_id = isset( $args[2] ) ? $args[2] : null;
+			$order    = wc_get_order( $order_id );
+			if ( $order ) {
+				$allcaps['pay_for_order'] = true;
+			}
+		}
+	}
+	return $allcaps;
+}
+add_filter( 'user_has_cap', 'km_order_pay_without_login', 9999, 3 );
+add_filter( 'woocommerce_order_email_verification_required', '__return_false', 9999 );
 
 /** --------------  DEBUG CODE START ----------------- */
 

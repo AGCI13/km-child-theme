@@ -149,6 +149,10 @@
   padding: 60px 0px 60px 0px;
 }
 
+.single-product  .woocommerce-variation-price .km-include-shipping{
+  margin-bottom:15px;
+}
+
 /*Badge Avis vérifiés */
 @media screen and (max-width: 767px) {
   #c840c452-4bc7-434b-a8ae-65de371acd17 {

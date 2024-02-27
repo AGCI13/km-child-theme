@@ -39,8 +39,6 @@ class Checkout_Billing_Adress_Widget extends \Elementor\Widget_Base {
 		<!-- Start Shipping adress -->
 		<div class="shipping_address">
 
-		<?php do_action( 'woocommerce_before_checkout_shipping_form', $checkout ); ?>
-
 			<div class="elementor-element elementor-widget h2_grey_back">
 				<h2><?php esc_html_e( 'Adresse de livraison', 'kingmateriaux' ); ?></h2>
 			</div>

@@ -46,6 +46,20 @@ class KM_Dynamic_Pricing {
 	public $ecotaxe_info_html;
 
 	/**
+	 * The include shipping message to display.
+	 *
+	 * @var string
+	 */
+	public $include_shipping_html;
+
+	/**
+	 * The include shipping message to display.
+	 *
+	 * @var string
+	 */
+	public $quantity_discount_msg_html;
+
+	/**
 	 * The list of products that are not purchasable.
 	 *
 	 * @var array
@@ -66,8 +80,10 @@ class KM_Dynamic_Pricing {
 	 * and to prevent creating multiple instances through the `new` keyword.
 	 */
 	private function __construct() {
-		$this->km_shipping_zone  = KM_Shipping_zone::get_instance();
-		$this->ecotaxe_info_html = '<div class="km-product-ecotaxe">' . sprintf( __( 'Dont %s d\'écotaxe', 'kingmateriaux' ), wc_price( $this->ecotaxe_rate_incl_taxes ) ) . '</div>';
+		$this->km_shipping_zone           = KM_Shipping_zone::get_instance();
+		$this->ecotaxe_info_html          = '<div class="km-product-ecotaxe">' . sprintf( __( 'Dont %s d\'écotaxe', 'kingmateriaux' ), wc_price( $this->ecotaxe_rate_incl_taxes ) ) . '</div>';
+		$this->include_shipping_html      = '<div class="km-include-shipping">' . esc_html__( 'Livraison incluse', 'kingmateriaux' ) . '</div>';
+		$this->quantity_discount_msg_html = '<div class="km-include-shipping">' . esc_html__( 'Tarifs dégressifs en fonction des quantités (visible uniquement dans le panier)', 'kingmateriaux' ) . '</div>';
 
 		$this->register();
 	}
@@ -86,7 +102,8 @@ class KM_Dynamic_Pricing {
 		add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_variation_prices_price', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 80, 3 );
-		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 99, 2 );
+		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 98, 2 );
+		add_filter( 'woocommerce_get_price_html', array( $this, 'maybe_display_include_shipping_html' ), 99, 2 );
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
 		add_filter( 'woocommerce_available_variation', array( $this, 'disable_variation_if_no_shipping_product' ), 10, 3 );
 		add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
@@ -141,11 +158,24 @@ class KM_Dynamic_Pricing {
 		}
 
 		if ( ! $this->km_shipping_zone->is_in_thirteen ) {
+
 			if ( empty( $price ) || ! $this->has_shipping_class( $product ) ) {
 				return $price;
 			}
 
-			$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
+			$km_big_bag_manager = KM_Big_Bag_Manager::get_instance();
+
+			if ( $km_big_bag_manager->is_big_bag( $product ) && ! in_array( $this->km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+				$shipping_bb_product = get_page_by_path( '1-big-bag-degressif', OBJECT, 'product' );
+				if ( $shipping_bb_product instanceof WP_Post ) {
+					$shipping_bb_product_id = $shipping_bb_product->ID;
+					$shipping_product       = wc_get_product( $shipping_bb_product_id );
+				} else {
+						return $price;
+				}
+			} else {
+				$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
+			}
 
 			if ( ! $shipping_product instanceof WC_Product ) {
 				return $price;
@@ -186,6 +216,33 @@ class KM_Dynamic_Pricing {
 		&& ( $product->is_type( 'simple' ) || $product->is_type( 'variation' ) ) ) {
 			$price .= $this->ecotaxe_info_html;
 		}
+		return $price;
+	}
+
+	/**
+	 * Affiche le message "Livraison incluse" si le produit est dans la zone 13.
+	 *
+	 * @param string     $price Le prix du produit.
+	 * @param WC_Product $product Le produit.
+	 * @return string Le prix du produit.
+	 */
+	public function maybe_display_include_shipping_html( $price, $product ) {
+		if ( ! $this->km_shipping_zone->is_in_thirteen ) {
+
+			$km_big_bag_manager = KM_Big_Bag_Manager::get_instance();
+
+			if ( ! $product->is_type( 'variation' ) ) {
+
+				$price .= $this->include_shipping_html;
+
+				if ( is_product() && $km_big_bag_manager->is_big_bag( $product ) && ! in_array( $this->km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+					$price .= $this->quantity_discount_msg_html;
+				}
+			} elseif ( $km_big_bag_manager->is_big_bag( $product ) && ! in_array( $this->km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+				$price .= $this->quantity_discount_msg_html;
+			}
+		}
+
 		return $price;
 	}
 

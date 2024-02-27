@@ -30,4 +30,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 </p>
 <p style='font-size:13px;font-style:italic;'>
 <?php esc_html_e( '*pas de porte : Livraison qui s’effectue en bas de votre immeuble ou à l’entrée de votre habitation (suivant l’accès). La livraison s’entend en limite de propriété (« pas de porte »), au plein air et sans manutention supplémentaire. Vous devez donc prendre vos dispositions pour pouvoir réceptionner votre colis et le transporter par vos propres moyens.', 'kingmateriaux' ); ?>
-</p>;
+</p>

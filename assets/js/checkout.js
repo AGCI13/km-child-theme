@@ -533,8 +533,8 @@ jQuery(document).ready(function ($) {
 
                     var paymentMethods = document.querySelectorAll('.wc_payment_method');
 
-                    paymentMethods.forEach(function(paymentMethod) {
-                        paymentMethod.addEventListener('click', function() {
+                    paymentMethods.forEach(function (paymentMethod) {
+                        paymentMethod.addEventListener('click', function () {
                             var radioButton = this.querySelector('input[name="payment_method"]');
                             if (radioButton) {
                                 radioButton.click();
@@ -680,4 +680,23 @@ jQuery(document).ready(function ($) {
             }
         });
     }
+
+    const masquerMoyenDePaiementSiContenu = () => {
+        // Sélectionner tous les éléments th dans les tableaux avec la classe .shop_table
+        const thElements = document.querySelectorAll('.shop_table th');
+
+        // Itérer sur chaque élément th
+        thElements.forEach(function (th) {
+            // Vérifier si le contenu de th inclut "Moyen de paiement"
+            if (th.textContent.trim().includes("Moyen de paiement")) {
+                // Masquer l'élément tr parent
+                th.parentElement.style.display = 'none';
+            }
+        });
+    }
+
+    if (document.body.classList.contains('woocommerce-order-pay')) {
+        masquerMoyenDePaiementSiContenu();
+    }
+
 });

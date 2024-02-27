@@ -12,6 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function km_change_cart_totals_text( $translated_text, $text, $domain ) {
+	if ( ! is_cart() ) {
+		return $translated_text;
+	}
+
 	$km_shipping_zone = KM_Shipping_Zone::get_instance();
 	if ( $km_shipping_zone->is_in_thirteen && is_cart() && 'Total' === $text ) {
 		$translated_text = 'Total hors livraison';
@@ -266,6 +270,7 @@ function km_add_redeem_coupon_in_cart_totals() {
 	<?php
 	// Afficher les coupons déjà appliqués.
 	foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+
 		?>
 	<tr class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
 		<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
@@ -275,6 +280,45 @@ function km_add_redeem_coupon_in_cart_totals() {
 	}
 }
 add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_in_cart_totals', 90 );
+
+
+function km_check_coupon_discount_amount( $valid, $coupon, $discount ) {
+
+	if ( ! $valid ) {
+		return $valid;
+	}
+
+	// Calculer le montant de la réduction pour le panier actuel.
+	$discount_amount = $coupon->get_discount_amount( WC()->cart->get_displayed_subtotal(), array(), true );
+
+	// Si le montant de la réduction est 0, invalider le coupon.
+	if ( 0 == $discount_amount ) {
+		throw new Exception( 'Désolé, ce coupon ne peut pas être appliqué car une autre réduction est déjà présente.' );
+	}
+	return $valid;
+}
+add_filter( 'woocommerce_coupon_is_valid', 'km_check_coupon_discount_amount', 10, 3 );
+
+// // Add action before calculate car totals with remove_coupon callback function
+// add_action( 'woocommerce_after_calculate_totals', 'km_remove_coupon', 99 );
+
+// function km_remove_coupon() {
+// check if coupon applieed has 0 value discount
+// $applied_coupons = WC()->cart->get_applied_coupons();
+
+// foreach ( $applied_coupons as $coupon ) {
+// error_log( var_export( $coupon, true ) );
+// $coupon_obj = new WC_Coupon( $coupon );
+// error_log( var_export( $coupon_obj, true ) );
+// $discount = $coupon_obj->get_discount_amount( WC()->cart->get_displayed_subtotal(), array(), true );
+
+// if ( 0 === $discount ) {
+// WC()->cart->remove_coupon( $coupon );
+// }
+// }
+// }
+
+
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande

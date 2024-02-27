@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         element.addEventListener('click', stopPropagationFunction);
         element.addEventListener('touchstart', stopPropagationFunction);
-    }
+	}
 });
 
 

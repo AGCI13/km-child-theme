@@ -729,7 +729,7 @@ Provisoire
   display: none;
 }
 
-.woocommerce form .form-row .required{
+.woocommerce form .form-row .required {
   color: var(--red-color)
 }
 
@@ -2038,7 +2038,7 @@ ul#menu-2-bc4d358 .menu-item-121571>a {
   margin-bottom: 40px !important;
 }
 
-.uael-woo-skin-grid-franko .uael-woo-products-thumbnail-wrap:hover .uael-product-actions{
+.uael-woo-skin-grid-franko .uael-woo-products-thumbnail-wrap:hover .uael-product-actions {
   display: none;
 }
 
@@ -2156,7 +2156,7 @@ h2.woocommerce-loop-product__title,
   font-family: 'Arca Majora 3', Lato, sans-s erif !important;
   font-weight: 700 !important;
   letter-spacing: -0.02em !important;
-  margin-left:10px !important;
+  margin-left: 10px !important;
   margin-right: 10px !important;
 }
 
@@ -2173,8 +2173,9 @@ li.product span.price,
   justify-content: center !important;
 }
 
-.uael-woocommerce .products li.product .price, .uael-woocommerce ul.products li.product .price{
-  line-height:1.15rem !important;
+.uael-woocommerce .products li.product .price,
+.uael-woocommerce ul.products li.product .price {
+  line-height: 1.15rem !important;
 }
 
 .km-price-info {
@@ -2194,7 +2195,7 @@ li.product span.price span.woocommerce-Price-amount,
   font-size: 19px !important;
   color: var(--color-primary) !important;
   line-height: 1.5rem;
-  font-weight: 700!important;
+  font-weight: 700 !important;
 }
 
 li.product span.price .km-product-ecotaxe,
@@ -3031,7 +3032,8 @@ button.shopengine_add_to_list_action.shopengine-wishlist.badge.inactive {
   width: 100%;
 }
 
-.elementor-menu-cart__product-name, .elementor-menu-cart__product-price {
+.elementor-menu-cart__product-name,
+.elementor-menu-cart__product-price {
   font-size: 14px;
   padding-left: 20px;
 }
@@ -3050,4 +3052,31 @@ button.shopengine_add_to_list_action.shopengine-wishlist.badge.inactive {
   margin-top: var(--cart-buttons-position-margin, 0);
   grid-column-gap: var(--space-between-buttons, 10px);
   grid-row-gap: var(--space-between-buttons, 10px);
+}
+
+@media (min-width: 768px) {
+  .woocommerce-order-pay .elementor-124393 .elementor-element.elementor-element-5d5a1e4 {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .woocommerce-order-pay .elementor-124393 .elementor-element.elementor-element-69813b2 {
+    display: none;
+  }
+}
+
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
+.km-include-shipping {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4em;
+}
+
+.woocommerce:where(body:not(.woocommerce-uses-block-theme)) div.product p.price,
+.woocommerce:where(body:not(.woocommerce-uses-block-theme)) div.product span.price {
+  color: var(--color-primary);
 }

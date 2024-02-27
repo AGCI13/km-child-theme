@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <h3><?php esc_html_e( 'Rappel des modalités de livraison :', 'kingmateriaux' ); ?></h3>
 
 <p><?php esc_html_e( 'Les big bag 1.5T seront livrés par un camion semi-remorque avec chariot embarqué motorisé. Attention : ils seront déposés au pas de porte* sans manutention supplémentaire. Il n’y aura pas de grue sur le camion.', 'kingmateriaux' ); ?></p>
-<p><?php esc_html_e( 'Taille du camion : 255m x 12m et 33m de hauteur.', 'kingmateriaux' ); ?></p>
+<p><?php esc_html_e( 'Taille du camion : 2,55m x 12m et 3,30m de hauteur.', 'kingmateriaux' ); ?></p>
 
 <p><?php esc_html_e( 'Pour toute demande concernant une annulation ou un changement merci de contacter directement le service transport au 07 87 18 06 17. Notez qu’une modification ou une annulation de commande peut engendrer des coûts supplémentaires. Veuillez prendre connaissance des différentes pénalités pouvant s’appliquer sur notre', 'kingmateriaux' ); ?><a href="https://kingmateriaux.com/livraison-big-bag-sur-palette/"><?php esc_html_e( ' page livraison.' ); ?> </a></p>
 

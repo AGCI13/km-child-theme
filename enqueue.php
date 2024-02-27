@@ -81,7 +81,7 @@ function km_front_scripts_enqueue() {
 		);
 	}
 
-	if ( is_product_category() ) {
+	if ( is_product_category() || is_search() ) {
 		wp_register_style( 'km-product-filters-style', $css_uri . 'product-filters.min.css', array(), filemtime( $css_path . 'product-filters.min.css' ), 'all' );
 		wp_register_script(
 			'km-product-filters-script',

@@ -74,6 +74,7 @@ add_action(
 		require_once 'includes/class-order-processing.php';
 		require_once 'includes/class-palletization-manager.php';
 		require_once 'includes/class-transporter-manager.php';
+		require_once 'includes/class-big-bag-manager.php';
 
 		require_once 'includes/class-shipping-methods.php';
 		require_once 'includes/shipping-methods/class-shipping-method-1.php';
@@ -92,5 +93,6 @@ add_action(
 		KM_Order_Processing::get_instance();
 		KM_Palletization_Manager::get_instance();
 		KM_Transporter_Manager::get_instance();
+		KM_Big_Bag_Manager::get_instance();
 	}
 );
