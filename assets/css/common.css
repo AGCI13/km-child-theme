@@ -849,20 +849,6 @@ Provisoire
   color: var(--red-color) !important;
 }
 
-.km-ecotaxe-message {
-  display: flex;
-}
-
-.elementor-widget-woocommerce-cart .woocommerce table.cart .km-ecotaxe-message p {
-  font-size: 13px;
-}
-
-.elementor-widget-woocommerce-cart .woocommerce table.cart .km-ecotaxe-message img {
-  width: 48px !important;
-  height: 44px !important;
-  margin-right: 10px;
-}
-
 .woocommerce div.product form.cart .variations select option:disabled {
   display: none;
 }

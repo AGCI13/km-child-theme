@@ -2,21 +2,18 @@
 
 /**
  * Classe de la méthode d'expédition Drive pickup
+ * 
+ * @package KingMateriaux
  */
 class Shipping_method_drive extends WC_Shipping_Method {
-
-
-	/**
-	 * Instance unique de la classe.
-	 *
-	 * @var KM_Shipping_Methods
-	 */
 
 	public $method_location;
 	public $cost;
 
 	/**
-	 *  Constructor.
+	 * Constructor.
+	 * @param int $instance_id
+	 * @return void
 	 */
 	public function __construct( $instance_id = 0 ) {
 		parent::__construct( $instance_id );

@@ -113,7 +113,7 @@ function km_display_shipping_delays_on_product_page( $product_id ) {
 	$product_id = $product->get_id();
 
 	// Récupérer l'ID de la zone de livraison.
-	$shipping_zone_id = KM_Shipping_Zone::get_instance()->shipping_zone_id;
+	$shipping_zone_id = km_get_shipping_zone_id();
 
 	// Vérifier si des délais de livraison personnalisés sont définis via ACF.
 	$custom_delays_hs = get_field( 'product_shipping_delays_product_shipping_delays_hs', $product_id );
@@ -170,7 +170,7 @@ function km_has_tonnage_calculator() {
 			array_filter(
 				$categories,
 				function ( $cat ) {
-					return $cat->parent !== 0;
+					return 0 !== $cat->parent;
 				}
 			)
 		);

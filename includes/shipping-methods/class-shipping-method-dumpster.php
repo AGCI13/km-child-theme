@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Classe de la méthode d'expédition Bennes
+ *
+ * @package KingMateriaux
+ */
 class Shipping_method_dumpster extends WC_Shipping_Method {
 
 	/**
@@ -81,8 +86,6 @@ class Shipping_method_dumpster extends WC_Shipping_Method {
 		foreach ( $package['contents'] as $item_id => $values ) {
 			$product = $values['data'];
 			if ( stripos( $product->get_name(), 'benne' ) === false ) {
-
-				// Si un produit ne contient pas 'benne', ne pas ajouter de tarif.
 				return;
 			}
 		}

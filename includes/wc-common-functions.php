@@ -9,7 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function km_redirect_to_login_if_not_logged_in() {
 	// Vérifie si l'utilisateur n'est pas connecté et tente d'accéder à "mon-compte" mais pas à "mot-passe-perdu".
-	if ( ! is_user_logged_in() && strpos( $_SERVER['REQUEST_URI'], 'mon-compte' ) !== false && strpos( $_SERVER['REQUEST_URI'], 'mon-compte/mot-passe-perdu' ) === false ) {
+	if ( ! is_user_logged_in() && strpos( $_SERVER['REQUEST_URI'], 'mon-compte' ) !== false
+	&& strpos( $_SERVER['REQUEST_URI'], 'mon-compte/mot-passe-perdu' ) === false ) {
 		wp_safe_redirect( site_url( '/se-connecter/' ) );
 		exit;
 	}
@@ -51,23 +52,14 @@ add_action( 'woocommerce_init', 'km_wc_customer_session_enabler' );
  * @return array
  */
 function km_set_new_customer_notification_email( $wp_new_user_notification_email, $user, $blogname ) {
-	// Vérifier si l'utilisateur a le rôle de "customer".
 	if ( in_array( 'customer', (array) $user->roles ) ) {
-		// Assurez-vous que WooCommerce est actif.
 		if ( function_exists( 'WC' ) ) {
-			// Récupérer l'instance de l'envoyeur d'email de WooCommerce.
 			$mailer = WC()->mailer();
-			// Récupérer l'email de nouveau compte client.
-			$email = $mailer->emails['WC_Email_Customer_New_Account'];
-			// Déclencher l'envoi de l'email.
+			$email  = $mailer->emails['WC_Email_Customer_New_Account'];
 			$email->trigger( $user->ID, null, false );
-
-			// Retourner un tableau vide pour désactiver l'email par défaut de WordPress.
 			return array();
 		}
 	}
-
-	// Pour les autres rôles, utiliser l'email par défaut de WordPress.
 	return $wp_new_user_notification_email;
 }
 add_filter( 'wp_new_user_notification_email', 'km_set_new_customer_notification_email', 10, 3 );
@@ -77,7 +69,7 @@ add_filter( 'wp_new_user_notification_email', 'km_set_new_customer_notification_
  */
 function km_get_bacs_account_details_html() {
 
-	$gateway = new WC_Gateway_BACS();
+	// $gateway = new WC_Gateway_BACS();
 	// $country   = WC()->countries->get_base_country();
 	// $locale    = $gateway->get_country_locale();
 	$bacs_info = get_option( 'woocommerce_bacs_accounts' );
@@ -85,19 +77,32 @@ function km_get_bacs_account_details_html() {
 		return;
 	}
 
-	$bank_name = esc_attr( wp_unslash( $bacs_info[0]['bank_name'] ) );
-	$iban_code = esc_attr( $bacs_info[0]['iban'] );
-	$bic_code  = esc_attr( $bacs_info[0]['bic'] );
+	$bank_name = isset( $bacs_info[0]['bank_name'] ) && ! empty( $bacs_info[0]['bank_name'] ) ? wp_unslash( $bacs_info[0]['bank_name'] ) : '';
+	$iban_code = isset( $bacs_info[0]['iban'] ) && ! empty( $bacs_info[0]['iban'] ) ? wp_unslash( $bacs_info[0]['iban'] ) : '';
+	$bic_code  = isset( $bacs_info[0]['bic'] ) && ! empty( $bacs_info[0]['bic'] ) ? wp_unslash( $bacs_info[0]['bic'] ) : '';
+
+	if ( empty( $bank_name ) || empty( $iban_code ) || empty( $bic_code ) ) {
+		return;
+	}
+
 	ob_start();
 	?>
-		<h3><?php _e( 'Nos coordonnées bancaires :' ); ?></h3>
-		<p class="bank_name"><?php _e( 'Banque' ); ?>: <strong><?php echo $bank_name; ?></strong></p>
-		<p class="iban"><?php _e( 'IBAN' ); ?>: <strong><?php echo $iban_code; ?></strong></p>
-		<p class="bic"><?php _e( 'BIC' ); ?>: <strong><?php echo $bic_code; ?></strong></p>
+		<h3><?php esc_html_e( 'Nos coordonnées bancaires :', 'kingmateriaux' ); ?></h3>
+
+		<?php if ( ! empty( $bank_name ) ) : ?>
+			<p class="bank_name"><?php esc_html_e( 'Banque', 'kingmateriaux' ); ?>: <strong><?php echo esc_attr( $bank_name ); ?></strong></p>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $iban_code ) ) : ?>
+			<p class="iban"><?php esc_html_e( 'IBAN', 'kingmateriaux' ); ?>: <strong><?php echo esc_attr( $iban_code ); ?></strong></p>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $bic_code ) ) : ?>
+			<p class="bic"><?php esc_html_e( 'BIC', 'kingmateriaux' ); ?>: <strong><?php echo esc_attr( $bic_code ); ?></strong></p>
+		<?php endif; ?>
+
 	<?php
-
 	$output = ob_get_clean();
-
 	return $output;
 }
 
@@ -110,26 +115,25 @@ function km_get_bacs_account_details_html() {
  * @return array
  */
 function km_filter_menu_items( $items, $args ) {
-	// Obtenez l'instance de KM_Shipping_Zone.
-	$shipping_zone = KM_Shipping_Zone::get_instance();
 
-	// Si on est pas dans la zone 13, masquez certaines catégories et leurs enfants.
-	if ( ! $shipping_zone->is_in_thirteen ) {
-		$menu_to_remove = array();
+	if ( km_is_shipping_zone_in_thirteen() ) {
+		return $items;
+	}
 
-		foreach ( $items as $key => $item ) {
-			// Identifiez les éléments de menu "Matériaux" et "Locations".
-			if ( false !== strpos( $item->url, 'materiaux-de-construction' ) || false !== strpos( $item->url, 'location' ) ) {
-				$menu_to_remove[] = $item->ID;
-				unset( $items[ $key ] );
-			}
+	$menu_to_remove = array();
+
+	foreach ( $items as $key => $item ) {
+		// Identifiez les éléments de menu "Matériaux" et "Locations".
+		if ( false !== strpos( $item->url, 'materiaux-de-construction' ) || false !== strpos( $item->url, 'location' ) ) {
+			$menu_to_remove[] = $item->ID;
+			unset( $items[ $key ] );
 		}
+	}
 
 		// Parcourez à nouveau pour supprimer les enfants de ces éléments de menu.
-		foreach ( $items as $key => $item ) {
-			if ( in_array( $item->menu_item_parent, $menu_to_remove ) ) {
-				unset( $items[ $key ] );
-			}
+	foreach ( $items as $key => $item ) {
+		if ( in_array( $item->menu_item_parent, $menu_to_remove ) ) {
+			unset( $items[ $key ] );
 		}
 	}
 

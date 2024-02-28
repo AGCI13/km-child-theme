@@ -11,15 +11,6 @@ class KM_Shipping_Methods {
 
 	use SingletonTrait;
 
-
-	/**
-	 * The shipping zone instance.
-	 *
-	 * @var KM_Shipping_zone|null
-	 */
-	public $km_shipping_zone;
-
-
 	/**
 	 * Weight classes.
 	 *
@@ -41,7 +32,6 @@ class KM_Shipping_Methods {
 	 * KM_Shipping_Methods constructor.
 	 */
 	public function __construct() {
-		$this->km_shipping_zone = KM_Shipping_zone::get_instance();
 		$this->register();
 	}
 
@@ -54,9 +44,9 @@ class KM_Shipping_Methods {
 	}
 
 	/**
-	 * Ajoute les options de livraison
+	 * Ajoute les méthodes de livraison
 	 *
-	 * @param array $methods
+	 * @param array $methods Les méthodes de livraison.
 	 * @return array
 	 */
 	public function add_shipping_methods( $methods ) {
@@ -88,7 +78,9 @@ class KM_Shipping_Methods {
 	/**
 	 * Calculate shipping cost based on weight for 'VRAC A LA TONNE' products.
 	 *
-	 * @param string $shipping_method_name The name of the shipping method.
+	 * @param string $shipping_method_id The name of the shipping method.
+	 * @param string $shipping_method_name The ID of the shipping method.
+	 *
 	 * @return float Total shipping cost.
 	 */
 	public function calculate_shipping_method_price( $shipping_method_id, $shipping_method_name ) {
@@ -115,7 +107,7 @@ class KM_Shipping_Methods {
 			}
 
 			// Utiliser check_product_name pour déterminer si le produit est 'géotextile' ou 'échantillon²s'.
-			if ( ! $this->check_product_name( $product_name, array( 'géotextile', 'échantillons' ) ) ) {
+			if ( ! km_check_product_name( $product_name, array( 'géotextile', 'échantillons' ) ) ) {
 				$only_geotextile_and_samples = false;
 			}
 
@@ -138,18 +130,16 @@ class KM_Shipping_Methods {
 
 		$weight_index              = $this->get_weight_class_index( $total_weight );
 		$weight_class_name         = array_keys( $this->weight_classes )[ $weight_index ];
-		$delivery_option_full_name = $this->km_shipping_zone->shipping_zone_name . ' ' . $shipping_method_name . ' - ' . $weight_class_name;
+		$delivery_option_full_name = km_get_shipping_zone_name() . ' ' . $shipping_method_name . ' - ' . $weight_class_name;
 
 		$shipping_product = $this->get_shipping_product( $delivery_option_full_name );
 
 		if ( ! $shipping_product ) {
-			$this->debug_shipping_vars( $total_weight, $multiple_trucks, $cart_has_plasterboard, 0, 0, $shipping_method_name );
 			return array( 'price_excl_tax' => 0 );
 		}
 
 		$shipping_price_excluding_taxes = wc_get_price_excluding_tax( $shipping_product );
 		$shipping_price_including_taxes = wc_get_price_including_tax( $shipping_product );
-		$this->debug_shipping_vars( $total_weight, $multiple_trucks, $cart_has_plasterboard, $shipping_price_excluding_taxes, $shipping_price_including_taxes, $shipping_method_name );
 
 		// Traitement spécifique selon la méthode de livraison et le besoin de plusieurs camions.
 		if ( in_array( $shipping_method_id, array( 'option2', 'option2express' ), true ) && ! $multiple_trucks && ! $multiple_trucks_only ) {
@@ -170,31 +160,9 @@ class KM_Shipping_Methods {
 	}
 
 	/**
-	 * Debug shipping variables.
-	 */
-	private function debug_shipping_vars( $total_weight, $multiple_trucks, $cart_has_plasterboard, $shipping_price_excluding_taxes, $shipping_price_including_taxes, $shipping_method_name ) {
-
-		/**
-		* For degugging purposes only.
-		*/
-		$detailed_shipping_cost = array(
-			'----------------------' => '-----------------------',
-			'poids_total'            => $total_weight,
-			'multiple_camions'       => $multiple_trucks ? 'Oui' : 'Non',
-			'placo_present'          => $cart_has_plasterboard ? 'Oui' : 'Non',
-			'total_livraison_ht'     => $shipping_price_excluding_taxes,
-			'total_livraison_ttc'    => $shipping_price_including_taxes,
-		);
-
-		foreach ( $detailed_shipping_cost as $key => $value ) {
-			// error_log( $key . ' : ' . var_export( $value, true ) );
-		}
-	}
-
-	/**
 	 * Calcule le prix de la livraison en fonction du poids du panier.
 	 *
-	 * @param string $delivery_option_full_name Le nom du produit de livraison.
+	 * @param string $shipping_product_name Le nom du produit de livraison.
 	 * @return object le produit de livraison
 	 */
 	private function get_shipping_product( $shipping_product_name ) {
@@ -222,12 +190,12 @@ class KM_Shipping_Methods {
 		return wc_get_product( $shipping_products_posts[0] );
 	}
 
-		/**
-		 * Calcule le poids total du panier.
-		 *
-		 * @param array $cart_items Les articles du panier.
-		 * @return float Le poids total du panier.
-		 */
+	/**
+	 * Calcule le poids total du panier.
+	 *
+	 * @param array $cart_items Les articles du panier.
+	 * @return float Le poids total du panier.
+	 */
 	private function calculate_total_weight( $cart_items ) {
 		$total_weight = 0;
 		foreach ( $cart_items as $cart_item ) {
@@ -237,12 +205,12 @@ class KM_Shipping_Methods {
 		return $total_weight;
 	}
 
-		/**
-		 * Calcule les informations de livraison en fonction du poids total.
-		 *
-		 * @param float $weight Le poids total du panier.
-		 * @return array Informations sur le coût de livraison.
-		 */
+	/**
+	 * Calcule les informations de livraison en fonction du poids total.
+	 *
+	 * @param float $weight Le poids total du panier.
+	 * @return array Informations sur le coût de livraison.
+	 */
 	private function calculate_trucks_number( $weight ) {
 		$remaining_weight = $weight / 1000; // Convertir en tonnes.
 		$total_trucks     = 0;
@@ -284,45 +252,21 @@ class KM_Shipping_Methods {
 		}
 	}
 
-		/**
-		 * Vérifie si un produit appartient à la catégorie 'isolation'.
-		 *
-		 * @param WC_Product $product Le produit à vérifier.
-		 * @return bool Vrai si le produit est dans la catégorie 'isolation', faux sinon.
-		 */
+	/**
+	 * Vérifie si un produit appartient à la catégorie 'isolation'.
+	 *
+	 * @param WC_Product $product Le produit à vérifier.
+	 * @return bool Vrai si le produit est dans la catégorie 'isolation', faux sinon.
+	 */
 	private function is_isolation_product( $product ) {
 		return has_term( 'isolation', 'product_cat', $product->get_id() );
 	}
 
 	/**
-	 * Vérifie si un le nom d'un produit contient une des chaînes de caractères données.
-	 *
-	 * @param string $product_name Le nom du produit.
-	 * @param array  $strings Les chaînes de caractères à vérifier.
-	 * @param string $operation L'opération à effectuer. 'or' ou 'and'.
-	 * @return bool Vrai si le nom du produit contient une des chaînes de caractères données, faux sinon.
-	 */
-	public function check_product_name( $product_name, $strings, $operation = 'or' ) {
-		$product_name = mb_strtolower( $product_name, 'UTF-8' );
-		$match_count  = 0;
-
-		foreach ( $strings as $string ) {
-			if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) === 0 ) {
-				if ( $operation === 'or' ) {
-					return true;
-				}
-				++$match_count;
-			}
-		}
-
-		return ( $operation === 'and' && $match_count === count( $strings ) );
-	}
-
-	/**
 	 * Filtre les méthodes d'expédition en fonction des produits dans le panier.
 	 *
-	 * @param array $rates
-	 * @param array $package
+	 * @param array $rates Les méthodes d'expédition.
+	 * @param array $package Les informations sur le panier.
 	 * @return array
 	 */
 	public function filter_shipping_methods( $rates, $package ) {

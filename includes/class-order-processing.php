@@ -19,30 +19,19 @@ class KM_Order_Processing {
 	use SingletonTrait;
 
 	/**
-	 *  The shipping zone instance.
-	 *
-	 * @var KM_Shipping_zone|null
-	 */
-	public $km_shipping_zone;
-	/**
-	 *  The shipping zone instance.
-	 *
-	 * @var KM_Dynamic_Pricing|null
-	 */
-	public $km_dynamic_pricing;
-
-	/**
 	 * Constructor.
 	 *
-	 * The constructor is protected to prevent creating a new instance from outside
-	 * and to prevent creating multiple instances through the `new` keyword.
+	 * @return void
 	 */
 	private function __construct() {
-		$this->km_shipping_zone   = KM_Shipping_zone::get_instance();
-		$this->km_dynamic_pricing = KM_Dynamic_Pricing::get_instance();
 		$this->register();
 	}
 
+	/**
+	 * Register hooks.
+	 *
+	 * @return void
+	 */
 	private function register() {
 		add_action( 'woocommerce_checkout_create_order', array( $this, 'save_drive_checkout_fields' ), 10, 2 );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_ecotax_to_order_items' ), 10, 4 );
@@ -113,9 +102,11 @@ class KM_Order_Processing {
 			$tax_rate          = WC_Tax::get_rate_percent_value( array_shift( array_keys( $tax_rates ) ) );
 			$product_tax_price = $product_price_excl_tax * ( $tax_rate / 100 );
 
+			$ecotaxe_rate = km_get_ecotaxe_rate();
+
 			if ( $item->get_meta( '_has_ecotax', true ) ) {
-				$product_price_excl_tax += $this->km_dynamic_pricing->ecotaxe_rate;
-				$product_tax_price      += $this->km_dynamic_pricing->ecotaxe_rate_incl_taxes - $this->km_dynamic_pricing->ecotaxe_rate;
+				$product_price_excl_tax += $ecotaxe_rate;
+				$product_tax_price      += km_get_ecotaxe_rate( true ) - $ecotaxe_rate;
 			}
 
 			wc_update_order_item_meta( $item_id, '_actual_product_price_excl', $product_price_excl_tax );
@@ -125,15 +116,17 @@ class KM_Order_Processing {
 				wc_update_order_item_meta( $item_id, '_tonnes', $item_data['quantity'] );
 			}
 
-			if ( $this->km_shipping_zone->is_in_thirteen && ! $first_item_processed ) {
+			$is_in_thirteen = km_is_shipping_zone_in_thirteen();
+
+			if ( $is_in_thirteen && ! $first_item_processed ) {
 				$first_item_processed = true;
 				$this->add_shipping_meta_data( $item_id, $_POST );
-			} elseif ( ! $this->km_shipping_zone->is_in_thirteen ) {
+			} elseif ( ! $is_in_thirteen ) {
 				$this->add_shipping_product_meta_data( $item_id, $product );
 			}
 		}
 
-		update_post_meta( $order_id, '_cookie_cp', $this->km_shipping_zone->zip_code );
+		update_post_meta( $order_id, '_cookie_cp', km_get_shipping_postcode() );
 	}
 
 	/**
@@ -163,7 +156,7 @@ class KM_Order_Processing {
 	 * @return void
 	 */
 	private function add_shipping_product_meta_data( $item_id, $product ) {
-		$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
+		$shipping_product = km_get_related_shipping_product( $product );
 
 		if ( $shipping_product ) {
 			$shipping_price_excl_tax = wc_get_price_excluding_tax( $shipping_product );

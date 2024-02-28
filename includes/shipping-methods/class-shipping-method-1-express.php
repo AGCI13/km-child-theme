@@ -1,17 +1,15 @@
 <?php
 
+/**
+ * Shipping method 1 express.
+ *
+ * @package KingMateriaux
+ */
 class Shipping_method_1_express extends WC_Shipping_Method {
 
 	/**
-	 * Instance unique de la classe.
-	 *
-	 * @var KM_Shipping_Methods
-	 */
-	private $km_shipping_methods;
-
-	/**
 	 *  Constructor.
-	 *   */
+	 */
 	public function __construct( $instance_id = 0 ) {
 		$this->id           = 'option1express';
 		$this->method_title = 'Option 1 Express';
@@ -119,7 +117,7 @@ class Shipping_method_1_express extends WC_Shipping_Method {
 			return;
 		}
 
-		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
+		$shipping_info = km_calculate_shipping_method_price( $this->id, $this->method_title );
 
 		if ( ! $shipping_info || 0 === $shipping_info['price_excl_tax'] ) {
 			return;

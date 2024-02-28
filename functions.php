@@ -71,6 +71,7 @@ add_action(
 		require_once 'includes/class-singleton-trait.php';
 		require_once 'includes/class-dynamic-pricing.php';
 		require_once 'includes/class-shipping-zone.php';
+		require_once 'includes/class-shipping-delays.php';
 		require_once 'includes/class-order-processing.php';
 		require_once 'includes/class-palletization-manager.php';
 		require_once 'includes/class-transporter-manager.php';
@@ -94,5 +95,7 @@ add_action(
 		KM_Palletization_Manager::get_instance();
 		KM_Transporter_Manager::get_instance();
 		KM_Big_Bag_Manager::get_instance();
+
+		require_once 'includes/helpers.php';
 	}
 );

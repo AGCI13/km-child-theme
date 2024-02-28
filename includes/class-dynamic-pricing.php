@@ -19,13 +19,6 @@ class KM_Dynamic_Pricing {
 	use SingletonTrait;
 
 	/**
-	 *  The shipping zone instance.
-	 *
-	 *  @var KM_Shipping_zone|null
-	 */
-	public $km_shipping_zone;
-
-	/**
 	 * The ecotaxe rate.
 	 *
 	 * @var float
@@ -80,7 +73,6 @@ class KM_Dynamic_Pricing {
 	 * and to prevent creating multiple instances through the `new` keyword.
 	 */
 	private function __construct() {
-		$this->km_shipping_zone           = KM_Shipping_zone::get_instance();
 		$this->ecotaxe_info_html          = '<div class="km-product-ecotaxe">' . sprintf( __( 'Dont %s d\'écotaxe', 'kingmateriaux' ), wc_price( $this->ecotaxe_rate_incl_taxes ) ) . '</div>';
 		$this->include_shipping_html      = '<div class="km-include-shipping">' . esc_html__( 'Livraison incluse', 'kingmateriaux' ) . '</div>';
 		$this->quantity_discount_msg_html = '<div class="km-include-shipping">' . esc_html__( 'Tarifs dégressifs en fonction des quantités (visible uniquement dans le panier)', 'kingmateriaux' ) . '</div>';
@@ -115,7 +107,7 @@ class KM_Dynamic_Pricing {
 	 * @return void
 	 */
 	public function set_prices_on_zip_or_zone_missing() {
-		if ( $this->km_shipping_zone->zip_code && $this->km_shipping_zone->shipping_zone_id ) {
+		if ( km_get_shipping_postcode() && km_get_shipping_zone_id() ) {
 			return;
 		}
 		add_filter( 'woocommerce_is_purchasable', '__return_false' );
@@ -132,9 +124,11 @@ class KM_Dynamic_Pricing {
 	 */
 	public function disable_variation_if_no_shipping_product( $variation_data, $product, $variation ) {
 
-		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $this->km_shipping_zone->is_in_thirteen )
-		|| ( $this->km_shipping_zone->is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
-		|| ( $this->km_shipping_zone->is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', $this->km_shipping_zone->shipping_zone_name ) ) ) ) {
+		$is_in_thirteen = km_is_shipping_zone_in_thirteen();
+
+		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $is_in_thirteen )
+		|| ( $is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
+		|| ( $is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_shipping_zone_name() ) ) ) ) {
 
 			// Désactiver la variation si aucun produit de livraison n'est disponible ou si le prix est 0.
 			$variation_data['is_purchasable']      = false;
@@ -157,15 +151,13 @@ class KM_Dynamic_Pricing {
 			$price += $this->ecotaxe_rate;
 		}
 
-		if ( ! $this->km_shipping_zone->is_in_thirteen ) {
+		if ( ! km_is_shipping_zone_in_thirteen() ) {
 
 			if ( empty( $price ) || ! $this->has_shipping_class( $product ) ) {
 				return $price;
 			}
 
-			$km_big_bag_manager = KM_Big_Bag_Manager::get_instance();
-
-			if ( $km_big_bag_manager->is_big_bag( $product ) && ! in_array( $this->km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+			if ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
 				$shipping_bb_product = get_page_by_path( '1-big-bag-degressif', OBJECT, 'product' );
 				if ( $shipping_bb_product instanceof WP_Post ) {
 					$shipping_bb_product_id = $shipping_bb_product->ID;
@@ -174,7 +166,7 @@ class KM_Dynamic_Pricing {
 						return $price;
 				}
 			} else {
-				$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $product );
+				$shipping_product = km_get_related_shipping_product( $product );
 			}
 
 			if ( ! $shipping_product instanceof WC_Product ) {
@@ -227,18 +219,16 @@ class KM_Dynamic_Pricing {
 	 * @return string Le prix du produit.
 	 */
 	public function maybe_display_include_shipping_html( $price, $product ) {
-		if ( ! $this->km_shipping_zone->is_in_thirteen ) {
-
-			$km_big_bag_manager = KM_Big_Bag_Manager::get_instance();
+		if ( ! km_is_shipping_zone_in_thirteen() ) {
 
 			if ( ! $product->is_type( 'variation' ) ) {
 
 				$price .= $this->include_shipping_html;
 
-				if ( is_product() && $km_big_bag_manager->is_big_bag( $product ) && ! in_array( $this->km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+				if ( is_product() && km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
 					$price .= $this->quantity_discount_msg_html;
 				}
-			} elseif ( $km_big_bag_manager->is_big_bag( $product ) && ! in_array( $this->km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+			} elseif ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
 				$price .= $this->quantity_discount_msg_html;
 			}
 		}
@@ -308,13 +298,14 @@ class KM_Dynamic_Pricing {
 		}
 
 		$disable_in_thirteen = get_field( 'dont_sell_in_thirteen', $product_id );
+		$is_in_thirteen      = km_is_shipping_zone_in_thirteen();
 
-		if ( $this->km_shipping_zone->is_in_thirteen && $disable_in_thirteen ) {
+		if ( $is_in_thirteen && $disable_in_thirteen ) {
 			$this->modify_product_status( $product_id, 'unpurchasable' );
 			return false;
 		}
 
-		if ( $product->is_type( 'simple' ) && ! $this->km_shipping_zone->is_in_thirteen && ! $this->is_product_shippable_out_13( $product ) ) {
+		if ( $product->is_type( 'simple' ) && ! $is_in_thirteen && ! $this->is_product_shippable_out_13( $product ) ) {
 			$this->modify_product_status( $product_id, 'unpurchasable' );
 			return false;
 		}
@@ -347,7 +338,7 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return bool Si le produit est achetable ou non.
 	 */
-	private function handle_variable_product( WC_Product $product ) {
+	private function handle_variable_product( $product ) {
 		$product_id                   = $product->get_id();
 		$all_variations_out_of_stock  = true;
 		$all_variations_unpurchasable = true;
@@ -384,17 +375,19 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product_Variation $variation La variation du produit.
 	 * @return bool True si la variation est achetable, false sinon.
 	 */
-	private function is_variation_purchasable( WC_Product_Variation $variation ) {
-		if ( ! $this->km_shipping_zone->is_in_thirteen ) {
+	private function is_variation_purchasable( $variation ) {
+		$is_in_thirteen = km_is_shipping_zone_in_thirteen();
+
+		if ( ! $is_in_thirteen ) {
 			return $this->check_shipping_product_price( $variation );
 		}
 
 		// Obtention de l'objet produit parent.
 		$parent_product = wc_get_product( $variation->get_parent_id() );
 
-		if ( $this->km_shipping_zone->is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) ) {
+		if ( $is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) ) {
 			return false;
-		} elseif ( $this->km_shipping_zone->is_in_thirteen && $parent_product instanceof WC_Product && false !== stripos( $parent_product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', $this->km_shipping_zone->shipping_zone_name ) ) ) {
+		} elseif ( $is_in_thirteen && $parent_product instanceof WC_Product && false !== stripos( $parent_product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_shipping_zone_name() ) ) ) {
 			return false;
 		}
 
@@ -408,7 +401,7 @@ class KM_Dynamic_Pricing {
 	 * @param string $status Le statut du produit ('unpurchasable' ou 'out_of_stock').
 	 * @return void
 	 */
-	private function modify_product_status( int $product_id, string $status ): void {
+	private function modify_product_status( $product_id, $status ) {
 		if ( 'unpurchasable' === $status && ! in_array( $product_id, $this->unpurchasable_products ) ) {
 			$this->unpurchasable_products[] = $product_id;
 		} elseif ( 'out_of_stock' === $status && ! in_array( $product_id, $this->out_of_stock_products ) ) {
@@ -425,7 +418,7 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return string Le prix du produit.
 	 */
-	public function display_product_status_message( string $price, WC_Product $product ): string {
+	public function display_product_status_message( $price, $product ) {
 		$product_id = $product->get_id();
 		$messages   = array();
 
@@ -451,7 +444,7 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return bool Si le produit a une classe de livraison ou non.
 	 */
-	private function has_shipping_class( WC_Product $product ): bool {
+	private function has_shipping_class( $product ) {
 		$shipping_class = $product->get_shipping_class();
 		return ! empty( $shipping_class );
 	}
@@ -462,9 +455,9 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $variation Le produit (variation) à vérifier.
 	 * @return bool Retourne true si un produit de livraison existe et que son prix est supérieur à 0€, false sinon.
 	 */
-	public function check_shipping_product_price( WC_Product $variation ): bool {
+	public function check_shipping_product_price( $variation ) {
 		// Obtient le produit de livraison associé.
-		$shipping_product = $this->km_shipping_zone->get_related_shipping_product( $variation );
+		$shipping_product = km_get_related_shipping_product( $variation );
 
 		// Vérifie si le produit de livraison existe et si son prix est supérieur à 0€.
 		if ( $shipping_product && $shipping_product->get_price() > 0 ) {
@@ -481,9 +474,9 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return string Le prix du produit.
 	 */
-	public function display_required_postcode_message( string $price, WC_Product $product ): string {
+	public function display_required_postcode_message( $price, $product ) {
 		// Si aucun code postal n'est entré, affichez le message.
-		if ( $this->km_shipping_zone->get_zip_and_country_from_cookie() === false ) {
+		if ( ! km_get_shipping_zone_id() ) {
 			return __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' );
 		}
 		// Sinon, retournez le prix habituel.
@@ -496,7 +489,7 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return bool Si le produit à une meta _has_ecotax.
 	 */
-	public function product_has_ecotax_meta( WC_Product $product ): bool {
+	public function product_has_ecotax_meta( $product ) {
 
 		if ( $product->is_type( 'variation' ) ) {
 			$parent_ecotax = get_post_meta( $product->get_parent_id(), '_has_ecotax', true );
@@ -521,7 +514,7 @@ class KM_Dynamic_Pricing {
 	 * @param string $context Le contexte dans lequel on se trouve (cart ou order).
 	 * @return float Le montant total de l'écotaxe dans le panier.
 	 */
-	public function get_total_ecotaxe( string $context = 'cart' ): float {
+	public function get_total_ecotaxe( $context = 'cart' ) {
 		// Calculate total ecotaxe in cart.
 		$total_ecotaxe = 0;
 

@@ -109,14 +109,6 @@ class Tonnage_Calculator_Widget extends \Elementor\Widget_Base {
 				<div class="density_body_result"><b><?php esc_html_e( 'Densité :', 'kingmateriaux' ); ?> </b><span id ='densite_value'> </span > </div >
 				<span id ='reset_tonnage_calculator'> <?php esc_html_e( 'Calculer un nouveau tonnage', 'kingmateriaux' ); ?></span>
 			</div>
-			<?php
-			/*
-			<div class="img_tonnage_calculator_form">
-				<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/femme-calcul-tonnage.png' ); ?>"
-					alt="image de calcul de tonnage" />
-			</div>
-			*/
-			?>
 			<div class="img_tonnage_calculator_result">
 				<img src="<?php echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'full' ) ); ?>"
 					alt="image de calcul de tonnage"/>

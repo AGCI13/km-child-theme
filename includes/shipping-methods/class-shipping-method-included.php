@@ -1,9 +1,17 @@
 <?php
 
+/**
+ * Classe de la méthode d'expédition Incluse
+ *
+ * @package KingMateriaux
+ */
 class Shipping_method_included extends WC_Shipping_Method {
 
 	/**
 	 *  Constructor.
+	 *
+	 * @param int $instance_id
+	 * @return void
 	 */
 	public function __construct( $instance_id = 0 ) {
 		$this->id                 = 'included';
@@ -77,13 +85,10 @@ class Shipping_method_included extends WC_Shipping_Method {
 			return;
 		}
 
-		$km_shipping_methods         = KM_Shipping_Methods::get_instance();
-		$only_geotextile_and_samples = true;
-
 		// Vérifier si tous les produits dans le panier ont 'benne' dans leur titre.
 		foreach ( $package['contents'] as $item ) {
 			$product = $item['data'];
-			if ( ! $km_shipping_methods->check_product_name( $product->get_name(), array( 'géotextile', 'échantillons' ) ) ) {
+			if ( ! km_check_product_name( $product->get_name(), array( 'géotextile', 'échantillons' ) ) ) {
 				return;
 			}
 		}

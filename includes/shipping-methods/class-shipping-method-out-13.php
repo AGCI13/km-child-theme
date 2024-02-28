@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Classe de la méthode d'expédition Incluse
+ *
+ * @package KingMateriaux
+ */
 class Shipping_method_out_13 extends WC_Shipping_Method {
 
 	/**
@@ -63,7 +68,6 @@ class Shipping_method_out_13 extends WC_Shipping_Method {
 			),
 		);
 	}
-
 
 	/**
 	 * Calcule les frais d'expédition.

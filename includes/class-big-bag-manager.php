@@ -40,9 +40,7 @@ class KM_Big_Bag_Manager {
 			return;
 		}
 
-		$km_shipping_zone = KM_Shipping_Zone::get_instance();
-
-		if ( $km_shipping_zone->is_in_thirteen || in_array( $km_shipping_zone->shipping_zone_id, array( 4, 5 ), true ) ) {
+		if ( km_is_shipping_zone_in_thirteen() || in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
 			return;
 		}
 
@@ -199,5 +197,23 @@ class KM_Big_Bag_Manager {
 		}
 
 		wp_send_json_success();
+	}
+
+	/**
+	 * Vérifie si un big bag est dans le panier.
+	 *
+	 * @return bool
+	 */
+	public function is_big_bag_in_cart() {
+		$cart = WC()->cart->get_cart();
+
+		foreach ( $cart as $cart_item ) {
+			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+			if ( $this->is_big_bag( $product_id ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

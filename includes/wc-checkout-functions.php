@@ -11,8 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function km_override_checkout_init(): void {
 	if ( isset( $_COOKIE['zip_code'] ) ) {
-		$zip_code                   = explode( '-', $_COOKIE['zip_code'] )[0];
-		$_POST['shipping_postcode'] = $zip_code;
+		$_POST['shipping_postcode'] = explode( '-', $_COOKIE['zip_code'] )[0];
 	}
 }
 add_action( 'woocommerce_checkout_init', 'km_override_checkout_init' );
@@ -73,7 +72,7 @@ add_action( 'wp_ajax_nopriv_get_drive_available_days', 'km_get_more_drive_availa
 function km_get_drive_available_days() {
 	$days = '';
 
-	// Get the days of the week and the specific dates to exclude
+	// Get the days of the week and the specific dates to exclude.
 	$drive_settings         = get_option( 'woocommerce_drive_settings', '' );
 	$unavailable_days       = isset( $drive_settings['unavailable_days'] ) ? $drive_settings['unavailable_days'] : '';
 	$unavailable_days_array = ! empty( $unavailable_days ) ? explode( ',', $unavailable_days ) : array();
@@ -127,104 +126,23 @@ function km_add_shipping_cost_to_cart_total() {
 	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) || in_array( 'included', $chosen_shipping_methods, true ) ) {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
 		$shipping_cost  = __( 'Inclus', 'kingmateriaux' );
-		$shiping_date   = km_display_shipping_delays_after_shipping();
+		$shipping_date  = km_get_shipping_delays();
 	} else {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
-		$shiping_date   = km_display_shipping_delays_after_shipping();
+		$shipping_date  = km_get_shipping_delays();
 		$shipping_cost  = WC()->cart->get_cart_shipping_total();
 	}
 	?>
 	<tr class="shipping">
 		<th><?php echo esc_html( $shipping_label ); ?></th>
 		<td data-title="<?php echo esc_html( $shipping_label ); ?>">
-		<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
-		<?php echo $shiping_date; ?>
+			<span class="shipping-cost"><?php echo $shipping_cost; ?></span>
+			<tr><td colspan="2" class="km-cart-longest-delay"><?php echo esc_html( $shipping_date ); ?></td></tr>
 		</td>
 	</tr>
 	<?php
 }
 add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
-
-/**
- * Ajoute les délais de livraison après le mode de livraison
- *
- * @return string
- */
-function km_display_shipping_delays_after_shipping( $longest_min_delay = 0, $longest_max_delay = 0 ) {
-
-	$html = '';
-
-	// Récupérer l'ID de la zone de livraison.
-	$shipping_zone_id = KM_Shipping_Zone::get_instance()->shipping_zone_id;
-
-	// Déterminer la saison actuelle.
-	$current_month  = gmdate( 'n' );
-	$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
-
-	$season = $is_high_season ? 'hs' : 'ls'; // 'hs' pour 'high season' et 'ls' pour 'low season
-
-	$shipping_zone_min_delays = get_option( 'min_shipping_days_' . $season . '_' . $shipping_zone_id );
-	$shipping_zone_min_delays = $shipping_zone_min_delays ? (int) $shipping_zone_min_delays : 0;
-
-	$shipping_zone_max_delays = get_option( 'max_shipping_days_' . $season . '_' . $shipping_zone_id );
-	$shipping_zone_max_delays = $shipping_zone_max_delays ? (int) $shipping_zone_max_delays : 0;
-
-	if ( 0 === $longest_min_delay && 0 === $longest_max_delay ) {
-		foreach ( WC()->cart->get_cart() as $cart_item ) {
-
-			// Vérifier si des délais de livraison personnalisés sont définis via ACF.
-			$custom_product_delays = get_field( 'product_shipping_delays_product_shipping_delays_' . $season, $cart_item['product_id'] );
-
-			if ( is_array( $custom_product_delays )
-			&& ( isset( $custom_product_delays[ 'min_shipping_days_' . $season ] ) || isset( $custom_product_delays[ 'max_shipping_days_' . $season ] ) )
-			&& ( $custom_product_delays[ 'min_shipping_days_' . $season ] || $custom_product_delays[ 'max_shipping_days_' . $season ] ) ) {
-				$min_shipping_days = $custom_product_delays[ 'min_shipping_days_' . $season ] ? $custom_product_delays[ 'min_shipping_days_' . $season ] : 0;
-				$max_shipping_days = $custom_product_delays[ 'max_shipping_days_' . $season ] ? $custom_product_delays[ 'max_shipping_days_' . $season ] : 0;
-			} else {
-				$min_shipping_days = $shipping_zone_min_delays;
-				$max_shipping_days = $shipping_zone_max_delays;
-			}
-
-			// Vérifier si les informations sont disponibles.
-			if ( 0 === $min_shipping_days && 0 === $max_shipping_days ) {
-				continue; // Si les deux sont manquants, ne rien afficher.
-			}
-
-			if ( $min_shipping_days > $longest_min_delay ) {
-				$longest_min_delay = (int) $min_shipping_days;
-			}
-
-			if ( $max_shipping_days > $longest_max_delay ) {
-				$longest_max_delay = (int) $max_shipping_days;
-			}
-		}
-	}
-
-	if ( 0 === $longest_min_delay && 0 === $longest_max_delay ) {
-		return; // Si les deux sont manquants, ne rien afficher.
-	}
-
-	$truly_longest_min_delay = min( $longest_min_delay, $longest_max_delay );
-	$truly_longest_max_delay = max( $longest_min_delay, $longest_max_delay );
-
-	$current_date = new DateTime(); // Date actuelle.
-
-	if ( $truly_longest_min_delay === $truly_longest_max_delay ) {
-		$delay          = $truly_longest_min_delay;
-		$delivery_date  = ( clone $current_date )->add( new DateInterval( 'P' . $delay . 'D' ) );
-		$formatted_date = $delivery_date->format( 'd/m/Y' );
-		$html          .= '<tr><td colspan="2" class="km-cart-longest-delay">' . esc_html__( 'Livraison estimée le ', 'kingmateriaux' ) . $formatted_date . '</td></tr>';
-	} else {
-		$min_delivery_date  = ( clone $current_date )->add( new DateInterval( 'P' . $truly_longest_min_delay . 'D' ) );
-		$formatted_min_date = $min_delivery_date->format( 'd/m/Y' );
-
-		$max_delivery_date  = ( clone $current_date )->add( new DateInterval( 'P' . $truly_longest_max_delay . 'D' ) );
-		$formatted_max_date = $max_delivery_date->format( 'd/m/Y' );
-
-		$html .= '<tr><td colspan="2" class="km-cart-longest-delay">' . esc_html__( 'Livraison estimée entre le ', 'kingmateriaux' ) . $formatted_min_date . ' et le ' . $formatted_max_date . '</td></tr>';
-	}
-	return $html;
-}
 
 /**
  * Ajoute les champs cachés pour les données de livraison.
@@ -233,9 +151,7 @@ function km_display_shipping_delays_after_shipping( $longest_min_delay = 0, $lon
  */
 function km_add_custom_hidden_fields_to_checkout() {
 
-	// Ajouter la condition, if is thirteen.
-	$km_shipping_zone = KM_Shipping_Zone::get_instance();
-	if ( ! $km_shipping_zone->is_in_thirteen() ) {
+	if ( ! km_is_shipping_zone_in_thirteen() ) {
 		return;
 	}
 
@@ -376,51 +292,3 @@ function km_order_pay_without_login( $allcaps, $caps, $args ) {
 }
 add_filter( 'user_has_cap', 'km_order_pay_without_login', 9999, 3 );
 add_filter( 'woocommerce_order_email_verification_required', '__return_false', 9999 );
-
-/** --------------  DEBUG CODE START ----------------- */
-
-// function km_display_shipping_info_in_footer() {
-// $km_shipping_zone = KM_Shipping_Zone::get_instance();
-// if ( is_admin() || ! is_checkout() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) || ! $km_shipping_zone->is_in_thirteen() ) {
-// return;
-// }
-// Vérifier si sur la page de paiement
-
-// Noms des cookies que vous pourriez avoir définis
-// $shipping_methods = array( 'option-1', 'option-1-express', 'option-2', 'option-2-express' );
-
-// echo '<div id="km-shipping-info-debug" class="km-debug-bar">';
-// echo '<h4>DEBUG</h4><img class="modal-debug-close km-modal-close" src="' . esc_url( get_stylesheet_directory_uri() . '/assets/img/cross.svg' ) . '" alt="close modal"></span>';
-// echo '<div class="debug-content"><p>Les couts de livraisons sont <strong>calculés lors de la mise à jour du panier</strong>. Pour l\'heure, le VRAC est compté à part. Si une plaque de placo est présente, tous les produits isolation sont comptés à part.</p>';
-
-// foreach ( $shipping_methods as $method ) {
-// $cookie_name = 'km_shipping_cost_' . $method;
-
-// if ( isset( $_COOKIE[ sanitize_title( $cookie_name ) ] ) ) {
-// $shipping_info = json_decode( stripslashes( $_COOKIE[ $cookie_name ] ), true );
-
-// echo '<table>';
-// echo '<thead><tr><th colspan="2">Coûts de livraison pour ' . esc_html( $method ) . ':</th></tr></thead>';
-// echo '<tbody>';
-// foreach ( $shipping_info as $key => $value ) {
-// if ( strpos( $key, 'poids' ) !== false ) {
-// $value = esc_html( $value ) . ' Kg';
-// } elseif ( strpos( $key, 'placo' ) !== false ) {
-// $value = esc_html( $value );
-// } elseif ( strpos( $key, 'prix' ) !== false ) {
-// $value = esc_html( $value ) . ' €';
-// } else {
-// $value = esc_html( $value );
-// }
-// echo '<tr><td>' . esc_html( $key ) . '</td><td>' . esc_html( $value ) . '</td></tr>';
-// }
-// echo '</tbody>';
-// echo '</table>';
-// }
-// }
-
-// echo '</div></div>';
-// }
-// add_action( 'wp_footer', 'km_display_shipping_info_in_footer' );
-
-/** --------------  DEBUG CODE END ----------------- */

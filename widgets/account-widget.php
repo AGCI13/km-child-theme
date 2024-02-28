@@ -27,11 +27,11 @@ class Account_Widget extends \Elementor\Widget_Base {
 
 		<div class="king-account">
 			<a href="<?php echo esc_url( $permalink ); ?>">
-			<img src="<?php echo get_stylesheet_directory_uri() . '/assets/img/account.svg'; ?>" alt="My Account">
+			<img src="<?php echo esc_url( get_stylesheet_directory_uri() ) . '/assets/img/account.svg'; ?>" alt="My Account">
 			<?php if ( is_user_logged_in() ) : ?>
-				<span class="king-account-content"><?php echo __( 'Mon compte', 'kingmateriaux' ); ?></span>
+				<span class="king-account-content"><?php esc_html_e( 'Mon compte', 'kingmateriaux' ); ?></span>
 			<?php else : ?>
-				<span class="king-account-content"><?php echo __( 'Se connecter', 'kingmateriaux' ); ?></span>
+				<span class="king-account-content"><?php esc_html_e( 'Se connecter', 'kingmateriaux' ); ?></span>
 			<?php endif; ?>
 			</a>
 		</div>

@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Ajoute un champ personnalisé au profil utilisateur.
+ *
+ * @param WP_User $user L'utilisateur.
+ *
+ * @return void
+ */
 function km_add_custom_user_profile_fields( $user ) {
 	?>
 	<table id="user-note-table" class="form-table">
@@ -19,7 +26,11 @@ function km_add_custom_user_profile_fields( $user ) {
 add_action( 'show_user_profile', 'km_add_custom_user_profile_fields' );
 add_action( 'edit_user_profile', 'km_add_custom_user_profile_fields' );
 
-
+/**
+ * Enregistre les champs personnalisés du profil utilisateur.
+ *
+ * @param int $user_id L'ID de l'utilisateur.
+ */
 function km_save_custom_user_profile_fields( $user_id ) {
 	if ( ! current_user_can( 'edit_user', $user_id ) || ! isset( $_POST['user_note'] ) ) {
 		return false;

@@ -33,11 +33,11 @@ class KM_Shipping_Zone {
 	public $shipping_zone_name = '';
 
 	/**
-	 * The zip_code string.
+	 * The shipping_postcode string.
 	 *
 	 * @var string|null
 	 */
-	public $zip_code = '';
+	public $shipping_postcode = '';
 
 	/**
 	 * The country code string.
@@ -53,6 +53,11 @@ class KM_Shipping_Zone {
 	 */
 	public $zones_in_thirteen = array( 12, 13, 14, 15, 16, 17, 18 );
 
+	/**
+	 * The boolean to check if the current shipping zone is in the thirtheen.
+	 *
+	 * @var bool
+	 */
 	public $is_in_thirteen = false;
 
 	/**
@@ -65,8 +70,7 @@ class KM_Shipping_Zone {
 		$this->get_zip_and_country_from_cookie();
 		$this->shipping_zone_id   = $this->get_shipping_zone_id_from_cookie();
 		$this->shipping_zone_name = $this->get_shipping_zone_name();
-
-		$this->is_in_thirteen = $this->is_in_thirteen();
+		$this->is_in_thirteen     = $this->is_in_thirteen();
 
 		$this->register();
 	}
@@ -93,16 +97,16 @@ class KM_Shipping_Zone {
 		if ( ! isset( $_COOKIE['zip_code'] ) || empty( $_COOKIE['zip_code'] ) ) {
 			return false;
 		}
-		$zip_cookie = sanitize_text_field( wp_unslash( $_COOKIE['zip_code'] ) );
+		$postcode = sanitize_text_field( wp_unslash( $_COOKIE['zip_code'] ) );
 
-		$zip_cookie = explode( '-', $zip_cookie );
+		$postcode = explode( '-', $postcode );
 
-		if ( ! isset( $zip_cookie[0] ) || empty( $zip_cookie[0] ) || ! isset( $zip_cookie[1] ) || empty( $zip_cookie[1] ) ) {
+		if ( ! isset( $postcode[0] ) || empty( $postcode[0] ) || ! isset( $postcode[1] ) || empty( $postcode[1] ) ) {
 			return false;
 		}
 
-		$this->zip_code     = $zip_cookie[0];
-		$this->country_code = $zip_cookie[1];
+		$this->shipping_postcode = $postcode[0];
+		$this->country_code      = $postcode[1];
 
 		return true;
 	}
@@ -114,7 +118,7 @@ class KM_Shipping_Zone {
 	 * @return string|false The shipping class slug or false on failure.
 	 */
 	public function get_product_shipping_class( $product ) {
-		// If an ID is passed, get the product object
+		// If an ID is passed, get the product object.
 		if ( is_numeric( $product ) ) {
 			$product = wc_get_product( $product );
 		}
@@ -146,13 +150,13 @@ class KM_Shipping_Zone {
 	 */
 	public function get_shipping_zone_id_from_cookie() {
 		// Retrieve the 'shipping_zone' cookie value using the KM_Cookie_Handler.
-		$zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
+		$shipping_zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
 
 		// Validate the zone ID to ensure it's a positive integer.
-		$zone_id = is_numeric( $zone_id ) ? (int) $zone_id : null;
+		$shipping_zone_id = is_numeric( $shipping_zone_id ) ? (int) $shipping_zone_id : null;
 
 		// Return the zone ID if it is a valid number, null otherwise.
-		return ( $zone_id > 0 ) ? $zone_id : null;
+		return ( $shipping_zone_id > 0 ) ? $shipping_zone_id : null;
 	}
 
 	/**
@@ -162,23 +166,17 @@ class KM_Shipping_Zone {
 	 */
 	public function get_shipping_zone_name() {
 
-		// First, get the shipping zone ID.
-		$shipping_zone_id = $this->shipping_zone_id ?: $this->get_shipping_zone_id_from_cookie();
+		$shipping_zone_id = $this->shipping_zone_id ? $this->shipping_zone_id : $this->get_shipping_zone_id_from_cookie();
 
-		// If no valid zone ID is found, return null.
 		if ( null === $shipping_zone_id ) {
 			return null;
 		}
 
-		// Get the shipping zone object by ID
 		$shipping_zone = new WC_Shipping_Zone( $shipping_zone_id );
 
-		// Check if the shipping zone ID is valid by checking if it's greater than 0
 		if ( 0 === $shipping_zone->get_id() ) {
 			return null;
 		}
-
-		// Return the shipping zone name
 		return $shipping_zone->get_zone_name();
 	}
 
@@ -187,7 +185,6 @@ class KM_Shipping_Zone {
 	 *
 	 * @return bool True if the shipping zone is in the thirtheen, false otherwise.
 	 */
-
 	public function is_in_thirteen() {
 
 		$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
@@ -238,7 +235,7 @@ class KM_Shipping_Zone {
 
 		// Récupérer le produit de livraison associé.
 		$args = array(
-			'fields'         => 'ids', // Ce qu'on demande à recupérer.
+			'fields'         => 'ids',
 			'post_type'      => 'product',
 			'post_status'    => array( 'private' ),
 			'posts_per_page' => 1,
@@ -335,7 +332,6 @@ class KM_Shipping_Zone {
 	 * @param string $postcode The zip code.
 	 * @return int|null The shipping zone ID or null if no zone is found.
 	 */
-
 	public function get_shipping_zone_id_from_postcode( $postcode ) {
 		$shipping_zones = WC_Shipping_Zones::get_zones();
 		$found_zone     = null;
@@ -365,6 +361,8 @@ class KM_Shipping_Zone {
 	 * Add custom fields to shipping zones.
 	 *
 	 * @param WC_Shipping_Zone $zone The shipping zone object.
+	 *
+	 * @return void
 	 */
 	public function add_custom_shipping_zone_fields( $zone ) {
 		$screen = get_current_screen();
@@ -373,7 +371,8 @@ class KM_Shipping_Zone {
 			return;
 		}
 
-		$zone_id = $_GET['zone_id'];
+		// Sanitize the zone_id.
+		$zone_id = intval( $_GET['zone_id'] );
 
 		// Récupèrer les paramètres si déjà enregistrés.
 		$min_shipping_days_hs = get_option( 'min_shipping_days_hs_' . $zone_id );
@@ -426,6 +425,11 @@ class KM_Shipping_Zone {
 		wp_send_json_success( array( 'message' => 'Délais de livraison sauvegardés' ) );
 	}
 
+	/**
+	 * Display the postcode modal.
+	 *
+	 * @return void
+	 */
 	public function modal_postcode_html() {
 
 		$active = '';
@@ -433,7 +437,7 @@ class KM_Shipping_Zone {
 			$active = 'active';
 		}
 
-		$shipping_zone_id = $this->shipping_zone_id ?: $this->get_shipping_zone_id_from_cookie();
+		$shipping_zone_id = $this->shipping_zone_id ? $this->shipping_zone_id : $this->get_shipping_zone_id_from_cookie();
 
 		// requiert le template.
 		require_once get_stylesheet_directory() . '/templates/modals/postcode.php';

@@ -1,13 +1,11 @@
 <?php
 
+/**
+ * Shipping method 2 express.
+ *
+ * @package KingMateriaux
+ */
 class Shipping_method_2_express extends WC_Shipping_Method {
-
-	/**
-	 * Instance unique de la classe.
-	 *
-	 * @var KM_Shipping_Methods
-	 */
-	private $km_shipping_methods;
 
 	/**
 	 *  Constructor.
@@ -110,7 +108,7 @@ class Shipping_method_2_express extends WC_Shipping_Method {
 	/**
 	 * Calcule les frais d'expédition.
 	 *
-	 * @param array $package
+	 * @param array $package Le package de livraison.
 	 * @return void
 	 */
 	public function calculate_shipping( $package = array() ): void {
@@ -119,7 +117,7 @@ class Shipping_method_2_express extends WC_Shipping_Method {
 			return;
 		}
 
-		$shipping_info = KM_Shipping_Methods::get_instance()->calculate_shipping_method_price( $this->id, $this->method_title );
+		$shipping_info = km_calculate_shipping_method_price( $this->id, $this->method_title );
 
 		if ( ! $shipping_info || 0 === $shipping_info['price_excl_tax'] ) {
 			return;

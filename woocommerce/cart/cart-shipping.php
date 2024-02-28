@@ -32,7 +32,6 @@ if ( $available_methods ) {
 		}
 	}
 }
-$km_shipping_zone  = KM_Shipping_zone::get_instance();
 $checkout          = WC()->checkout();
 $shipping_selected = 'selected';
 if ( 'drive' === $chosen_method ) {

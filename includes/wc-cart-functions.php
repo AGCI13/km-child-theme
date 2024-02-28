@@ -16,8 +16,7 @@ function km_change_cart_totals_text( $translated_text, $text, $domain ) {
 		return $translated_text;
 	}
 
-	$km_shipping_zone = KM_Shipping_Zone::get_instance();
-	if ( $km_shipping_zone->is_in_thirteen && is_cart() && 'Total' === $text ) {
+	if ( km_is_shipping_zone_in_thirteen() && is_cart() && 'Total' === $text ) {
 		$translated_text = 'Total hors livraison';
 	}
 	return $translated_text;
@@ -114,10 +113,12 @@ function km_display_ecotaxe_with_unit_price( $price_html, $cart_item, $cart_item
 	if ( is_admin() ) {
 		return;
 	}
-	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
+	error_log( var_export( km_get_ecotaxe_rate( true ), true ) );
 
 	if ( $cart_item['_has_ecotax'] ) {
-		$price_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $km_dynamique_pricing->ecotaxe_rate_incl_taxes ) ) . '</small>';
+		$price_html .= '<br><small class="ecotaxe-amount">'
+		. sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( km_get_ecotaxe_rate( true ) ) )
+		. '</small>';
 	}
 	return $price_html;
 }
@@ -135,10 +136,9 @@ function km_display_ecotaxe_with_subtotal( $subtotal_html, $cart_item, $cart_ite
 	if ( is_admin() ) {
 		return;
 	}
-	$km_dynamique_pricing = KM_Dynamic_Pricing::get_instance();
 
 	if ( $cart_item['_has_ecotax'] ) {
-		$ecotaxe_total  = $km_dynamique_pricing->ecotaxe_rate_incl_taxes * $cart_item['quantity'];
+		$ecotaxe_total  = km_get_ecotaxe_rate( true ) * $cart_item['quantity'];
 		$subtotal_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotaxe_total ) ) . '</small>';
 	}
 	return $subtotal_html;
@@ -147,25 +147,65 @@ add_filter( 'woocommerce_cart_item_subtotal', 'km_display_ecotaxe_with_subtotal'
 
 
 /**
- * Affiche le message de l'éco-taxe sous le panier
+ * Affiche les informations relatives au big bag sous le panier
  *
  * @return void
  */
-function km_ecotaxe_message_display() {
+function km_cart_big_bag_discount_info_html() {
+	if ( ! km_is_big_bag_in_cart() || km_is_shipping_zone_in_thirteen() ) {
+		return;
+	}
 	?>
-	<tr>
-		<td colspan="100%" class="km-ecotaxe-row" >
-			<div  class="km-ecotaxe-message">	
-				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/ecotaxe.png' ); ?>" alt="">
-				<p><?php esc_html_e( "Cette taxe s'applique pour contribuer à limiter et/ou à atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
-			</p>
+	<tr class="km-cart-info-row">
+		<td colspan="100%">
+			<div class="km-cart-info-wrapper km-big-bag-discount-message">	
+				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-big-bag.png' ); ?>" alt="icone big bag">
+				<?php esc_html_e( 'Tarifs des Big Bags dégressifs en fonction des quantités.', 'kingmateriaux' ); ?>
 			</div>
 		</td>
 	</tr>
 	<?php
 }
-add_action( 'woocommerce_cart_contents', 'km_ecotaxe_message_display', 99 );
+add_action( 'woocommerce_cart_contents', 'km_cart_big_bag_discount_info_html', 70 );
 
+/**
+ * Affiche les informations relatives à l'éco-taxe sous le panier
+ *
+ * @return void
+ */
+function km_cart_ecotaxe_info_html() {
+	?>
+	<tr class="km-cart-info-row">
+		<td colspan="100%">
+			<div class="km-cart-info-wrapper km-ecotaxe-message">	
+				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/ecotaxe.png' ); ?>" alt="icone ecotax">
+				<?php esc_html_e( "L'Écotaxe s'applique pour contribuer à limiter/atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
+			</div>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'woocommerce_cart_contents', 'km_cart_ecotaxe_info_html', 80 );
+
+/**
+ * Affiche les informations de livraison sous le panier
+ *
+ * @return void
+ */
+function km_cart_shipping_delays_info() {
+	?>
+	<tr class="km-cart-info-row">
+		<td colspan="100%" class="km-cart-info-row">
+			<div class="km-cart-info-wrapper km-shipping-delay-message">	
+				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
+				<?php echo esc_html( km_get_shipping_delays() ); ?>
+			</div>
+		</td>
+	</tr>
+	<?php
+}
+
+add_action( 'woocommerce_cart_contents', 'km_cart_shipping_delays_info', 90 );
 
 /**
  * Ajoute le montant de l'éco-taxe au total de la commande
@@ -175,8 +215,7 @@ add_action( 'woocommerce_cart_contents', 'km_ecotaxe_message_display', 99 );
  */
 function km_add_ecotax_to_order_total_html( $html ) {
 
-	$km_dynamic_pricing = KM_Dynamic_Pricing::get_instance();
-	$total_ecotaxe      = $km_dynamic_pricing->get_total_ecotaxe();
+	$total_ecotaxe = km_get_total_ecotaxe();
 
 	if ( ! $total_ecotaxe ) {
 		return $html;
@@ -197,25 +236,18 @@ add_filter( 'woocommerce_cart_totals_order_total_html', 'km_add_ecotax_to_order_
  */
 
 function km_display_shipping_info_text() {
-	// Vérifiez si WC_Cart est initialisé
 	if ( is_admin() || ! is_a( WC()->cart, 'WC_Cart' ) ) {
 		return;
 	}
 
-	$km_shipping_zone = KM_Shipping_Zone::get_instance();
-
-	// Vérifie si les conditions pour afficher les informations de livraison sont remplies
-	if ( ! $km_shipping_zone->zip_code || ( ! $km_shipping_zone->is_in_thirteen() && ! $km_shipping_zone->shipping_zone_id ) ) {
+	if ( ! km_get_shipping_postcode() || ( ! km_is_shipping_zone_in_thirteen() && ! km_get_shipping_zone_id() ) ) {
 		return;
 	}
-
-	$shipping_html = km_get_shipping_info_text( $km_shipping_zone );
-
 	?>
 	<tr class="shipping-info">
 		<th><?php esc_html_e( 'Expédition', 'kingmateriaux' ); ?></th>
 		<td data-title="<?php esc_html_e( 'Expédition', 'kingmateriaux' ); ?>">
-			<?php echo $shipping_html; ?>
+			<?php echo km_get_shipping_info_text(); ?>
 		</td>
 	</tr>
 	<?php
@@ -225,26 +257,31 @@ function km_display_shipping_info_text() {
 /**
  * Retourne le texte à afficher pour les informations de livraison
  *
- * @param KM_Shipping_Zone $km_shipping_zone
  * @return string
  */
-function km_get_shipping_info_text( $km_shipping_zone ) {
-	if ( $km_shipping_zone->is_in_thirteen() ) {
+function km_get_shipping_info_text() {
+	if ( km_is_shipping_zone_in_thirteen() ) {
 		$shipping_text = __( 'Calcul à l\'étape suivante', 'kingmateriaux' );
-	} elseif ( $km_shipping_zone->shipping_zone_id ) {
+	} elseif ( km_get_shipping_zone_id() ) {
 		$shipping_text = __( 'Incluse', 'kingmateriaux' );
 	} else {
 		return '';
 	}
 
-	$shipping_text .= '<br>' . __( 'Livraison à ', 'kingmateriaux' ) . '<b>' . $km_shipping_zone->zip_code . '</b>';
+	$shipping_text .= '<br>' . __( 'Livraison à ', 'kingmateriaux' ) . '<b>' . km_get_shipping_postcode() . '</b>';
 	$shipping_text .= '<br><a class="btn-link modal_pc_open_btn" href="#">' . __( 'Modifier le code postal', 'kingmateriaux' ) . '</a>';
 
 	return $shipping_text;
 }
 
-add_filter( 'woocommerce_cart_totals_before_order_total', 'km_display_shipping_info_text', 10 );
+add_filter( 'woocommerce_cart_totals_before_order_total', 'km_display_shipping_info_text', 80 );
 
+
+/**
+ * Ajoute le champ de saisie du code promo après le total de la commande
+ *
+ * @return void
+ */
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande
  *
@@ -266,65 +303,15 @@ function km_add_redeem_coupon_in_cart_totals() {
 			</form>
 		</td>
 	</tr>
-
 	<?php
-	// Afficher les coupons déjà appliqués.
-	foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
-
-		?>
-	<tr class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
-		<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
-		<td data-title="<?php echo esc_attr( wc_cart_totals_coupon_label( $coupon, false ) ); ?>"><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
-	</tr>
-		<?php
-	}
 }
-add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_in_cart_totals', 90 );
-
-
-function km_check_coupon_discount_amount( $valid, $coupon, $discount ) {
-
-	if ( ! $valid ) {
-		return $valid;
-	}
-
-	// Calculer le montant de la réduction pour le panier actuel.
-	$discount_amount = $coupon->get_discount_amount( WC()->cart->get_displayed_subtotal(), array(), true );
-
-	// Si le montant de la réduction est 0, invalider le coupon.
-	if ( 0 == $discount_amount ) {
-		throw new Exception( 'Désolé, ce coupon ne peut pas être appliqué car une autre réduction est déjà présente.' );
-	}
-	return $valid;
-}
-add_filter( 'woocommerce_coupon_is_valid', 'km_check_coupon_discount_amount', 10, 3 );
-
-// // Add action before calculate car totals with remove_coupon callback function
-// add_action( 'woocommerce_after_calculate_totals', 'km_remove_coupon', 99 );
-
-// function km_remove_coupon() {
-// check if coupon applieed has 0 value discount
-// $applied_coupons = WC()->cart->get_applied_coupons();
-
-// foreach ( $applied_coupons as $coupon ) {
-// error_log( var_export( $coupon, true ) );
-// $coupon_obj = new WC_Coupon( $coupon );
-// error_log( var_export( $coupon_obj, true ) );
-// $discount = $coupon_obj->get_discount_amount( WC()->cart->get_displayed_subtotal(), array(), true );
-
-// if ( 0 === $discount ) {
-// WC()->cart->remove_coupon( $coupon );
-// }
-// }
-// }
-
-
+add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_in_cart_totals', 50 );
 
 /**
  * Ajoute le champ de saisie du code promo après le total de la commande
  *
- * @param array  $cart_item
- * @param string $cart_item_key
+ * @param array  $cart_item The cart item data.
+ * @param string $cart_item_key The cart item key.
  * @return void
  */
 function km_add_pallet_description_under_product_name( $cart_item, $cart_item_key ) {

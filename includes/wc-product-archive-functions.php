@@ -6,7 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_filter( 'wp_ajax_filter_archive_products', 'km_filter_archive_products' );
 add_filter( 'wp_ajax_nopriv_filter_archive_products', 'km_filter_archive_products' );
-
+/**
+ * Filtre les produits de la page d'archive en fonction des termes de taxonomie sélectionnés.
+ *
+ * @return void
+ */
 function km_filter_archive_products() {
 
 	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
@@ -183,7 +187,7 @@ function km_archive_product_assets() {
 	$category = get_queried_object();
 
 	// Get the category's parent, if it exists, otherwise use the current category.
-	$category_name = get_term_by( 'id', $category->parent ?: $category->term_id, 'product_cat' )->name;
+	$category_name = get_term_by( 'id', $category->parent ? $category->parent : $category->term_id, 'product_cat' )->name;
 
 	// Set the category name to lowercase.
 	$category_name = strtolower( $category_name );
