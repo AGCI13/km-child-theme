@@ -102,7 +102,7 @@ add_filter( 'body_class', 'km_add_custom_body_class_for_unpurchasable_products' 
  * @param array $classes Les classes du body.
  * @return array Les classes du body.
  */
-function km_display_shipping_delays_on_product_page( $product_id ) {
+function km_display_shipping_dates_on_product_page( $product_id ) {
 
 	global $product;
 

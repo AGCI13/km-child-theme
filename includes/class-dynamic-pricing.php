@@ -67,6 +67,13 @@ class KM_Dynamic_Pricing {
 	private $out_of_stock_products = array();
 
 	/**
+	 * Shipping zone where decreasing prices arn't available
+	 *
+	 * @var array
+	 */
+	private $shipping_zones_no_decreasing_prices = array( 4, 5 );
+
+	/**
 	 * Constructor.
 	 *
 	 * The constructor is protected to prevent creating a new instance from outside
@@ -157,7 +164,7 @@ class KM_Dynamic_Pricing {
 				return $price;
 			}
 
-			if ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
+			if ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), $this->shipping_zones_no_decreasing_prices, true ) ) {
 				$shipping_bb_product = get_page_by_path( '1-big-bag-degressif', OBJECT, 'product' );
 				if ( $shipping_bb_product instanceof WP_Post ) {
 					$shipping_bb_product_id = $shipping_bb_product->ID;
@@ -225,10 +232,10 @@ class KM_Dynamic_Pricing {
 
 				$price .= $this->include_shipping_html;
 
-				if ( is_product() && km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
+				if ( is_product() && km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), $this->shipping_zones_no_decreasing_prices, true ) ) {
 					$price .= $this->quantity_discount_msg_html;
 				}
-			} elseif ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
+			} elseif ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), $this->shipping_zones_no_decreasing_prices, true ) ) {
 				$price .= $this->quantity_discount_msg_html;
 			}
 		}

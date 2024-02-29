@@ -22,6 +22,6 @@ class Product_Shipping_Dates_Widget extends \Elementor\Widget_Base {
 	}
 
 	protected function render() {
-		echo km_get_shipping_delays( 'product' );
+		echo km_get_shipping_dates( 'product' );
 	}
 }

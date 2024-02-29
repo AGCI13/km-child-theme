@@ -88,7 +88,7 @@ function km_get_drive_available_days() {
 	for ( $i = $offset; $i < $offset + $day_num; $i++ ) {
 		$date           = strtotime( '+' . $i . ' days' );
 		$day_name       = strtolower( date_i18n( 'l', $date ) );
-		$formatted_date = date_i18n( 'Y-m-d', $date );
+		$formatted_date = date_i18n( 'd F Y', $date );
 
 		if ( in_array( $day_name, $unavailable_days_array ) || in_array( $formatted_date, $unavailable_dates_array ) ) {
 			++$offset;
@@ -126,10 +126,10 @@ function km_add_shipping_cost_to_cart_total() {
 	} elseif ( in_array( 'out13', $chosen_shipping_methods, true ) || in_array( 'included', $chosen_shipping_methods, true ) ) {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
 		$shipping_cost  = __( 'Inclus', 'kingmateriaux' );
-		$shipping_date  = km_get_shipping_delays();
+		$shipping_date  = km_get_shipping_dates();
 	} else {
 		$shipping_label = __( 'Frais de livraison', 'kingmateriaux' );
-		$shipping_date  = km_get_shipping_delays();
+		$shipping_date  = km_get_shipping_dates();
 		$shipping_cost  = WC()->cart->get_cart_shipping_total();
 	}
 	?>
@@ -142,7 +142,7 @@ function km_add_shipping_cost_to_cart_total() {
 	</tr>
 	<?php
 }
-add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
+// add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
 
 /**
  * Ajoute les champs cachés pour les données de livraison.
@@ -247,6 +247,29 @@ function km_add_shipping_rate_conditions( $chosen_method ) {
 	}
 }
 add_action( 'km_after_shipping_rate', 'km_add_shipping_rate_conditions', 10, 1 );
+
+
+/**
+ * Ajoute les conditions de livraison pour les modes de livraison.
+ *
+ * @param string $chosen_method Le mode de livraison choisi.
+ * @return void
+ */
+function km_display_shipping_dates( $chosen_method ) {
+	$shipping_dates = km_get_shipping_dates();
+
+	if ( ! $shipping_dates ) {
+		return;
+	}
+	?>
+		<div class="km-checkout-shipping-info">	
+			<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
+			<?php echo esc_html( $shipping_dates ); ?>
+			<input type="hidden" name="shipping_dates" value="<?php echo esc_html( $shipping_dates ); ?>">
+		</div>
+	<?php
+}
+add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
 
 /**
  * Ajout une case à chocher pour s'inscrire à la newsletter sur la page de paiement

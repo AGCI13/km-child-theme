@@ -102,6 +102,48 @@ add_action( 'woocommerce_after_cart_table', 'km_after_cart_coupon_content' );
  */
 
 /**
+ * Ajoute le montant de l'éco-taxe au total de la commande
+ *
+ * @param string $html Le HTML du total d'ecotaxe de la commande.
+ * @return string
+ */
+function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $context ) {
+	if ( is_admin() ) {
+		return;
+	}
+
+	$new_price_html = '';
+
+	$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+
+	if ( km_is_big_bag( $product_id ) && $cart_item['quantity'] > 1 && ! km_is_shipping_zone_in_thirteen() && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
+		$product                = wc_get_product( $product_id );
+		$initial_price          = $product->get_price();
+		$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );
+
+		if ( 'subtotal' === $context && is_float( $initial_price_incl_tax ) && $initial_price_incl_tax > 0 ) {
+			$initial_price_incl_tax *= $cart_item['quantity'];
+		}
+
+		$new_price_html .= '<del>'
+		. wc_price( $initial_price_incl_tax )
+		. '</del> ';
+	}
+
+	$new_price_html .= $price_html;
+
+	if ( $cart_item['_has_ecotax'] ) {
+		$ecotax_amount = 'subtotal' === $context ? km_get_ecotaxe_rate( true ) * $cart_item['quantity'] : km_get_ecotaxe_rate( true );
+
+		$new_price_html .= '<br><small class="ecotaxe-amount">'
+		. sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotax_amount ) )
+		. '</small>';
+	}
+
+	return $new_price_html;
+}
+
+/**
  * Affiche la mention de l'éco-taxe sous le prix unitaire
  *
  * @param string $price_html
@@ -109,20 +151,10 @@ add_action( 'woocommerce_after_cart_table', 'km_after_cart_coupon_content' );
  * @param string $cart_item_key
  * @return string
  */
-function km_display_ecotaxe_with_unit_price( $price_html, $cart_item, $cart_item_key ) {
-	if ( is_admin() ) {
-		return;
-	}
-	error_log( var_export( km_get_ecotaxe_rate( true ), true ) );
-
-	if ( $cart_item['_has_ecotax'] ) {
-		$price_html .= '<br><small class="ecotaxe-amount">'
-		. sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( km_get_ecotaxe_rate( true ) ) )
-		. '</small>';
-	}
-	return $price_html;
+function km_change_product_unit_price( $price_html, $cart_item, $cart_item_key ) {
+	return km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, 'unit' );
 }
-add_filter( 'woocommerce_cart_item_price', 'km_display_ecotaxe_with_unit_price', 10, 3 );
+add_filter( 'woocommerce_cart_item_price', 'km_change_product_unit_price', 10, 3 );
 
 /**
  * Affiche la mention de l'éco-taxe sous le sous-total
@@ -132,18 +164,10 @@ add_filter( 'woocommerce_cart_item_price', 'km_display_ecotaxe_with_unit_price',
  * @param string $cart_item_key
  * @return string
  */
-function km_display_ecotaxe_with_subtotal( $subtotal_html, $cart_item, $cart_item_key ) {
-	if ( is_admin() ) {
-		return;
-	}
-
-	if ( $cart_item['_has_ecotax'] ) {
-		$ecotaxe_total  = km_get_ecotaxe_rate( true ) * $cart_item['quantity'];
-		$subtotal_html .= '<br><small class="ecotaxe-amount">' . sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotaxe_total ) ) . '</small>';
-	}
-	return $subtotal_html;
+function km_change_product_line_subtotal( $subtotal_html, $cart_item, $cart_item_key ) {
+	return km_change_cart_price_html( $subtotal_html, $cart_item, $cart_item_key, 'subtotal' );
 }
-add_filter( 'woocommerce_cart_item_subtotal', 'km_display_ecotaxe_with_subtotal', 10, 3 );
+add_filter( 'woocommerce_cart_item_subtotal', 'km_change_product_line_subtotal', 10, 3 );
 
 
 /**
@@ -179,7 +203,7 @@ function km_cart_ecotaxe_info_html() {
 		<td colspan="100%">
 			<div class="km-cart-info-wrapper km-ecotaxe-message">	
 				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/ecotaxe.png' ); ?>" alt="icone ecotax">
-				<?php esc_html_e( "L'Écotaxe s'applique pour contribuer à limiter/atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
+				<?php esc_html_e( "L'Écotaxe s'applique pour contribuer à limiter, atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
 			</div>
 		</td>
 	</tr>
@@ -198,7 +222,7 @@ function km_cart_shipping_delays_info() {
 		<td colspan="100%" class="km-cart-info-row">
 			<div class="km-cart-info-wrapper km-shipping-delay-message">	
 				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
-				<?php echo esc_html( km_get_shipping_delays() ); ?>
+				<?php echo esc_html( km_get_shipping_dates() ); ?>
 			</div>
 		</td>
 	</tr>
@@ -210,7 +234,7 @@ add_action( 'woocommerce_cart_contents', 'km_cart_shipping_delays_info', 90 );
 /**
  * Ajoute le montant de l'éco-taxe au total de la commande
  *
- * @param string $value
+ * @param string $html Le HTML du total d'ecotaxe de la commande.
  * @return string
  */
 function km_add_ecotax_to_order_total_html( $html ) {

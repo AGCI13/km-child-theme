@@ -43,23 +43,15 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 			<?php if ( strpos( strtolower( $order->get_shipping_method() ), 'drive' ) === false ) : ?>
 				<tr>
 					<td>
-						<strong><?php esc_html_e( 'Mode de livraison :', 'woocommerce' ); ?></strong> <?php echo $order->get_shipping_method(); ?>
+						<strong><?php esc_html_e( 'Mode de livraison :', 'woocommerce' ); ?></strong> <?php echo esc_html( $order->get_shipping_method() ); ?>
 					</td>
 				</tr>
 			<?php endif; ?>
-			<tr>
-				<td>
-					<?php if ( strpos( strtolower( $order->get_shipping_method() ), 'drive' ) !== false ) : ?>
-						<strong><?php esc_html_e( 'Récupération de la commande au Drive le', 'woocommerce' ); ?></strong> <?php echo get_post_meta( $order->get_id(), '_drive_date', true ); ?> à <?php echo get_post_meta( $order->get_id(), '_drive_time', true ); ?>
-					<?php else : ?>
-						<strong><?php esc_html_e( 'Livraison :', 'woocommerce' ); ?></strong> à partir du <?php echo wc_format_datetime( $order->get_date_created(), 'd F' ); ?>
-					<?php endif; ?>
-				</td>
-			</tr>
+
 			<?php if ( strpos( strtolower( $order->get_shipping_method() ), 'drive' ) === false ) : ?>
 				<tr>
 					<td>
-						<strong><?php esc_html_e( 'Adr. de livraison :', 'woocommerce' ); ?></strong> <?php echo $order->get_billing_address_1(); ?>, <?php echo $order->get_billing_city(); ?> <?php echo $order->get_billing_postcode(); ?>
+						<strong><?php esc_html_e( 'Adr. de livraison :', 'woocommerce' ); ?></strong> <?php echo esc_html( $order->get_billing_address_1() ); ?>, <?php echo esc_html( $order->get_billing_city() ); ?> <?php echo esc_html( $order->get_billing_postcode() ); ?>
 					</td>
 				</tr>
 			<?php endif; ?>

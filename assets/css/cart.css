@@ -382,3 +382,14 @@
 .woocommerce .cart_totals table.shop_table_responsive tr td.km-cart-longest-delay {
     padding-top: 0;
 }
+
+.elementor-widget-woocommerce-cart .woocommerce table.cart td.product-price,
+.elementor-widget-woocommerce-cart .woocommerce table.cart td.product-subtotal {
+    padding-right: 7px;
+}
+
+@media screen and (min-width: 768px) {
+    .elementor-widget-woocommerce-cart .woocommerce table.cart td.product-name {
+        width: 31%;
+    }
+}

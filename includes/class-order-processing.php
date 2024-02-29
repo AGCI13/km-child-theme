@@ -41,17 +41,22 @@ class KM_Order_Processing {
 	/**
 	 * Save drive checkout fields
 	 *
-	 * @param WC_Order $order
-	 * @param array    $data
+	 * @param WC_Order $order The order object.
+	 * @param array    $data  The posted data.
 	 * @return void
 	 */
 	public function save_drive_checkout_fields( $order, $data ) {
-		if ( isset( $_POST['drive_date'] ) ) {
-			$order->update_meta_data( '_drive_date', sanitize_text_field( $_POST['drive_date'] ) );
-		}
 
-		if ( isset( $_POST['drive_time'] ) ) {
-			$order->update_meta_data( '_drive_time', sanitize_text_field( $_POST['drive_time'] ) );
+		$custom_fields = array(
+			'drive_date',
+			'drive_time',
+			'shipping_dates',
+		);
+
+		foreach ( $custom_fields as $field ) {
+			if ( isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) {
+				$order->update_meta_data( '_' . $field, sanitize_text_field( $_POST[ $field ] ) );
+			}
 		}
 	}
 

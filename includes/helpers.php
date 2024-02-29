@@ -90,12 +90,12 @@ function km_get_shipping_zone_name() {
  *
  * @return string
  */
-function km_get_shipping_delays( $context = 'cart', $min = 0, $max = 0 ) {
+function km_get_shipping_dates( $context = 'cart', $min = 0, $max = 0 ) {
 	if ( ! class_exists( 'KM_Shipping_Delays' ) ) {
 		exit( 'KM_Shipping_Delays class does not exist' );
 	}
 	$km_shipping_delays = new KM_Shipping_Delays( km_get_shipping_zone_id(), $context, $min, $max );
-	return $km_shipping_delays->km_display_shipping_delays();
+	return $km_shipping_delays->km_display_shipping_dates();
 }
 
 

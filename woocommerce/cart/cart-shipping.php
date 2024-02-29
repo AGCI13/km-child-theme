@@ -188,7 +188,7 @@ if ( 'drive' === $chosen_method ) {
 						</div>
 					</div>
 			<?php endif; ?>
-			
+
 			<?php if ( is_cart() ) : ?>
 				<p class="woocommerce-shipping-destination">
 					<?php

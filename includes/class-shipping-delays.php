@@ -40,7 +40,7 @@ class KM_Shipping_Delays {
 	 *
 	 * @return string
 	 */
-	public function km_display_shipping_delays() {
+	public function km_display_shipping_dates() {
 
 		if ( 'cart' === $this->context ) {
 			$longuest_delays = $this->calculate_longest_delays_for_cart();
@@ -63,6 +63,11 @@ class KM_Shipping_Delays {
 			'min' => 0,
 			'max' => 0,
 		);
+
+		if ( ! WC()->cart || ! WC()->cart->get_cart() ) {
+			return $longest_delays;
+		}
+
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			$delays                = $this->get_shipping_delays( $cart_item['product_id'] );
 			$longest_delays['min'] = max( $longest_delays['min'], $delays['min'] );
@@ -92,38 +97,31 @@ class KM_Shipping_Delays {
 	 * @return string
 	 */
 	private function generate_delay_html( $delays ) {
-
-		$html = '';
-
 		if ( 0 === $delays['min'] && 0 === $delays['max'] ) {
 			return '';
 		}
 
-		// Calculer les dates de livraison estimées.
-		$current_date           = current_time( 'timestamp' );
-		$min_delivery_timestamp = strtotime( '+' . $delays['min'] . ' days', $current_date );
-		$max_delivery_timestamp = strtotime( '+' . $delays['max'] . ' days', $current_date );
+		$current_date      = time();
+		$min_delivery_date = wp_date( 'j F Y', strtotime( '+' . $delays['min'] . ' days', $current_date ) );
+		$max_delivery_date = wp_date( 'j F Y', strtotime( '+' . $delays['max'] . ' days', $current_date ) );
 
-		// Formater les dates selon la locale.
-		$formatted_min_date = date_i18n( 'j F Y', $min_delivery_timestamp );
-		$formatted_max_date = date_i18n( 'j F Y', $max_delivery_timestamp );
+		if ( $delays['min'] === $delays['max'] ) {
+			$delivery_estimate = esc_html__( 'Livraison estimée le ', 'kingmateriaux' ) . $min_delivery_date;
+		} else {
+			// Vérifie si le mois et l'année sont identiques pour les deux dates.
+			$min_month_year = wp_date( 'F Y', strtotime( '+' . $delays['min'] . ' days', $current_date ) );
+			$max_month_year = wp_date( 'F Y', strtotime( '+' . $delays['max'] . ' days', $current_date ) );
 
-		// Construire le HTML en fonction du contexte.
-		if ( 'cart' === $this->context ) {
-			if ( $delays['min'] === $delays['max'] ) {
-				$html .= esc_html__( 'Livraison estimée le ', 'kingmateriaux' ) . $formatted_min_date;
+			if ( $min_month_year === $max_month_year ) {
+				// Si le mois et l'année sont identiques, affiche seulement le jour pour la date minimale.
+				$min_day           = wp_date( 'j', strtotime( '+' . $delays['min'] . ' days', $current_date ) );
+				$delivery_estimate = esc_html__( 'Livraison estimée entre le ', 'kingmateriaux' ) . $min_day . ' et le ' . $max_delivery_date;
 			} else {
-				$html .= esc_html__( 'Livraison estimée entre le ', 'kingmateriaux' ) . date_i18n( 'j', $min_delivery_timestamp ) . ' et le ' . $formatted_max_date;
-			}
-		} elseif ( 'product' === $this->context ) {
-			if ( $delays['min'] === $delays['max'] ) {
-				$html .= esc_html__( 'Livraison estimée le ', 'kingmateriaux' ) . $formatted_min_date;
-			} else {
-				$html .= esc_html__( 'Livraison estimée entre le ', 'kingmateriaux' ) . date_i18n( 'j', $min_delivery_timestamp ) . ' et le ' . $formatted_max_date;
+				$delivery_estimate = esc_html__( 'Livraison estimée entre le ', 'kingmateriaux' ) . $min_delivery_date . ' et le ' . $max_delivery_date;
 			}
 		}
 
-		return $html;
+		return $delivery_estimate;
 	}
 
 	/**
@@ -143,8 +141,14 @@ class KM_Shipping_Delays {
 		$shipping_zone_delays  = $this->get_zone_delays( $season );
 		$custom_product_delays = $this->get_product_delays( $product_id, $season );
 
-		$min_delay = max( $shipping_zone_delays['min'], $custom_product_delays['min'] );
-		$max_delay = max( $shipping_zone_delays['max'], $custom_product_delays['max'] );
+		$shipping_zone_min_delays = min( $shipping_zone_delays['min'], $shipping_zone_delays['max'] );
+		$shipping_zone_max_delays = max( $shipping_zone_delays['min'], $shipping_zone_delays['max'] );
+
+		$custom_product_min_delays = min( $custom_product_delays['min'], $custom_product_delays['max'] );
+		$custom_product_max_delays = max( $custom_product_delays['min'], $custom_product_delays['max'] );
+
+		$min_delay = max( $shipping_zone_min_delays, $custom_product_min_delays );
+		$max_delay = max( $shipping_zone_max_delays, $custom_product_max_delays );
 
 		return array(
 			'min' => $min_delay,
@@ -172,6 +176,7 @@ class KM_Shipping_Delays {
 	private function get_zone_delays( $season ) {
 		$min_delay = get_option( "min_shipping_days_{$season}_" . $this->shipping_zone_id, 0 );
 		$max_delay = get_option( "max_shipping_days_{$season}_" . $this->shipping_zone_id, 0 );
+
 		return array(
 			'min' => (int) $min_delay,
 			'max' => (int) $max_delay,

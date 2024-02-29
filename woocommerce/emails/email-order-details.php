@@ -46,6 +46,15 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 			<?php echo wp_kses_post( $before . sprintf( __( 'Passée le : <time datetime="%1$s">%2$s</time>', 'woocommerce' ), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) ); ?>
 		<td>
 	</tr>
+	<tr>
+		<td>
+			<?php if ( strpos( strtolower( $order->get_shipping_method() ), 'drive' ) !== false ) : ?>
+					<strong><?php esc_html_e( 'Récupération de la commande au Drive le', 'woocommerce' ); ?></strong> <?php echo esc_html( get_post_meta( $order->get_id(), '_drive_date', true ) ); ?> à <?php echo esc_html( get_post_meta( $order->get_order_number(), '_drive_time', true ) ); ?>
+				<?php else : ?>
+					<strong><?php echo esc_html( get_post_meta( $order->get_order_number(), '_shipping_dates', true ) ); ?></strong>
+				<?php endif; ?>
+		</td>
+	</tr>
 </table>
 
 <h3><?php echo __( 'Vos produits :', 'woocommerce' ); ?></h3>
