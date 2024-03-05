@@ -154,73 +154,6 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    const copyShippingAddressToBillingAdress = () => {
-
-        const shippingFirstName = document.querySelector('#shipping_first_name');
-        const billingFirstName = document.querySelector('#billing_first_name');
-        const shippingLastName = document.querySelector('#shipping_last_name');
-        const billingLastName = document.querySelector('#billing_last_name');
-        const shippingAddress = document.querySelector('#shipping_address_1');
-        const billingAddress = document.querySelector('#billing_address_1');
-        const shippingAddress2 = document.querySelector('#shipping_address_2');
-        const billingAddress2 = document.querySelector('#billing_address_2');
-        const shippingCity = document.querySelector('#shipping_city');
-        const billingCity = document.querySelector('#billing_city');
-        const shippingPostcode = document.querySelector('#shipping_postcode');
-        const billingPostcode = document.querySelector('#billing_postcode');
-        const shippingCountry = document.querySelector('#shipping_country');
-        const billingCountry = document.querySelector('#billing_country');
-
-        const selectedShippingMethod = document.querySelector('.woocommerce-shipping-methods.selected');
-
-        if (!selectedShippingMethod || !selectedShippingMethod.id) return;
-
-        if (selectedShippingMethod.id === 'shipping-method-drive') {
-            if (billingFirstName && shippingFirstName && shippingFirstName.value === '') {
-                shippingFirstName.value = billingFirstName.value;
-            }
-
-            if (billingLastName && shippingLastName && shippingLastName.value === '') {
-                shippingLastName.value = billingLastName.value;
-            }
-
-            if (billingAddress && shippingAddress && shippingAddress.value === '') {
-                shippingAddress.value = billingAddress.value;
-            }
-            if (billingAddress2 && shippingAddress2 && shippingAddress2.value === '') {
-                shippingAddress2.value = billingAddress2.value;
-            }
-            if (billingCity && shippingCity && shippingCity.value === '') {
-                shippingCity.value = billingCity.value;
-            }
-        }
-        else {
-            if (shippingFirstName && billingFirstName && billingFirstName.value === '') {
-                billingFirstName.value = shippingFirstName.value;
-            }
-
-            if (shippingLastName && billingLastName && billingLastName.value === '') {
-                billingLastName.value = shippingLastName.value;
-            }
-
-            if (shippingAddress && billingAddress && billingAddress.value === '') {
-                billingAddress.value = shippingAddress.value;
-            }
-            if (shippingAddress2 && billingAddress2 && billingAddress2.value === '') {
-                billingAddress2.value = shippingAddress2.value;
-            }
-            if (shippingCity && billingCity && billingCity.value === '') {
-                billingCity.value = shippingCity.value;
-            }
-            if (shippingPostcode && billingPostcode && billingPostcode.value === '') {
-                billingPostcode.value = shippingPostcode.value;
-            }
-            if (shippingCountry && billingCountry && billingCountry.value === '') {
-                billingCountry.value = shippingCountry.value;
-            }
-        }
-    }
-
     const handleShippingMethodClick = (shippingMethod, shippingOptions, shippingInputs, billingActions, billingFields, shippingSection) => {
         if (shippingMethod.classList.contains('selected')) return;
 
@@ -350,6 +283,73 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    const copyShippingAddressToBillingAdress = () => {
+
+        const shippingFirstName = document.querySelector('#shipping_first_name');
+        const billingFirstName = document.querySelector('#billing_first_name');
+        const shippingLastName = document.querySelector('#shipping_last_name');
+        const billingLastName = document.querySelector('#billing_last_name');
+        const shippingAddress = document.querySelector('#shipping_address_1');
+        const billingAddress = document.querySelector('#billing_address_1');
+        const shippingAddress2 = document.querySelector('#shipping_address_2');
+        const billingAddress2 = document.querySelector('#billing_address_2');
+        const shippingCity = document.querySelector('#shipping_city');
+        const billingCity = document.querySelector('#billing_city');
+        const shippingPostcode = document.querySelector('#shipping_postcode');
+        const billingPostcode = document.querySelector('#billing_postcode');
+        const shippingCountry = document.querySelector('#shipping_country');
+        const billingCountry = document.querySelector('#billing_country');
+
+        const selectedShippingMethod = document.querySelector('.woocommerce-shipping-methods.selected');
+
+        if (!selectedShippingMethod || !selectedShippingMethod.id) return;
+
+        if (selectedShippingMethod.id === 'shipping-method-drive') {
+            if (billingFirstName && shippingFirstName && shippingFirstName.value === '') {
+                shippingFirstName.value = billingFirstName.value;
+            }
+
+            if (billingLastName && shippingLastName && shippingLastName.value === '') {
+                shippingLastName.value = billingLastName.value;
+            }
+
+            if (billingAddress && shippingAddress && shippingAddress.value === '') {
+                shippingAddress.value = billingAddress.value;
+            }
+            if (billingAddress2 && shippingAddress2 && shippingAddress2.value === '') {
+                shippingAddress2.value = billingAddress2.value;
+            }
+            if (billingCity && shippingCity && shippingCity.value === '') {
+                shippingCity.value = billingCity.value;
+            }
+        }
+        else {
+            if (shippingFirstName && billingFirstName && billingFirstName.value === '') {
+                billingFirstName.value = shippingFirstName.value;
+            }
+
+            if (shippingLastName && billingLastName && billingLastName.value === '') {
+                billingLastName.value = shippingLastName.value;
+            }
+
+            if (shippingAddress && billingAddress && billingAddress.value === '') {
+                billingAddress.value = shippingAddress.value;
+            }
+            if (shippingAddress2 && billingAddress2 && billingAddress2.value === '') {
+                billingAddress2.value = shippingAddress2.value;
+            }
+            if (shippingCity && billingCity && billingCity.value === '') {
+                billingCity.value = shippingCity.value;
+            }
+            if (shippingPostcode && billingPostcode && billingPostcode.value === '') {
+                billingPostcode.value = shippingPostcode.value;
+            }
+            if (shippingCountry && billingCountry && billingCountry.value === '') {
+                billingCountry.value = shippingCountry.value;
+            }
+        }
+    }
+
     const loadDriveDateTimePicker = () => {
 
         let dateTimePickers = document.querySelectorAll('.drive-datetimepicker');
@@ -362,8 +362,8 @@ jQuery(document).ready(function ($) {
             const selectedStoredDate = localStorage.getItem('driveDate');
             const selectedStoredTime = localStorage.getItem('driveTime');
 
-            let selectedDate = selectedStoredDate;
-            let selectedTime = selectedStoredTime;
+            let selectedDate = selectedStoredDate ? selectedStoredDate : null;
+            let selectedTime = selectedStoredTime ? selectedStoredTime : null;
 
             const setActiveClass = (elements, activeElement) => {
                 elements.forEach((element) => {
@@ -373,12 +373,9 @@ jQuery(document).ready(function ($) {
             };
 
             const setDriveTotalsInfo = () => {
-                if (!selectedDate && !selectedTime) return;
-                // change selectedDate  format to d/m/Y
-                const dateParts = selectedDate.split('-');
-                const formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
-                displayDatetimeElem.innerHTML = 'le ' + formattedDate + ' à ' + selectedTime;
-            }
+                if (!selectedDate || !selectedTime) return;
+                displayDatetimeElem.innerHTML = 'le ' + selectedDate + ' à ' + selectedTime;
+            }    
 
             const handleDayClick = (day) => {
                 setActiveClass(dayInputs, day);
@@ -390,13 +387,11 @@ jQuery(document).ready(function ($) {
                 localStorage.setItem('driveDate', chosenDate);
                 setDriveTotalsInfo();
 
+                const afternoonSlots = dateTimePicker.querySelectorAll('.time-slot.afternoon .slot');
                 if (day.innerText.includes('samedi')) {
                     document.querySelector('.time-slot.afternoon').classList.add('disabled');
-                    document.querySelectorAll('.time-slot.afternoon .slot').forEach((slot) => {
-                        slot.classList.remove('active');
-                    });
-                }
-                else {
+                    afternoonSlots.forEach((slot) => slot.classList.remove('active'));
+                } else {
                     document.querySelector('.time-slot.afternoon').classList.remove('disabled');
                 }
                 validateCustomFields($('[name="drive_date"]'));
@@ -558,38 +553,27 @@ jQuery(document).ready(function ($) {
 
 
     const setHiddenShippingFields = () => {
-
-        //Detect if a shipping option is selected :
         const selectedShippingOption = document.querySelector('.km-shipping-option.selected');
 
         if (!selectedShippingOption) return;
 
-        shipping_price = selectedShippingOption.getAttribute('data-shipping-price');
-        shipping_sku = selectedShippingOption.getAttribute('data-shipping-sku');
-        shipping_tax = selectedShippingOption.getAttribute('data-shipping-tax');
+        const shippingPrice = selectedShippingOption.getAttribute('data-shipping-price');
+        const shippingSku = selectedShippingOption.getAttribute('data-shipping-sku');
+        const shippingTax = selectedShippingOption.getAttribute('data-shipping-tax');
 
-        if (shipping_price) {
-            const km_shipping_price = document.getElementById('km_shipping_price');
-            //set value of km-shipping-price input field 
-            if (km_shipping_price) {
-                km_shipping_price.value = shipping_price;
-            }
+        const kmShippingPrice = document.getElementById('km_shipping_price');
+        if (kmShippingPrice && shippingPrice) {
+            kmShippingPrice.value = shippingPrice;
         }
 
-        if (shipping_sku) {
-            //set value of km-shipping-sku input field 
-            const km_shipping_sku = document.getElementById('km_shipping_sku');
-            if (km_shipping_sku) {
-                km_shipping_sku.value = shipping_sku;
-            }
+        const kmShippingSku = document.getElementById('km_shipping_sku');
+        if (kmShippingSku && shippingSku) {
+            kmShippingSku.value = shippingSku;
         }
 
-        if (shipping_tax) {
-            //set value of km-shipping-tax input field
-            const km_shipping_tax = document.getElementById('km_shipping_tax');
-            if (km_shipping_tax) {
-                km_shipping_tax.value = shipping_tax;
-            }
+        const kmShippingTax = document.getElementById('km_shipping_tax');
+        if (kmShippingTax && shippingTax) {
+            kmShippingTax.value = shippingTax;
         }
     }
 

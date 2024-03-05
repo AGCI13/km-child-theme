@@ -28,6 +28,37 @@ function km_check_product_name( $product_name, $strings, $operation = 'or' ) {
 }
 
 /**
+ * Vérifie si un produit appartient à une ou plusieurs catégories.
+ *
+ * @param WC_Product $product Le produit à vérifier.
+ * @param array      $categories Les catégories à vérifier.
+ *
+ * @return bool Vrai si le produit appartient à une ou plusieurs catégories, faux sinon.
+ */
+function km_product_has_category( $product, $categories ) {
+	if ( ! $product instanceof WC_Product ) {
+		$product = wc_get_product( $product );
+	}
+
+	if ( $product->is_type( 'variation' ) ) {
+		$product = wc_get_product( $product->get_parent_id() );
+	}
+
+	$product_id = $product->get_id();
+
+	$categories = (array) $categories;
+
+	foreach ( $categories as $category ) {
+		if ( has_term( $category, 'product_cat', $product_id ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+/**
  * Vérifie si la zone de livraison se trouve dans le département du 13.
  *
  * @return bool
@@ -124,24 +155,52 @@ function km_get_ecotaxe_rate( $with_tax = false ) {
  * @return WC_Product
  */
 function km_get_related_shipping_product( $product ) {
-	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
-		exit( 'KM_Dynamic_Pricing class does not exist' );
+	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
+		exit( 'KM_Shipping_Zone class does not exist' );
 	}
 	return KM_Shipping_Zone::get_instance()->get_related_shipping_product( $product );
 }
 
 /**
- * Vérifie si un produit est big bag un big bag
+ * Vérifie si un produit à un tarif dégressif de livraison
+ *
+ * @param WC_Product|int $product Le produit ou $product_id à vérifier.
+ *
+ * @return bool
+ */
+function km_product_has_decreasing_shipping_price( $product ) {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->product_has_decreasing_shipping_price( $product );
+}
+
+/**
+ * Vérifie si un produit est un big bag
  *
  * @param WC_Product|int $product Le produit ou $product_id à vérifier.
  *
  * @return bool
  */
 function km_is_big_bag( $product ) {
-	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
-		exit( 'KM_Dynamic_Pricing class does not exist' );
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
 	}
 	return KM_Big_Bag_Manager::get_instance()->is_big_bag( $product );
+}
+
+/**
+ * Vérifie si un produit est big bag avec des dalles
+ *
+ * @param WC_Product|int $product Le produit ou $product_id à vérifier.
+ *
+ * @return bool
+ */
+function km_is_big_bag_and_slab( $product ) {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab( $product );
 }
 
 /**
@@ -149,11 +208,63 @@ function km_is_big_bag( $product ) {
  *
  * @return bool
  */
-function km_is_big_bag_in_cart() {
-	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
-		exit( 'KM_Dynamic_Pricing class does not exist' );
+function km_is_big_bag_price_decreasing_zone() {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
 	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_in_cart();
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_price_decreasing_zone();
+}
+
+/**
+ * Vérifie on se trouve dans une zone ou soit les big bag soit les dalles ont un tarif dégressif
+ *
+ * @return bool
+ */
+function km_is_big_bag_and_slab_price_decreasing_zone() {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone();
+}
+
+/**
+ * Vérifie si un big bag est dans le panier
+ *
+ * @return bool
+ */
+function km_product_has_decreasing_shipping_price_in_cart() {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->count_items_with_decreasing_shipping_price_in_cart();
+}
+
+/**
+ * Récupère le produit de livraison associé à un produit Big bag.
+ *
+ * @param WC_Product $product Le produit pour lequel récupérer le produit de livraison.
+ *
+ * @return WC_Product
+ */
+function km_get_big_bag_shipping_product( $product, ) {
+
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->get_big_bag_shipping_product( $product );
+}
+
+/**
+ * Vérifie si un produit avec un tarif dégressif de livraison est dans le panier.
+
+ * @return bool
+ */
+function km_has_item_with_decreasing_shipping_price_in_cart() {
+
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->count_items_with_decreasing_shipping_price_in_cart();
 }
 
 /**

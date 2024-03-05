@@ -142,7 +142,7 @@ function km_add_shipping_cost_to_cart_total() {
 	</tr>
 	<?php
 }
-// add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
+add_action( 'woocommerce_review_order_before_order_total', 'km_add_shipping_cost_to_cart_total', 20 );
 
 /**
  * Ajoute les champs cachés pour les données de livraison.
@@ -269,7 +269,7 @@ function km_display_shipping_dates( $chosen_method ) {
 		</div>
 	<?php
 }
-add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
+// add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
 
 /**
  * Ajout une case à chocher pour s'inscrire à la newsletter sur la page de paiement

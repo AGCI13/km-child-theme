@@ -13,17 +13,90 @@ class KM_Big_Bag_Manager {
 	use SingletonTrait;
 
 	/**
+	 * The shipping zone IDs where the big bag price is not decreasing.
+	 *
+	 * @var array
+	 */
+	private $big_bag_decreasing_price_zone = array( 6, 7, 9, 10, 11 );
+
+	/**
+	 * The shipping zone IDs where the big bag price is not decreasing.
+	 *
+	 * @var array
+	 */
+	private $big_bag_and_slab_decreasing_price_zone = array( 5, 6, 7, 9, 10, 11 );
+
+	/**
+	 * The big bag slabs product IDs.
+	 *
+	 * @var array
+	 */
+	private $big_bag_slabs_ids = array( 96800, 96815 );
+
+
+	/**
+	 * The count of big bags in the cart.
+	 *
+	 * @var int
+	 */
+	private $count_big_bag_in_cart = 0;
+
+	/**
+	 * The count of big bags and slabs in the cart.
+	 *
+	 * @var int
+	 */
+	private $count_big_bag_and_slab_in_cart = 0;
+
+	/**
+	 * The price of shipping for one big bag.
+	 *
+	 * @var float
+	 */
+	private $one_big_bag_shipping_price;
+
+	/**
+	 * The price of shipping for one big bag and slab.
+	 *
+	 * @var float
+	 */
+	private $one_big_bag_and_slab_shipping_price;
+
+	/**
 	 * Constructor
 	 *
 	 * @return void
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_cart_item_prices' ), 20, 1 );
+	}
 
-		// Client demand to hide BB confirmation popup. Uncomment these line to enable it.
-		// add_action( 'woocommerce_after_single_product', array( $this, 'render_big_bag_confirmation_popup' ) );
-		// add_action( 'wp_ajax_big_bag_user_accept', array( $this, 'big_bag_user_accept' ) );
-		// add_action( 'wp_ajax_nopriv_big_bag_user_accept', array( $this, 'big_bag_user_accept' ) );
+	/**
+	 * Check if the product is a big bag.
+	 *
+	 * @param int|WC_Product $product The product ID or the product object.
+	 * @return bool
+	 */
+	public function product_has_decreasing_shipping_price( $product ) {
+		return $this->is_big_bag( $product ) || $this->is_big_bag_and_slab( $product );
+	}
+
+	/**
+	 * Check if the decreasing price can apply to big bags for the current shipping zone.
+	 *
+	 * @return bool
+	 */
+	public function is_big_bag_price_decreasing_zone() {
+		return in_array( km_get_shipping_zone_id(), $this->big_bag_decreasing_price_zone, true );
+	}
+
+	/**
+	 * Check if the decreasing price can apply to big bags and slabs for the current shipping zone.
+	 *
+	 * @return bool
+	 */
+	public function is_big_bag_and_slab_price_decreasing_zone() {
+		return in_array( km_get_shipping_zone_id(), $this->big_bag_and_slab_decreasing_price_zone, true );
 	}
 
 	/***
@@ -32,46 +105,35 @@ class KM_Big_Bag_Manager {
 	 * @param WC_Cart $cart The cart object.
 	 */
 	public function adjust_cart_item_prices( $cart ) {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) || did_action( 'woocommerce_before_calculate_totals' ) >= 2
+		|| ! $this->count_items_with_decreasing_shipping_price_in_cart() ) {
 			return;
 		}
+		$cart_content = $cart->get_cart();
 
-		if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
-			return;
-		}
-
-		if ( km_is_shipping_zone_in_thirteen() || in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
-			return;
-		}
-
-		$cart = $cart->get_cart();
-
-		$bigbag_quantity = $this->get_big_bag_quantity_in_cart( $cart );
-
-		if ( 0 === $bigbag_quantity ) {
-			return;
-		}
-
-		$shipping_product_for_one_bb = get_page_by_path( '1-big-bag-degressif', OBJECT, 'product' );
-
-		if ( ! $shipping_product_for_one_bb ) {
-			return;
-		}
-
-		$shipping_product_id_for_one_bb = $shipping_product_for_one_bb->ID;
-
-		$one_big_bag_shipping_price = wc_get_product( $shipping_product_id_for_one_bb )->get_price();
-		$big_bags_shipping_price    = $this->calculate_big_bags_shipping_price( $bigbag_quantity, $one_big_bag_shipping_price );
-
-		foreach ( $cart as $cart_item ) {
+		foreach ( $cart_content as $cart_item ) {
 
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
-			if ( ! is_int( $product_id ) || ! $this->is_big_bag( $product_id ) ) {
+			if ( $this->is_big_bag( $product_id ) && $this->is_big_bag_price_decreasing_zone() ) {
+				$total_quantity             = $this->count_big_bag_in_cart;
+				$one_big_bag_shipping_price = $this->one_big_bag_shipping_price ? $this->one_big_bag_shipping_price : $this->get_big_bag_shipping_product_price( $product_id );
+			} elseif ( $this->is_big_bag_and_slab( $product_id ) && $this->is_big_bag_and_slab_price_decreasing_zone() ) {
+				$total_quantity             = $this->count_big_bag_and_slab_in_cart;
+				$one_big_bag_shipping_price = $this->one_big_bag_and_slab_shipping_price ? $this->one_big_bag_and_slab_shipping_price : $this->get_big_bag_shipping_product_price( $cart_item['variation_id'] );
+			} else {
 				continue;
 			}
 
-			$new_price = $cart_item['data']->get_price( 'edit' ) + $big_bags_shipping_price / $bigbag_quantity - $one_big_bag_shipping_price;
+			if ( ! $one_big_bag_shipping_price ) {
+				continue;
+			}
+
+			$big_bags_shipping_price = $this->calculate_big_bags_shipping_price( $product_id, $total_quantity, $one_big_bag_shipping_price );
+			$raw_item_price          = floatval( $cart_item['data']->get_price( 'edit' ) );
+			$new_price               = $raw_item_price + ( $big_bags_shipping_price / $total_quantity ) - $one_big_bag_shipping_price;
+
 			$cart_item['data']->set_price( $new_price );
 		}
 	}
@@ -79,29 +141,23 @@ class KM_Big_Bag_Manager {
 	/**
 	 * Calcule le prix de livraison des big bags.
 	 *
+	 * @param int $product_id L'ID du produit.
 	 * @param int $bigbag_quantity La quantité de big bags.
 	 * @return float Le prix de livraison des big bags.
 	 */
-	public function calculate_big_bags_shipping_price( $bigbag_quantity, $one_big_bag_shipping_price ) {
-
-		// Get big bag quantity modulo 8.
-		$bigbag_quantity_modulo = intval( round( $bigbag_quantity % 8 ) );
-
-		// Get integer division of big bag quantity by 8.
-		$bigbag_quantity_division = intval( floor( $bigbag_quantity / 8 ) );
-
+	public function calculate_big_bags_shipping_price( $product_id, $bigbag_quantity, $one_big_bag_shipping_price ) {
 		$shipping_price = 0;
 
-		if ( $bigbag_quantity_division > 0 ) {
+		$bigbag_quantity_modulo   = $bigbag_quantity % 8;
+		$bigbag_quantity_division = intdiv( $bigbag_quantity, 8 );
 
-			for ( $i = 0; $i < $bigbag_quantity_division; $i++ ) {
-				$shipping_product_id = get_page_by_path( '8-big-bag-degressif', OBJECT, 'product' )->ID;
-				$shipping_price     += wc_get_product( $shipping_product_id )->get_price();
-			}
+		if ( $bigbag_quantity_division > 0 ) {
+			$shipping_price += $bigbag_quantity_division * $this->get_big_bag_shipping_product_price( $product_id, 8 );
 		}
 
 		if ( $bigbag_quantity_modulo > 0 ) {
-			$shipping_price += ( 1 === $bigbag_quantity_modulo ) ? $one_big_bag_shipping_price : wc_get_product( get_page_by_path( $bigbag_quantity_modulo . '-big-bag-degressif', OBJECT, 'product' )->ID )->get_price();
+			$additional_price = 1 === $bigbag_quantity_modulo ? $one_big_bag_shipping_price : $this->get_big_bag_shipping_product_price( $product_id, $bigbag_quantity_modulo );
+			$shipping_price  += $additional_price;
 		}
 
 		return $shipping_price;
@@ -114,15 +170,21 @@ class KM_Big_Bag_Manager {
 	 * @return int La quantité de big bag dans le panier.
 	 */
 	public function get_big_bag_quantity_in_cart( $cart ) {
-		$bigbag_quantity = 0;
 
-		foreach ( $cart as $cart_item_key => $cart_item ) {
-			if ( $this->is_big_bag( $cart_item['product_id'] ) || $this->is_big_bag( $cart_item['variation_id'] ) ) {
-				$bigbag_quantity += $cart_item['quantity'];
+		$count                     = array();
+		$count['big_bag']          = 0;
+		$count['big_bag_and_slab'] = 0;
+
+		foreach ( $cart as $cart_item ) {
+			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+
+			if ( $this->is_big_bag( $product_id ) ) {
+				$count['big_bag'] += $cart_item['quantity'];
+			} if ( $this->is_big_bag_and_slab( $product_id ) ) {
+				$count['big_bag_and_slab'] += $cart_item['quantity'];
 			}
 		}
-
-		return $bigbag_quantity;
+		return $count;
 	}
 
 	/**
@@ -132,71 +194,53 @@ class KM_Big_Bag_Manager {
 	 * @return bool Vrai si le produit est un big bag, faux sinon.
 	 */
 	public function is_big_bag( $product ) {
-
-		if ( ! $product ) {
-			return false;
-		}
-
 		$product_id = $product instanceof WC_Product ? $product->get_id() : $product;
-		$product    = wc_get_product( $product_id );
 
-		// Vérifier si le produit appartient à la catégorie 'location-big-bag'.
-		if ( has_term( 'location-big-bag', 'product_cat', $product_id ) ) {
-			return true; // Si le produit appartient à la catégorie, retourner vrai.
-		}
-
-		// Vérifier si l'ID du produit n'est pas l'un des IDs exclus.
-		if ( in_array( $product_id, array( 96815, 96800 ), true ) ) {
-			return false;
-		}
-
-		if ( stripos( $product->get_name(), 'dalles stabilisatrices' ) !== false ) {
-			return false;
-		}
-
-		// Vérifier si le nom du produit contient 'Big Bag'.
-		if ( stripos( $product->get_name(), 'big bag' ) !== false ) {
-			return true;
-		}
-
-		return false;
+		return has_term( 'location-big-bag', 'product_cat', $product_id ) ||
+				( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product_id ) );
 	}
 
 	/**
-	 * Affiche la popup de confirmation d'ajout de palette.
+	 * Vérifie si le produit est un big bag de dalles.
+	 *
+	 * @param int|WC_Product $product L'ID du produit ou l'objet produit.
+	 * @return bool Vrai si le produit est un big bag de dalles, faux sinon.
 	 */
-	public function render_big_bag_confirmation_popup() {
-		$product_id = get_the_ID();
+	public function is_big_bag_and_slab( $product ) {
 
-		if ( false === $this->is_big_bag( $product_id ) ) {
-			return;
+		$product = $product instanceof WC_Product ? $product : wc_get_product( $product );
+
+		if ( $product->is_type( 'variation' ) ) {
+			$product_id = $product->get_parent_id();
+		} else {
+			$product_id = $product->get_id();
 		}
 
-		if ( isset( $_COOKIE['big_bag_user_accept'] ) || WC()->session->get( 'big_bag_user_accept' ) ) {
-			return;
-		}
-
-		// Enqueue scripts.
-		wp_enqueue_script( 'add-to-cart-confirmation' );
-
-		// requiert le template.
-		require_once get_stylesheet_directory() . '/templates/modals/big-bag.php';
+		return in_array( $product_id, $this->big_bag_slabs_ids, true );
 	}
 
 	/**
-	 * Gère la confirmation d'ajout de palette.
+	 * Récupère le produit de livraison associé à un produit big bag.
+	 *
+	 * @param WC_Product $product Le produit pour lequel récupérer le produit de livraison.
+	 * @return WC_Product
 	 */
-	public function big_bag_user_accept() {
+	public function get_big_bag_shipping_product( $product_id, $qty = 1 ) {
+		$shipping_product_name = $this->is_big_bag( $product_id ) ? "{$qty}-big-bag-degressif" : "prix-degressif-bb-dalles-{$qty}";
+		$shipping_product_post = get_page_by_path( $shipping_product_name, OBJECT, 'product' );
 
-		if ( is_user_logged_in() ) {
-			WC()->cart->set_session( 'big_bag_user_accept', true );
-		}
-
-		if ( ! isset( $_COOKIE['big_bag_user_accept'] ) ) {
-			setcookie( 'big_bag_user_accept', true, time() + 3600 * 24 * 30, '/' );
-		}
-
-		wp_send_json_success();
+		return $shipping_product_post ? wc_get_product( $shipping_product_post->ID ) : null;
+	}
+	/**
+	 * Récupère le prix du produit de livraison associé à un produit.
+	 *
+	 * @param WC_Product $product Le produit pour lequel récupérer le prix du produit de livraison.
+	 * @param int        $qty La quantité de big bags.
+	 * @return int|bool Le prix du produit de livraison ou faux si le produit de livraison n'existe pas.
+	 */
+	public function get_big_bag_shipping_product_price( $product, $qty = 1 ) {
+		$shipping_product = $this->get_big_bag_shipping_product( $product, $qty );
+		return $shipping_product ? floatval( $shipping_product->get_price( 'edit' ) ) : null;
 	}
 
 	/**
@@ -204,14 +248,28 @@ class KM_Big_Bag_Manager {
 	 *
 	 * @return bool
 	 */
-	public function is_big_bag_in_cart() {
+	public function count_items_with_decreasing_shipping_price_in_cart() {
 		$cart = WC()->cart->get_cart();
+
+		// Pré-déterminer les zones de prix décroissant pour éviter des appels répétés à ces vérifications dans la boucle.
+		$is_big_bag_price_decreasing_zone          = $this->is_big_bag_price_decreasing_zone();
+		$is_big_bag_and_slab_price_decreasing_zone = $this->is_big_bag_and_slab_price_decreasing_zone();
 
 		foreach ( $cart as $cart_item ) {
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
-			if ( $this->is_big_bag( $product_id ) ) {
-				return true;
+
+			// Vérifier si le produit est un big bag ou un big bag et dalle et si la zone actuelle permet un prix décroissant.
+			if ( ( $this->is_big_bag( $product_id ) && $is_big_bag_price_decreasing_zone ) ) {
+				$this->count_big_bag_in_cart += $cart_item['quantity'];
 			}
+
+			if ( ( $this->is_big_bag_and_slab( $product_id ) && $is_big_bag_and_slab_price_decreasing_zone ) ) {
+				$this->count_big_bag_and_slab_in_cart += $cart_item['quantity'];
+			}
+		}
+
+		if ( $this->count_big_bag_in_cart > 0 || $this->count_big_bag_and_slab_in_cart > 0 ) {
+			return true;
 		}
 
 		return false;

@@ -67,13 +67,6 @@ class KM_Dynamic_Pricing {
 	private $out_of_stock_products = array();
 
 	/**
-	 * Shipping zone where decreasing prices arn't available
-	 *
-	 * @var array
-	 */
-	private $shipping_zones_no_decreasing_prices = array( 4, 5 );
-
-	/**
 	 * Constructor.
 	 *
 	 * The constructor is protected to prevent creating a new instance from outside
@@ -153,36 +146,24 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix du produit.
 	 */
 	public function change_product_price_based_on_shipping_zone( $price, $product ) {
-
 		if ( $this->product_has_ecotax_meta( $product ) ) {
 			$price += $this->ecotaxe_rate;
 		}
 
-		if ( ! km_is_shipping_zone_in_thirteen() ) {
+		if ( km_is_shipping_zone_in_thirteen() ) {
+			return $price;
+		}
 
-			if ( empty( $price ) || ! $this->has_shipping_class( $product ) ) {
-				return $price;
-			}
+		if ( ( ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone() ) ||
+		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product ) ) ) ) {
+			$shipping_product = km_get_big_bag_shipping_product( $product );
+		} else {
+			$shipping_product = km_get_related_shipping_product( $product );
+		}
 
-			if ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), $this->shipping_zones_no_decreasing_prices, true ) ) {
-				$shipping_bb_product = get_page_by_path( '1-big-bag-degressif', OBJECT, 'product' );
-				if ( $shipping_bb_product instanceof WP_Post ) {
-					$shipping_bb_product_id = $shipping_bb_product->ID;
-					$shipping_product       = wc_get_product( $shipping_bb_product_id );
-				} else {
-						return $price;
-				}
-			} else {
-				$shipping_product = km_get_related_shipping_product( $product );
-			}
-
-			if ( ! $shipping_product instanceof WC_Product ) {
-				return $price;
-			}
-
+		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
-
-			if ( $shipping_price && is_numeric( $shipping_price ) ) {
+			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
 			}
 		}
@@ -232,10 +213,10 @@ class KM_Dynamic_Pricing {
 
 				$price .= $this->include_shipping_html;
 
-				if ( is_product() && km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), $this->shipping_zones_no_decreasing_prices, true ) ) {
+				if ( is_product() && km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone() ) {
 					$price .= $this->quantity_discount_msg_html;
 				}
-			} elseif ( km_is_big_bag( $product ) && ! in_array( km_get_shipping_zone_id(), $this->shipping_zones_no_decreasing_prices, true ) ) {
+			} elseif ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone() ) {
 				$price .= $this->quantity_discount_msg_html;
 			}
 		}

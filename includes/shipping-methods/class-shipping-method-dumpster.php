@@ -82,14 +82,6 @@ class Shipping_method_dumpster extends WC_Shipping_Method {
 			return;
 		}
 
-		// Vérifier si tous les produits dans le panier ont 'benne' dans leur titre.
-		foreach ( $package['contents'] as $item_id => $values ) {
-			$product = $values['data'];
-			if ( stripos( $product->get_name(), 'benne' ) === false ) {
-				return;
-			}
-		}
-
 		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(

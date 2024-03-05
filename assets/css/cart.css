@@ -214,6 +214,13 @@
     font-size: 15px;
 }
 
+.shopengine-cart .e-shop-table .shop_table .km-cart-info-row .km-cart-info-wrapper.km-big-bag-discount-message {
+    color: white;
+    background-color: #ae8e57;
+    font-size: 16px;
+}
+
+
 .shopengine-cart .e-shop-table .shop_table .km-cart-info-row .km-cart-info-wrapper img {
     width: 44px;
     height: auto;

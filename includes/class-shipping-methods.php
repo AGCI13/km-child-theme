@@ -90,11 +90,10 @@ class KM_Shipping_Methods {
 			return array( 'price_excl_tax' => 0 );
 		}
 
-		$total_weight                = 0;
-		$vrac_count                  = 0;
-		$other_product_count         = 0;
-		$cart_has_plasterboard       = false;
-		$only_geotextile_and_samples = true;
+		$total_weight          = 0;
+		$vrac_count            = 0;
+		$other_product_count   = 0;
+		$cart_has_plasterboard = false;
 
 		foreach ( $cart_items as $cart_item ) {
 			$product        = $cart_item['data'];
@@ -106,11 +105,6 @@ class KM_Shipping_Methods {
 				$total_weight += $product_weight;
 			}
 
-			// Utiliser check_product_name pour déterminer si le produit est 'géotextile' ou 'échantillon²s'.
-			if ( ! km_check_product_name( $product_name, array( 'géotextile', 'échantillons' ) ) ) {
-				$only_geotextile_and_samples = false;
-			}
-
 			if ( stripos( $product_name, 'vrac' ) !== false ) {
 				++$vrac_count;
 			} elseif ( stripos( $product_name, 'Plaque de plâtre' ) !== false ) {
@@ -118,10 +112,6 @@ class KM_Shipping_Methods {
 			} else {
 				++$other_product_count;
 			}
-		}
-
-		if ( $only_geotextile_and_samples ) {
-			return array( 'price_excl_tax' => 0 );
 		}
 
 		// Détermination de la nécessité d'utiliser plusieurs camions.
@@ -270,24 +260,48 @@ class KM_Shipping_Methods {
 	 * @return array
 	 */
 	public function filter_shipping_methods( $rates, $package ) {
-		$only_geotextile_and_samples = true;
+
+		$only_included_shipping_products = true;
+		$only_included_big_bag           = true;
+		$only_location_bennes            = true;
 
 		foreach ( $package['contents'] as $item ) {
 			$product = $item['data'];
 
-			if ( mb_stripos( $product->get_name(), 'géotextile', 0, 'UTF-8' ) !== 0 &&
-			mb_stripos( $product->get_name(), 'échantillons', 0, 'UTF-8' ) !== 0 ) {
-				$only_geotextile_and_samples = false;
-				break;
+			$bigbag_check = ! km_product_has_category( $product, array( 'location-big-bag' ) );
+			if ( $bigbag_check ) {
+				$only_included_big_bag = false;
 			}
+
+			if ( ! km_check_product_name( $product->get_name(), 'géotextile' )
+			&& $bigbag_check
+			&& ! km_product_has_category( $product, array( 'echantillons' ) )
+			&& ! km_product_has_category( $product, 'location-bennes' ) ) {
+				$only_included_shipping_products = false;
+			}
+
+			if ( ! km_product_has_category( $product, 'location-bennes' ) ) {
+				$only_location_bennes = false;
+			} 
 		}
 
-		// Si tous les produits sont 'géotextile' et 'échantillon', supprimer toutes les autres méthodes sauf 'included'.
-		if ( $only_geotextile_and_samples ) {
-			foreach ( $rates as $rate_id => $rate ) {
-				if ( 'included' !== $rate->method_id ) {
-					unset( $rates[ $rate_id ] );
-				}
+		foreach ( $rates as $rate_id => $rate ) {
+
+			if ( ! $only_location_bennes && 'dumpster' === $rate->method_id ) {
+				unset( $rates[ $rate_id ] );
+			}
+
+			if ( $only_location_bennes && 'drive' === $rate->method_id || $has_location_bennes ) {
+				unset( $rates[ $rate_id ] );
+			}
+
+			if ( ( $only_included_shipping_products && ! in_array( $rate->method_id, array( 'included', 'drive' ), true ) ) ||
+			( ! $only_included_shipping_products && ( 'included' === $rate->method_id ) ) ) {
+				unset( $rates[ $rate_id ] );
+			}
+
+			if ( $only_included_big_bag && 'included' === $rate->method_id ) {
+				$rate->label = 'Livraison par Colissimo';
 			}
 		}
 

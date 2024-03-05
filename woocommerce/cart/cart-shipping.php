@@ -45,12 +45,7 @@ if ( 'drive' === $chosen_method ) {
 		<?php if ( $shipping_methods ) : ?>
 			<div id="shipping-method-shipping" class="woocommerce-shipping-methods <?php echo esc_html( $shipping_selected ); ?>">	
 				<div class="km-shipping-header">
-					<?php
-					// Check if shipping method has only one entry.
-					if ( count( $shipping_methods ) > 1 ) :
-						?>
 					<span class="select-shipping <?php echo esc_html( $shipping_selected ); ?>" data-shipping="shipping"></span>
-					<?php endif; ?>
 					<h3><?php esc_html_e( 'Livraison à Domicile ou sur Chantier', 'kingmateriaux' ); ?></h3>
 
 					<?php

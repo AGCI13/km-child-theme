@@ -116,7 +116,8 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 
 	$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
-	if ( km_is_big_bag( $product_id ) && $cart_item['quantity'] > 1 && ! km_is_shipping_zone_in_thirteen() && ! in_array( km_get_shipping_zone_id(), array( 4, 5 ), true ) ) {
+	if ( $cart_item['quantity'] > 1 && ( ( km_is_big_bag( $product_id ) && km_is_big_bag_price_decreasing_zone() ) ||
+		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product_id ) ) ) ) {
 		$product                = wc_get_product( $product_id );
 		$initial_price          = $product->get_price();
 		$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );
@@ -176,7 +177,8 @@ add_filter( 'woocommerce_cart_item_subtotal', 'km_change_product_line_subtotal',
  * @return void
  */
 function km_cart_big_bag_discount_info_html() {
-	if ( ! km_is_big_bag_in_cart() || km_is_shipping_zone_in_thirteen() ) {
+
+	if ( ! km_has_item_with_decreasing_shipping_price_in_cart() ) {
 		return;
 	}
 	?>

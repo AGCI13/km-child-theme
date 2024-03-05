@@ -38,7 +38,7 @@ class Shipping_method_included extends WC_Shipping_Method {
 		$this->init_settings();
 
 		$this->enabled            = $this->get_option( 'enabled' );
-		$this->title              = $this->get_option( 'title' );
+		$this->title              = $this->title ? $this->title : $this->get_option( 'title' );
 		$this->method_description = $this->get_option( 'description' );
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -84,17 +84,6 @@ class Shipping_method_included extends WC_Shipping_Method {
 		if ( 'yes' !== $this->get_option( 'enabled', 'yes' ) ) {
 			return;
 		}
-
-		// Vérifier si tous les produits dans le panier ont 'benne' dans leur titre.
-		foreach ( $package['contents'] as $item ) {
-			$product = $item['data'];
-			if ( ! km_check_product_name( $product->get_name(), array( 'géotextile', 'échantillons' ) ) ) {
-				return;
-			}
-		}
-
-		// Appliquer la méthode d'expédition seulement si tous les produits correspondent.
-		$this->title = $this->get_option( 'title', $this->method_title );
 
 		$rate = array(
 			'id'        => $this->id,
