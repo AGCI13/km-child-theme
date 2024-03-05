@@ -359,6 +359,18 @@ class KM_Shipping_Zone {
 	}
 
 	/**
+	 * Vérifie si le produit est achetable hors de la zone 13.
+	 * Un produit est achetable hors de la zone 13 si il a une classe de livraison et que son prix est supérieur à 0€.
+	 *
+	 * @param WC_Product $product Le produit.
+	 * @return bool Si le produit est achetable hors de la zone 13.
+	 */
+	public function is_product_shippable_out_13( $product ) {
+		return $product->get_shipping_class_id() && km_get_shipping_product_price( $product );
+	}
+
+
+	/**
 	 * Add custom fields to shipping zones.
 	 *
 	 * @param WC_Shipping_Zone $zone The shipping zone object.

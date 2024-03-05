@@ -146,6 +146,21 @@ function km_get_ecotaxe_rate( $with_tax = false ) {
 	return KM_Dynamic_Pricing::get_instance()->ecotaxe_rate;
 }
 
+
+function km_get_shipping_product_price( $product ) {
+	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
+		exit( 'KM_Dynamic_Pricing class does not exist' );
+	}
+	return KM_Dynamic_Pricing::get_instance()->get_shipping_product_price( $product );
+}
+
+function km_is_product_shippable_out_13( $product ) {
+	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
+		exit( 'KM_Shipping_Zone class does not exist' );
+	}
+	return KM_Shipping_Zone::get_instance()->is_product_shippable_out_13( $product );
+}
+
 /**
  * Récupère le produit de livraison associé à un produit.
  *

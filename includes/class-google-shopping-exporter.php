@@ -47,6 +47,19 @@ class KM_Google_Shopping_Exporter {
 	private function generate_secondary_flow_data( $secondary_flows ) {
 	}
 
+	public function get_fitlered_products( $excluded_categories, $excluded_products ) {
+		$args = array(
+			'limit'            => -1,
+			'status'           => 'publish',
+			'orderby'          => 'title',
+			'order'            => 'ASC',
+			'category__not_in' => $excluded_categories,
+			'exclude'          => $excluded_products,
+		);
+
+		$products = wc_get_products( $args );
+	}
+	
 	private function generate_csv_files( $csv ) {
 	}
 

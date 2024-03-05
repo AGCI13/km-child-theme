@@ -126,7 +126,7 @@ class KM_Dynamic_Pricing {
 
 		$is_in_thirteen = km_is_shipping_zone_in_thirteen();
 
-		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $is_in_thirteen )
+		if ( ( ! $this->get_shipping_product_price( $variation ) && ! $is_in_thirteen )
 		|| ( $is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
 		|| ( $is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_current_shipping_zone_name() ) ) ) ) {
 
@@ -293,7 +293,7 @@ class KM_Dynamic_Pricing {
 			return false;
 		}
 
-		if ( $product->is_type( 'simple' ) && ! $is_in_thirteen && ! $this->is_product_shippable_out_13( $product ) ) {
+		if ( $product->is_type( 'simple' ) && ! $is_in_thirteen && ! km_is_product_shippable_out_13( $product ) ) {
 			$this->modify_product_status( $product_id, 'unpurchasable' );
 			return false;
 		}
@@ -303,17 +303,6 @@ class KM_Dynamic_Pricing {
 		}
 
 		return $is_purchasable;
-	}
-
-	/**
-	 * Vérifie si le produit est achetable hors de la zone 13.
-	 * Un produit est achetable hors de la zone 13 si il a une classe de livraison et que son prix est supérieur à 0€.
-	 *
-	 * @param WC_Product $product Le produit.
-	 * @return bool Si le produit est achetable hors de la zone 13.
-	 */
-	private function is_product_shippable_out_13( $product ) {
-		return $product->get_shipping_class_id() && $this->check_shipping_product_price( $product );
 	}
 
 	/**
@@ -365,9 +354,8 @@ class KM_Dynamic_Pricing {
 	 */
 	private function is_variation_purchasable( $variation ) {
 		$is_in_thirteen = km_is_shipping_zone_in_thirteen();
-
 		if ( ! $is_in_thirteen ) {
-			return $this->check_shipping_product_price( $variation );
+			return $this->get_shipping_product_price( $variation ) ? true : false;
 		}
 
 		// Obtention de l'objet produit parent.
@@ -443,13 +431,18 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $variation Le produit (variation) à vérifier.
 	 * @return bool Retourne true si un produit de livraison existe et que son prix est supérieur à 0€, false sinon.
 	 */
-	public function check_shipping_product_price( $variation ) {
-		// Obtient le produit de livraison associé.
+	public function get_shipping_product_price( $variation ) {
+	
 		$shipping_product = km_get_related_shipping_product( $variation );
 
-		// Vérifie si le produit de livraison existe et si son prix est supérieur à 0€.
-		if ( $shipping_product && $shipping_product->get_price() > 0 ) {
-			return true;
+		if ( ! $shipping_product ) {
+			return false;
+		}
+
+		$shipping_product_price = $shipping_product->get_price();
+
+		if ( $shipping_product && $shipping_product_price > 0 ) {
+			return $shipping_product_price;
 		}
 
 		return false;
