@@ -120,7 +120,7 @@ class KM_Shipping_Methods {
 
 		$weight_index              = $this->get_weight_class_index( $total_weight );
 		$weight_class_name         = array_keys( $this->weight_classes )[ $weight_index ];
-		$delivery_option_full_name = km_get_shipping_zone_name() . ' ' . $shipping_method_name . ' - ' . $weight_class_name;
+		$delivery_option_full_name = km_get_current_shipping_zone_name() . ' ' . $shipping_method_name . ' - ' . $weight_class_name;
 
 		$shipping_product = $this->get_shipping_product( $delivery_option_full_name );
 

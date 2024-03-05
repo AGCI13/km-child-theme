@@ -70,7 +70,7 @@ class KM_Shipping_Zone {
 		$this->get_zip_and_country_from_cookie();
 		$this->shipping_zone_id   = $this->get_shipping_zone_id_from_cookie();
 		$this->shipping_zone_name = $this->get_shipping_zone_name();
-		$this->is_in_thirteen     = $this->is_in_thirteen();
+		$this->is_in_thirteen     = $this->is_zone_in_thirteen();
 
 		$this->register();
 	}
@@ -109,6 +109,25 @@ class KM_Shipping_Zone {
 		$this->country_code      = $postcode[1];
 
 		return true;
+	}
+
+	/**
+	 * Checks if the current shipping zone is in the thirtheen.
+	 *
+	 * @param int $zone_id The zone ID.
+	 *
+	 * @return bool
+	 */
+	public function is_zone_in_thirteen( $zone_id = null ) {
+
+		$zone_id = $zone_id ? $zone_id : $this->shipping_zone_id;
+
+		if ( ! is_array( $this->zones_in_thirteen ) || empty( $this->zones_in_thirteen )
+			|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
+			return false;
+		}
+
+		return in_array( $zone_id, $this->zones_in_thirteen, true );
 	}
 
 	/**
@@ -178,24 +197,6 @@ class KM_Shipping_Zone {
 			return null;
 		}
 		return $shipping_zone->get_zone_name();
-	}
-
-	/**
-	 * Checks if the current shipping zone is in the thirtheen.
-	 *
-	 * @return bool True if the shipping zone is in the thirtheen, false otherwise.
-	 */
-	public function is_in_thirteen() {
-
-		$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
-
-		if ( in_array( $shipping_zone_id, $this->zones_in_thirteen ) ) {
-			global $km_is_in_thirteen;
-			$km_is_in_thirteen = true;
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

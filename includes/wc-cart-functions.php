@@ -266,7 +266,7 @@ function km_display_shipping_info_text() {
 		return;
 	}
 
-	if ( ! km_get_shipping_postcode() || ( ! km_is_shipping_zone_in_thirteen() && ! km_get_shipping_zone_id() ) ) {
+	if ( ! km_get_current_shipping_postcode() || ( ! km_is_shipping_zone_in_thirteen() && ! km_get_current_shipping_zone_id() ) ) {
 		return;
 	}
 	?>
@@ -288,13 +288,13 @@ function km_display_shipping_info_text() {
 function km_get_shipping_info_text() {
 	if ( km_is_shipping_zone_in_thirteen() ) {
 		$shipping_text = __( 'Calcul à l\'étape suivante', 'kingmateriaux' );
-	} elseif ( km_get_shipping_zone_id() ) {
+	} elseif ( km_get_current_shipping_zone_id() ) {
 		$shipping_text = __( 'Incluse', 'kingmateriaux' );
 	} else {
 		return '';
 	}
 
-	$shipping_text .= '<br>' . __( 'Livraison à ', 'kingmateriaux' ) . '<b>' . km_get_shipping_postcode() . '</b>';
+	$shipping_text .= '<br>' . __( 'Livraison à ', 'kingmateriaux' ) . '<b>' . km_get_current_shipping_postcode() . '</b>';
 	$shipping_text .= '<br><a class="btn-link modal_pc_open_btn" href="#">' . __( 'Modifier le code postal', 'kingmateriaux' ) . '</a>';
 
 	return $shipping_text;

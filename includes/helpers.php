@@ -63,13 +63,13 @@ function km_product_has_category( $product, $categories ) {
  *
  * @return bool
  */
-function km_is_shipping_zone_in_thirteen() {
+function km_is_shipping_zone_in_thirteen( $zone_id = null ) {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
 	}
 
-	return KM_Shipping_Zone::get_instance()->is_in_thirteen;
+	return KM_Shipping_Zone::get_instance()->is_zone_in_thirteen( $zone_id );
 }
 
 /**
@@ -77,7 +77,7 @@ function km_is_shipping_zone_in_thirteen() {
  *
  * @return int
  */
-function km_get_shipping_zone_id() {
+function km_get_current_shipping_zone_id() {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
@@ -90,7 +90,7 @@ function km_get_shipping_zone_id() {
  *
  * @return string
  */
-function km_get_shipping_postcode() {
+function km_get_current_shipping_postcode() {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
@@ -98,13 +98,12 @@ function km_get_shipping_postcode() {
 	return KM_Shipping_Zone::get_instance()->shipping_postcode;
 }
 
-
 /**
  * Récupère le nom de la zone de livraison.
  *
  * @return string
  */
-function km_get_shipping_zone_name() {
+function km_get_current_shipping_zone_name() {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
@@ -125,7 +124,7 @@ function km_get_shipping_dates( $context = 'cart', $min = 0, $max = 0 ) {
 	if ( ! class_exists( 'KM_Shipping_Delays' ) ) {
 		exit( 'KM_Shipping_Delays class does not exist' );
 	}
-	$km_shipping_delays = new KM_Shipping_Delays( km_get_shipping_zone_id(), $context, $min, $max );
+	$km_shipping_delays = new KM_Shipping_Delays( km_get_current_shipping_zone_id(), $context, $min, $max );
 	return $km_shipping_delays->km_display_shipping_dates();
 }
 
@@ -208,11 +207,11 @@ function km_is_big_bag_and_slab( $product ) {
  *
  * @return bool
  */
-function km_is_big_bag_price_decreasing_zone() {
+function km_is_big_bag_price_decreasing_zone( $zone_id = null ) {
 	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
 		exit( 'KM_Big_Bag_Manager class does not exist' );
 	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_price_decreasing_zone();
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_price_decreasing_zone( $zone_id );
 }
 
 /**
@@ -220,11 +219,11 @@ function km_is_big_bag_price_decreasing_zone() {
  *
  * @return bool
  */
-function km_is_big_bag_and_slab_price_decreasing_zone() {
+function km_is_big_bag_and_slab_price_decreasing_zone( $zone_id = null ) {
 	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
 		exit( 'KM_Big_Bag_Manager class does not exist' );
 	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone();
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone( $zone_id );
 }
 
 /**

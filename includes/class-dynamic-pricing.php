@@ -107,7 +107,7 @@ class KM_Dynamic_Pricing {
 	 * @return void
 	 */
 	public function set_prices_on_zip_or_zone_missing() {
-		if ( km_get_shipping_postcode() && km_get_shipping_zone_id() ) {
+		if ( km_get_current_shipping_postcode() && km_get_current_shipping_zone_id() ) {
 			return;
 		}
 		add_filter( 'woocommerce_is_purchasable', '__return_false' );
@@ -128,7 +128,7 @@ class KM_Dynamic_Pricing {
 
 		if ( ( ! $this->check_shipping_product_price( $variation ) && ! $is_in_thirteen )
 		|| ( $is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
-		|| ( $is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_shipping_zone_name() ) ) ) ) {
+		|| ( $is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_current_shipping_zone_name() ) ) ) ) {
 
 			// Désactiver la variation si aucun produit de livraison n'est disponible ou si le prix est 0.
 			$variation_data['is_purchasable']      = false;
@@ -145,17 +145,17 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return float Le prix du produit.
 	 */
-	public function change_product_price_based_on_shipping_zone( $price, $product ) {
+	public function change_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
 		if ( $this->product_has_ecotax_meta( $product ) ) {
 			$price += $this->ecotaxe_rate;
 		}
 
-		if ( km_is_shipping_zone_in_thirteen() ) {
+		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) {
 			return $price;
 		}
 
-		if ( ( ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone() ) ||
-		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product ) ) ) ) {
+		if ( ( ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone( $zone_id ) ) ||
+		( km_is_big_bag_and_slab_price_decreasing_zone( $zone_id ) && km_is_big_bag_and_slab( $product ) ) ) ) {
 			$shipping_product = km_get_big_bag_shipping_product( $product );
 		} else {
 			$shipping_product = km_get_related_shipping_product( $product );
@@ -375,7 +375,7 @@ class KM_Dynamic_Pricing {
 
 		if ( $is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) ) {
 			return false;
-		} elseif ( $is_in_thirteen && $parent_product instanceof WC_Product && false !== stripos( $parent_product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_shipping_zone_name() ) ) ) {
+		} elseif ( $is_in_thirteen && $parent_product instanceof WC_Product && false !== stripos( $parent_product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_current_shipping_zone_name() ) ) ) {
 			return false;
 		}
 
@@ -464,7 +464,7 @@ class KM_Dynamic_Pricing {
 	 */
 	public function display_required_postcode_message( $price, $product ) {
 		// Si aucun code postal n'est entré, affichez le message.
-		if ( ! km_get_shipping_zone_id() ) {
+		if ( ! km_get_current_shipping_zone_id() ) {
 			return __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' );
 		}
 		// Sinon, retournez le prix habituel.

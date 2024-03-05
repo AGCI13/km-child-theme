@@ -86,8 +86,9 @@ class KM_Big_Bag_Manager {
 	 *
 	 * @return bool
 	 */
-	public function is_big_bag_price_decreasing_zone() {
-		return in_array( km_get_shipping_zone_id(), $this->big_bag_decreasing_price_zone, true );
+	public function is_big_bag_price_decreasing_zone( $zone_id = null ) {
+		$zone_id = $zone_id ? $zone_id : km_get_current_shipping_zone_id();
+		return in_array( $zone_id, $this->big_bag_decreasing_price_zone, true );
 	}
 
 	/**
@@ -95,8 +96,9 @@ class KM_Big_Bag_Manager {
 	 *
 	 * @return bool
 	 */
-	public function is_big_bag_and_slab_price_decreasing_zone() {
-		return in_array( km_get_shipping_zone_id(), $this->big_bag_and_slab_decreasing_price_zone, true );
+	public function is_big_bag_and_slab_price_decreasing_zone( $zone_id = null ) {
+		$zone_id = $zone_id ? $zone_id : km_get_current_shipping_zone_id();
+		return in_array( $zone_id, $this->big_bag_and_slab_decreasing_price_zone, true );
 	}
 
 	/***
