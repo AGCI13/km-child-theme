@@ -366,6 +366,19 @@ class KM_Shipping_Zone {
 	 * @return bool Si le produit est achetable hors de la zone 13.
 	 */
 	public function is_product_shippable_out_13( $product ) {
+
+		if ( ! $product instanceof WC_Product ) {
+			$product = wc_get_product( $product );
+		}
+
+		if ( ! $product ) {
+			return false;
+		}
+
+		if ( 96218 === $product->get_id() ) {
+			error_log( var_export( $product->get_shipping_class_id() && km_get_shipping_product_price( $product ), true ) );
+		}
+
 		return $product->get_shipping_class_id() && km_get_shipping_product_price( $product );
 	}
 

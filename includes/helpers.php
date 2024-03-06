@@ -15,8 +15,13 @@ function km_check_product_name( $product_name, $strings, $operation = 'or' ) {
 	$product_name = mb_strtolower( $product_name, 'UTF-8' );
 	$match_count  = 0;
 
+	// Assurez-vous que $strings est un tableau
+	if ( ! is_array( $strings ) ) {
+		$strings = array( $strings );
+	}
+
 	foreach ( $strings as $string ) {
-		if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) === 0 ) {
+		if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) !== false ) {
 			if ( 'or' === $operation ) {
 				return true;
 			}
