@@ -375,11 +375,7 @@ class KM_Shipping_Zone {
 			return false;
 		}
 
-		if ( 96218 === $product->get_id() ) {
-			error_log( var_export( $product->get_shipping_class_id() && km_get_shipping_product_price( $product ), true ) );
-		}
-
-		return $product->get_shipping_class_id() && km_get_shipping_product_price( $product );
+		return $product->get_shipping_class_id() && km_get_shipping_product_price( $product ) ? true : false;
 	}
 
 

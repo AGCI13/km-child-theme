@@ -166,6 +166,11 @@ function km_is_product_shippable_out_13( $product ) {
 	return KM_Shipping_Zone::get_instance()->is_product_shippable_out_13( $product );
 }
 
+function km_is_purchasable_in_zone( $product_id, $zone_id ) {
+	return km_is_shipping_zone_in_thirteen( $zone_id ) ? true : km_is_product_shippable_out_13( $product_id );
+}
+
+
 /**
  * Récupère le produit de livraison associé à un produit.
  *

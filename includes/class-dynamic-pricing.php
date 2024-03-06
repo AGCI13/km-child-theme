@@ -429,14 +429,14 @@ class KM_Dynamic_Pricing {
 	}
 
 	/**
-	 * Vérifie si une variation de produit a un produit de livraison associé avec un prix supérieur à 0€.
+	 * Vérifie si un produit de produit a un produit de livraison associé avec un prix supérieur à 0€.
 	 *
-	 * @param WC_Product $variation Le produit (variation) à vérifier.
+	 * @param WC_Product $product Le produit (variation) à vérifier.
 	 * @return bool Retourne true si un produit de livraison existe et que son prix est supérieur à 0€, false sinon.
 	 */
-	public function get_shipping_product_price( $variation ) {
+	public function get_shipping_product_price( $product ) {
 
-		$shipping_product = km_get_related_shipping_product( $variation );
+		$shipping_product = km_get_related_shipping_product( $product );
 
 		if ( ! $shipping_product ) {
 			return false;
