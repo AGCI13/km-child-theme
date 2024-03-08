@@ -66,15 +66,12 @@ class KM_Transporter_Manager {
 			return $enabled;
 		}
 
-		// Récupérer la valeur du champ 'transporteur' pour cette commande.
 		$transporter_slug = get_post_meta( $order->get_id(), 'transporteur', true );
 
-		// Si le transporteur est 'non-defini', ne pas envoyer l'email.
 		if ( 'non-defini' === $transporter_slug ) {
 			return false; // Désactive l'envoi de l'email.
 		}
 
-		// Sinon, ne change rien (l'email peut être envoyé).
 		return $enabled;
 	}
 
@@ -85,11 +82,14 @@ class KM_Transporter_Manager {
 	 * @return string
 	 */
 	public function modify_completed_order_email_subject( $subject, $order ) {
-		// Obtenez la valeur du champ ACF 'transporteur' pour cette commande.
 		$transporter_slug = get_post_meta( $order->get_id(), 'transporteur', true );
 
-		// Modifiez l'objet de l'email en fonction de la valeur du champ 'transporteur'.
-		if ( $transporter_slug && 'non-defini' !== $transporter_slug ) {
+		if ( $transporter_slug && 'non-defini' === $transporter_slug ) {
+			return $subject;
+		} elseif ( $transporter_slug && 'king-drive' === $transporter_slug ) {
+			/* translators: %s the selected transporter */
+			$subject = __( 'Votre commande Drive est prête !', 'kingmateriaux' );
+		} elseif ( $transporter_slug ) {
 			/* translators: %s the selected transporter */
 			$subject = sprintf( __( 'Votre commande a été expédié avec %s.', 'kingmateriaux' ), $this->transporters[ $transporter_slug ] );
 		}
@@ -109,7 +109,6 @@ class KM_Transporter_Manager {
 
 		$file = get_stylesheet_directory() . '/templates/emails/transporters/' . $transp_slug . '.php';
 
-		// Vérifie si le transporteur est dans le tableau $transporters.
 		if ( array_key_exists( $transp_slug, $this->transporters ) && file_exists( $file ) ) {
 			require_once $file;
 		} else {

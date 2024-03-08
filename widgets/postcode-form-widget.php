@@ -19,11 +19,14 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 
 	protected function render() {
 		$postcode = km_get_current_shipping_postcode();
+		$zone_id  = km_get_current_shipping_zone_id();
 		?>
 		<div class="header_postcode">
-			<?php if ( $postcode && km_get_current_shipping_zone_id() ) : ?>
+			<?php if ( $postcode && $postcode ) : ?>
 				<p><?php esc_html_e( 'Code postal', 'kingmateriaux' ); ?> : <span class="btn-link modal_pc_open_btn"><?php echo esc_html( $postcode ); ?></span></p>
-				<?php else : ?>
+			<?php elseif ( $zone_id ) : ?>
+				<p><?php esc_html_e( 'Pour affiner les tarifs', 'kingmateriaux' ); ?> : <span class="btn-link modal_pc_open_btn"><?php esc_html_e( 'Rentrez votre code postal', 'kingmateriaux' ); ?></span></p>
+			<?php else : ?>
 				<p><?php esc_html_e( 'Pour voir nos tarifs', 'kingmateriaux' ); ?> : <span class="btn-link modal_pc_open_btn"><?php esc_html_e( 'Rentrez votre code postal', 'kingmateriaux' ); ?></span></p>
 			<?php endif; ?>
 		</div>

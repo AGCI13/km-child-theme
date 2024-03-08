@@ -108,12 +108,12 @@ function km_get_current_shipping_postcode() {
  *
  * @return string
  */
-function km_get_current_shipping_zone_name() {
+function km_get_shipping_zone_name( $shipping_zone_id = null ) {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
 	}
-	return KM_Shipping_Zone::get_instance()->shipping_zone_name;
+	return KM_Shipping_Zone::get_instance()->get_shipping_zone_name( $shipping_zone_id );
 }
 
 /**
@@ -152,24 +152,45 @@ function km_get_ecotaxe_rate( $with_tax = false ) {
 }
 
 
-function km_get_shipping_product_price( $product ) {
+function km_get_shipping_product_price( $product, $zone_id = null ) {
 	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
 		exit( 'KM_Dynamic_Pricing class does not exist' );
 	}
-	return KM_Dynamic_Pricing::get_instance()->get_shipping_product_price( $product );
+	return KM_Dynamic_Pricing::get_instance()->get_shipping_product_price( $product, $zone_id );
 }
 
-function km_is_product_shippable_out_13( $product ) {
+function km_change_product_price_based_on_shipping_zone( $price, $product, $zone_id ) {
+	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
+		exit( 'KM_Dynamic_Pricing class does not exist' );
+	}
+	KM_Dynamic_Pricing::get_instance()->change_product_price_based_on_shipping_zone( $price, $product, $zone_id );
+}
+
+/**
+ * Vérifie si un produit est expédiable dans un département hors 13.
+ *
+ * @param WC_Product|int $product Le produit ou $product_id à vérifier.
+ *
+ * @return bool
+ */
+function km_is_product_shippable_out_13( $product, $zone_id = null ) {
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
 	}
-	return KM_Shipping_Zone::get_instance()->is_product_shippable_out_13( $product );
+	return KM_Shipping_Zone::get_instance()->is_product_shippable_out_13( $product, $zone_id );
 }
 
-function km_is_purchasable_in_zone( $product_id, $zone_id ) {
-	return km_is_shipping_zone_in_thirteen( $zone_id ) ? true : km_is_product_shippable_out_13( $product_id );
+/**
+ * Vérifie si un produit est achetable dans une zone de livraison donnée.
+ *
+ * @param WC_Product|int $product Le produit ou $product_id à vérifier.
+ * @param int            $zone_id L'ID de la zone de livraison.
+ *
+ * @return bool
+ */
+function km_is_purchasable_in_zone( $product, $zone_id ) {
+	return km_is_shipping_zone_in_thirteen( $zone_id ) ? true : km_is_product_shippable_out_13( $product, $zone_id );
 }
-
 
 /**
  * Récupère le produit de livraison associé à un produit.

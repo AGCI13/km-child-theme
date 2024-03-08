@@ -247,3 +247,7 @@ function km_save_custom_field_variations( $variation_id, $i ) {
 	update_post_meta( $variation_id, '_disable_variation_in_13', $checkbox_value );
 }
 add_action( 'woocommerce_save_product_variation', 'km_save_custom_field_variations', 10, 2 );
+
+
+
+add_action( 'woocommerce_before_single_product', 'km_display_shipping_dates_on_product_page' );

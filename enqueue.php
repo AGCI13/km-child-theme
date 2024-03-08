@@ -184,6 +184,7 @@ function km_admin_scripts_enqueue( $hook ) {
 		}
 	}
 
+	wp_register_script( 'google-shopping-script', $js_uri . 'google-shopping.min.js', array(), filemtime( $js_path . 'google-shopping.min.js' ), false );
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.min.js', array(), filemtime( $js_path . 'ajax.min.js' ), false );
 	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 	wp_enqueue_script( 'km-ajax-script' );
