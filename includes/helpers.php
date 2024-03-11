@@ -15,7 +15,6 @@ function km_check_product_name( $product_name, $strings, $operation = 'or' ) {
 	$product_name = mb_strtolower( $product_name, 'UTF-8' );
 	$match_count  = 0;
 
-	// Assurez-vous que $strings est un tableau
 	if ( ! is_array( $strings ) ) {
 		$strings = array( $strings );
 	}
@@ -50,7 +49,6 @@ function km_product_has_category( $product, $categories ) {
 	}
 
 	$product_id = $product->get_id();
-
 	$categories = (array) $categories;
 
 	foreach ( $categories as $category ) {
@@ -151,7 +149,13 @@ function km_get_ecotaxe_rate( $with_tax = false ) {
 	return KM_Dynamic_Pricing::get_instance()->ecotaxe_rate;
 }
 
-
+/**
+ * Récupère prix du produit de livraison associé à un produit.
+ *
+ * @param WC_Product|int $product Le produit ou $product_id pour lequel récupérer le prix du produit de livraison.
+ * @param int            $zone_id L'ID de la zone de livraison.
+ * @return float
+ */
 function km_get_shipping_product_price( $product, $zone_id = null ) {
 	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
 		exit( 'KM_Dynamic_Pricing class does not exist' );
@@ -159,6 +163,15 @@ function km_get_shipping_product_price( $product, $zone_id = null ) {
 	return KM_Dynamic_Pricing::get_instance()->get_shipping_product_price( $product, $zone_id );
 }
 
+/**
+ * Modifie le prix d'un produit en fonction de la zone de livraison.
+ *
+ * @param float      $price Le prix du produit.
+ * @param WC_Product $product Le produit.
+ * @param int        $zone_id L'ID de la zone de livraison.
+ *
+ * @return float
+ */
 function km_change_product_price_based_on_shipping_zone( $price, $product, $zone_id ) {
 	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
 		exit( 'KM_Dynamic_Pricing class does not exist' );

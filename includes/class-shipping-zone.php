@@ -95,6 +95,7 @@ class KM_Shipping_Zone {
 
 		if ( $shipping_zone_id ) {
 			setcookie( 'shipping_zone', $shipping_zone_id, time() + ( 86400 * 30 ), '/' );
+			setcookie( 'zip_code', '', time() + ( 86400 * 30 ), '/' );
 		} elseif ( ! $this->shipping_zone_id ) {
 			$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
 		}

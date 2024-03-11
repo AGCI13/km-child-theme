@@ -152,8 +152,14 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix du produit.
 	 */
 	public function change_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
+
+		// Required with discount plugin.
+		if ( 0 === $price || '0' === $price ) {
+			return $price;
+		}
+
 		if ( $this->product_has_ecotax_meta( $product ) ) {
-			$price += $this->ecotaxe_rate;
+				$price += $this->ecotaxe_rate;
 		}
 
 		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) {
