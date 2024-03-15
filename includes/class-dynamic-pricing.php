@@ -73,6 +73,13 @@ class KM_Dynamic_Pricing {
 	 */
 	private $is_in_thirteen;
 
+		/**
+		 * Return true if the shipping zone is 13.
+		 *
+		 * @var int
+		 */
+	private $current_shipping_zone_id;
+
 	/**
 	 * Constructor.
 	 *
@@ -84,6 +91,7 @@ class KM_Dynamic_Pricing {
 		$this->include_shipping_html      = '<div class="km-include-shipping">' . esc_html__( 'Livraison incluse', 'kingmateriaux' ) . '</div>';
 		$this->quantity_discount_msg_html = '<div class="km-include-shipping">' . esc_html__( 'Tarifs dégressifs en fonction des quantités (visible uniquement dans le panier)', 'kingmateriaux' ) . '</div>';
 		$this->is_in_thirteen             = km_is_shipping_zone_in_thirteen();
+		$this->current_shipping_zone_id   = km_get_current_shipping_zone_id();
 
 		$this->register();
 	}
@@ -101,7 +109,6 @@ class KM_Dynamic_Pricing {
 		add_filter( 'woocommerce_is_purchasable', array( $this, 'handle_product_purchasability' ), 10, 2 );
 		add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
-		add_filter( 'woocommerce_variation_prices_price', array( $this, 'change_variation_prices_based_on_shipping_zone' ), 80, 3 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 98, 2 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'maybe_display_include_shipping_html' ), 99, 2 );
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
@@ -115,7 +122,7 @@ class KM_Dynamic_Pricing {
 	 * @return void
 	 */
 	public function set_prices_on_zip_or_zone_missing() {
-		if ( km_get_current_shipping_zone_id() ) {
+		if ( $this->current_shipping_zone_id ) {
 			return;
 		}
 		add_filter( 'woocommerce_is_purchasable', '__return_false' );
@@ -158,17 +165,41 @@ class KM_Dynamic_Pricing {
 			return $price;
 		}
 
-		if ( $this->product_has_ecotax_meta( $product ) ) {
-				$price += $this->ecotaxe_rate;
+		if ( is_null( $zone_id ) ) {
+			$zone_id = $this->current_shipping_zone_id;
 		}
 
 		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) {
+			if ( $this->product_has_ecotax_meta( $product ) ) {
+				$price += $this->ecotaxe_rate;
+			}
 			return $price;
 		}
 
-		$price = $this->calculate_shipping_price( $price, $product, $zone_id );
+		return $this->get_localized_product_price( $price, $product, $zone_id );
+	}
 
-		return $price;
+	/**
+	 * Récupère le prix du produit localisé dans la meta du produit ou le calcule
+	 *
+	 * @param float      $price Le prix du produit.
+	 * @param WC_Product $product Le produit.
+	 * @param int        $zone_id L'ID de la zone de livraison.
+	 * @return float Le prix du produit.
+	 */
+	private function get_localized_product_price( $price, $product, $zone_id ) {
+
+		$product_id = $product->get_id();
+
+		if ( ! get_query_var( 'force-recalc-prices' ) && ! get_post_meta( $product_id, '_atoonext_sync', true ) ) {
+			$localized_product_price = get_post_meta( $product_id, '_price_zone_' . $zone_id, true );
+		}
+
+		if ( $localized_product_price && is_numeric( $localized_product_price ) ) {
+			return $localized_product_price;
+		} else {
+			return $this->calculate_shipping_price( $price, $product, $zone_id );
+		}
 	}
 
 	/**
@@ -182,32 +213,25 @@ class KM_Dynamic_Pricing {
 	 */
 	private function calculate_shipping_price( $price, $product, $zone_id ) {
 
-		if ( ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone( $zone_id ) )
-		|| ( km_is_big_bag_and_slab( $product ) && km_is_big_bag_and_slab_price_decreasing_zone( $zone_id ) ) ) {
+		if ( km_is_big_bag_price_decreasing_zone( $zone_id ) && ( km_is_big_bag( $product )
+		|| ( km_is_big_bag_and_slab( $product ) ) ) ) {
 			$shipping_product = km_get_big_bag_shipping_product( $product );
 		} else {
 			$shipping_product = km_get_related_shipping_product( $product );
+		}
+
+		if ( $this->product_has_ecotax_meta( $product ) ) {
+			$price += $this->ecotaxe_rate;
 		}
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
 			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
+				update_post_meta( $product->get_id(), '_price_zone_' . $zone_id, $price );
 			}
 		}
 		return $price;
-	}
-
-	/**
-	 * Change les prix des variations de produit en fonction de la zone de livraison.
-	 *
-	 * @param array      $price Les prix des variations de produit.
-	 * @param WC_Product $variation La variation de produit.
-	 * @param WC_Product $product Le produit.
-	 * @return array Les prix des variations de produit.
-	 */
-	public function change_variation_prices_based_on_shipping_zone( $price, $variation, $product ) {
-		return $this->change_product_price_based_on_shipping_zone( $price, $product );
 	}
 
 	/**
@@ -251,6 +275,19 @@ class KM_Dynamic_Pricing {
 		return $price;
 	}
 
+
+	/**
+	 * Change les prix des variations de produit en fonction de la zone de livraison.
+	 *
+	 * @param array      $price Les prix des variations de produit.
+	 * @param WC_Product $variation La variation de produit.
+	 * @param WC_Product $product Le produit.
+	 * @return array Les prix des variations de produit.
+	 */
+	public function change_variation_prices_based_on_shipping_zone( $price, $variation, $product ) {
+		return $this->change_product_price_based_on_shipping_zone( $price, $product );
+	}
+
 	/**
 	 * Ajuste le range de prix pour les produits variables.
 	 *
@@ -263,7 +300,16 @@ class KM_Dynamic_Pricing {
 		$prices      = array();
 		$has_ecotaxe = false;
 
-		// Parcourez les variations disponibles.
+		if ( ! $product->is_purchasable() ) {
+			return $price;
+		}
+
+		$price_range = get_post_meta( $product->get_id(), '_price_range_' . $this->current_shipping_zone_id, true );
+
+		if ( $price_range ) {
+			return $price_range;
+		}
+
 		foreach ( $product->get_available_variations() as $variation ) {
 			$variation_obj = wc_get_product( $variation['variation_id'] );
 
@@ -287,13 +333,14 @@ class KM_Dynamic_Pricing {
 				$price = wc_price( $min_price );
 
 			} else {
-				// Sinon, affichez le range de prix.
 				$price = wc_format_price_range( $min_price, $max_price );
 			}
 
 			if ( true === $has_ecotaxe ) {
 				$price .= $this->ecotaxe_info_html;
 			}
+
+			update_post_meta( $product->get_id(), '_price_range_' . $this->current_shipping_zone_id, $price );
 		}
 		return $price;
 	}
@@ -480,11 +527,9 @@ class KM_Dynamic_Pricing {
 	 * @return string Le prix du produit.
 	 */
 	public function display_required_postcode_message( $price, $product ) {
-		// Si aucun code postal n'est entré, affichez le message.
-		if ( ! km_get_current_shipping_zone_id() ) {
+		if ( ! $this->current_shipping_zone_id ) {
 			return __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' );
 		}
-		// Sinon, retournez le prix habituel.
 		return $price;
 	}
 
@@ -512,6 +557,7 @@ class KM_Dynamic_Pricing {
 
 		return false;
 	}
+
 
 	/**
 	 * Retourne le montant total de l'écotaxe dans le panier.

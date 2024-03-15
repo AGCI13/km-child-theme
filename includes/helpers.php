@@ -274,18 +274,6 @@ function km_is_big_bag_price_decreasing_zone( $zone_id = null ) {
 }
 
 /**
- * Vérifie on se trouve dans une zone ou soit les big bag soit les dalles ont un tarif dégressif
- *
- * @return bool
- */
-function km_is_big_bag_and_slab_price_decreasing_zone( $zone_id = null ) {
-	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
-		exit( 'KM_Big_Bag_Manager class does not exist' );
-	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone( $zone_id );
-}
-
-/**
  * Vérifie si un big bag est dans le panier
  *
  * @return bool

@@ -118,8 +118,8 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 
 	$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
-	if ( $big_bag_quantity > 1 && ( km_is_big_bag( $product_id ) && km_is_big_bag_price_decreasing_zone() ) ||
-		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product_id ) ) ) {
+	if ( $big_bag_quantity > 1 && km_is_big_bag_price_decreasing_zone() && ( km_is_big_bag( $product_id ) ||
+		km_is_big_bag_and_slab( $product_id ) ) ) {
 			$product                = wc_get_product( $product_id );
 			$initial_price          = $product->get_price();
 			$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );

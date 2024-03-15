@@ -83,7 +83,6 @@ function km_tonnage_calculation() {
  * @param array $classes Les classes du body.
  * @return array Les classes du body.
  */
-
 function km_add_custom_body_class_for_unpurchasable_products( $classes ) {
 	$product = wc_get_product( get_the_ID() );
 
@@ -247,3 +246,34 @@ function km_save_custom_field_variations( $variation_id, $i ) {
 	update_post_meta( $variation_id, '_disable_variation_in_13', $checkbox_value );
 }
 add_action( 'woocommerce_save_product_variation', 'km_save_custom_field_variations', 10, 2 );
+
+
+
+/**
+ * Vérifie si le prix d'un produit woocommerce a chang& lors de sa modification et si oui ajoute la meta _atoonext_sync
+ *
+ * @param int    $product_id
+ * @param object $product
+ * @return void
+ */
+function km_check_for_price_change( $product_id, $product ) {
+
+	if ( isset( $_POST['_regular_price'] ) || isset( $_POST['_sale_price'] ) ) {
+		update_post_meta( $product_id, '_atoonext_sync', 'yes' );
+	}
+}
+add_action( 'woocommerce_update_product', 'km_check_for_price_change', 10, 2 );
+
+/**
+ * Vérifie si le prix d'une variation de produit woocommerce a changée lors de sa modification et si oui ajoute la meta _atoonext_sync
+ *
+ * @param int $variation_id
+ * @param int $i
+ */
+function km_check_variation_for_price_change( $variation_id, $i ) {
+	if ( isset( $_POST['variable_regular_price'][ $i ] ) || isset( $_POST['variable_sale_price'][ $i ] ) ) { // Vérifiez si le prix régulier ou le prix de vente de la variation a été soumis.
+		$product_id = wp_get_post_parent_id( $variation_id );
+		update_post_meta( $product_id, '_atoonext_sync', 'true' );
+	}
+}
+add_action( 'woocommerce_save_product_variation', 'km_check_variation_for_price_change', 10, 2 );
