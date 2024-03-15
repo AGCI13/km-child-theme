@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fromDisplay = document.querySelector('#fromDisplay');
     const toDisplay = document.querySelector('#toDisplay');
     const closeButton = document.querySelector('.km-product-filters_close');
+   
+    let originalGrilleCategorieContent = null;
 
     closeButton.addEventListener('click', () => {
         const filterBar = document.querySelector('.km-product-filters_sliding-bar');
@@ -61,7 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             resetRangeSlider();
-            filterForm.querySelectorAll('[type="submit"]')[0].click();
+
+            if (originalGrilleCategorieContent !== null) {
+                const grilleCategorie = document.querySelector('.grille-categorie');
+                if (grilleCategorie) {
+                    grilleCategorie.innerHTML = originalGrilleCategorieContent;
+                }
+            }
+    
         });
 
         filterForm.addEventListener('submit', (e) => {
@@ -88,6 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            if (originalGrilleCategorieContent === null) {
+                const grilleCategorie = document.querySelector('.grille-categorie');
+                if (grilleCategorie) {
+                    originalGrilleCategorieContent = grilleCategorie.innerHTML;
+                }
+            }
+
             // kmAjaxCall est une fonction que vous devez définir
             kmAjaxCall('filter_archive_products', formDataObj, {}).then((response) => {
                 if (response.success) {
@@ -95,11 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const resultCount = document.querySelector('.woocommerce-result-count');
                     const pagination = document.querySelector('.woocommerce-pagination');
 
-                    console.log(response.data.found_results_count);
-                    if (response.data.found_results_count > 0) {
-                        document.body.classList.remove('modal-open');
-                        filterBar.classList.remove('open');
-                    }
+                    // if (response.data.found_results_count > 0) {
+                    //     document.body.classList.remove('modal-open');
+                    //     filterBar.classList.remove('open');
+                    // }
 
                     if (product_wrapper) {
                         product_wrapper.innerHTML = response.data.content_html;

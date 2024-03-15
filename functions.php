@@ -46,15 +46,20 @@ if ( ! class_exists( 'ACF' ) ) {
 	return;
 }
 
-// Importation des fichiers.
-require_once 'enqueue.php';
+if ( ! function_exists( 'setup_kingmateriaux_theme' ) ) {
+	add_action( 'after_setup_theme', 'setup_kingmateriaux_theme' );
 
-require_once 'widgets/register-widgets.php';
+	function setup_kingmateriaux_theme() {
+		require_once 'enqueue.php';
 
-require_once 'includes/marketing-ops-functions.php';
+		require_once 'widgets/register-widgets.php';
 
-require_once 'includes/taxonomies/product-taxo-colors.php';
-require_once 'includes/taxonomies/product-taxo-uses.php';
+		require_once 'includes/marketing-ops-functions.php';
+
+		require_once 'includes/taxonomies/product-taxo-colors.php';
+		require_once 'includes/taxonomies/product-taxo-uses.php';
+	}
+}
 
 add_action(
 	'woocommerce_init',
@@ -86,6 +91,11 @@ add_action(
 		require_once 'includes/shipping-methods/class-shipping-method-out-13.php';
 		require_once 'includes/shipping-methods/class-shipping-method-dumpster.php';
 		require_once 'includes/shipping-methods/class-shipping-method-included.php';
+		require_once 'includes/shipping-methods/class-shipping-method-included.php';
+
+		require_once 'includes/class-google-shopping-exporter.php';
+
+		require_once 'includes/helpers.php';
 
 		// Initialisation des classes.
 		KM_Shipping_Zone::get_instance();
@@ -95,7 +105,6 @@ add_action(
 		KM_Palletization_Manager::get_instance();
 		KM_Transporter_Manager::get_instance();
 		KM_Big_Bag_Manager::get_instance();
-
-		require_once 'includes/helpers.php';
+		KM_Google_Shopping_Exporter::get_instance();
 	}
 );

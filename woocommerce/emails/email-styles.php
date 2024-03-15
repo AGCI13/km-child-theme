@@ -205,7 +205,6 @@ z-index: 9;
 }
 
 h4{
-margin-top:0;
 font-weight: 400;
 font-size: 1.2em;
 }

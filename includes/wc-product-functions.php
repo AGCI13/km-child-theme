@@ -113,7 +113,7 @@ function km_display_shipping_dates_on_product_page( $product_id ) {
 	$product_id = $product->get_id();
 
 	// Récupérer l'ID de la zone de livraison.
-	$shipping_zone_id = km_get_shipping_zone_id();
+	$shipping_zone_id = km_get_current_shipping_zone_id();
 
 	// Vérifier si des délais de livraison personnalisés sont définis via ACF.
 	$custom_delays_hs = get_field( 'product_shipping_delays_product_shipping_delays_hs', $product_id );

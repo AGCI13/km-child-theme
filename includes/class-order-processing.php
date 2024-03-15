@@ -131,7 +131,7 @@ class KM_Order_Processing {
 			}
 		}
 
-		update_post_meta( $order_id, '_cookie_cp', km_get_shipping_postcode() );
+		update_post_meta( $order_id, '_cookie_cp', km_get_current_shipping_postcode() );
 	}
 
 	/**

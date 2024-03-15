@@ -263,44 +263,58 @@ class KM_Shipping_Methods {
 
 		$only_included_shipping_products = true;
 		$only_included_big_bag           = true;
+		$only_included_geotextile        = true;
 		$only_location_bennes            = true;
+		$only_included_echantillons      = true;
 
+		$i = 0;
 		foreach ( $package['contents'] as $item ) {
 			$product = $item['data'];
 
-			$bigbag_check = ! km_product_has_category( $product, array( 'location-big-bag' ) );
-			if ( $bigbag_check ) {
+			$is_location_big_bag = km_product_has_category( $product, 'location-big-bag' );
+
+			if ( ! $is_location_big_bag ) {
 				$only_included_big_bag = false;
 			}
 
-			if ( ! km_check_product_name( $product->get_name(), 'géotextile' )
-			&& $bigbag_check
-			&& ! km_product_has_category( $product, array( 'echantillons' ) )
-			&& ! km_product_has_category( $product, 'location-bennes' ) ) {
-				$only_included_shipping_products = false;
+			$is_location_bennes = km_product_has_category( $product, 'location-bennes' );
+
+			if ( ! $is_location_bennes ) {
+				$only_location_bennes = false;
 			}
 
-			if ( ! km_product_has_category( $product, 'location-bennes' ) ) {
-				$only_location_bennes = false;
-			} 
+			$is_geotextile = km_check_product_name( $product->get_name(), 'géotextile' );
+
+			if ( ! $is_geotextile ) {
+				$only_included_geotextile = false;
+			}
+
+			$is_echantillons = km_product_has_category( $product, 'echantillons' );
+			if ( ! $is_echantillons ) {
+				$only_included_echantillons = false;
+			}
+
+			if ( ! $is_location_big_bag && ! $is_location_bennes && ! $is_geotextile && ! $is_echantillons ) {
+				$only_included_shipping_products = false;
+			}
 		}
 
 		foreach ( $rates as $rate_id => $rate ) {
 
-			if ( ! $only_location_bennes && 'dumpster' === $rate->method_id ) {
+			if ( ( $only_included_shipping_products && ! in_array( $rate_id, array( 'included', 'drive' ), true ) ) ||
+			( ! $only_included_shipping_products && ( 'included' === $rate_id ) ) ) {
 				unset( $rates[ $rate_id ] );
 			}
 
-			if ( $only_location_bennes && 'drive' === $rate->method_id || $has_location_bennes ) {
+			if ( ! $only_location_bennes && 'dumpster' === $rate_id ) {
 				unset( $rates[ $rate_id ] );
 			}
 
-			if ( ( $only_included_shipping_products && ! in_array( $rate->method_id, array( 'included', 'drive' ), true ) ) ||
-			( ! $only_included_shipping_products && ( 'included' === $rate->method_id ) ) ) {
+			if ( $only_location_bennes && 'drive' === $rate_id ) {
 				unset( $rates[ $rate_id ] );
 			}
 
-			if ( $only_included_big_bag && 'included' === $rate->method_id ) {
+			if ( $only_included_big_bag && 'included' === $rate_id ) {
 				$rate->label = 'Livraison par Colissimo';
 			}
 		}

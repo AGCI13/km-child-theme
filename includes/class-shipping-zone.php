@@ -67,13 +67,15 @@ class KM_Shipping_Zone {
 	 * and to prevent creating multiple instances through the `new` keyword.
 	 */
 	private function __construct() {
+		$this->shipping_zone_id = $this->get_shipping_zone_id();
 		$this->get_zip_and_country_from_cookie();
-		$this->shipping_zone_id   = $this->get_shipping_zone_id_from_cookie();
+
 		$this->shipping_zone_name = $this->get_shipping_zone_name();
-		$this->is_in_thirteen     = $this->is_in_thirteen();
+		$this->is_in_thirteen     = $this->is_zone_in_thirteen();
 
 		$this->register();
 	}
+
 
 	/**
 	 * Register hooks
@@ -87,6 +89,49 @@ class KM_Shipping_Zone {
 		add_action( 'admin_footer', array( $this, 'add_custom_shipping_zone_fields' ) );
 		add_action( 'wp_footer', array( $this, 'modal_postcode_html' ) );
 	}
+
+	private function get_shipping_zone_id() {
+		$shipping_zone_id = $this->maybe_get_zone_url_id();
+
+		if ( $shipping_zone_id ) {
+			setcookie( 'shipping_zone', $shipping_zone_id, time() + ( 86400 * 30 ), '/' );
+			setcookie( 'zip_code', '', time() + ( 86400 * 30 ), '/' );
+		} elseif ( ! $this->shipping_zone_id ) {
+			$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
+		}
+
+		return $shipping_zone_id;
+	}
+
+	private function maybe_get_zone_url_id() {
+		if ( isset( $_GET['region_id'] ) && ! empty( $_GET['region_id'] ) ) {
+
+			if ( is_numeric( $_GET['region_id'] ) && $_GET['region_id'] > 0 ) {
+				return intval( $_GET['region_id'] );
+			}
+
+			return $this->get_zone_id_from_name( $_GET['region_id'] );
+		}
+		return null;
+	}
+
+	private function get_zone_id_from_name( $shipping_zone_name ) {
+		$shipping_zones     = WC_Shipping_Zones::get_zones();
+		$zone_id            = null;
+		$shipping_zone_name = strtolower( str_replace( ' ', '', $shipping_zone_name ) );
+
+		foreach ( $shipping_zones as $zone_data ) {
+			$zone      = new WC_Shipping_Zone( $zone_data['id'] );
+			$zone_name = strtolower( str_replace( ' ', '', $zone->get_zone_name() ) );
+
+			if ( $zone_name === $shipping_zone_name ) {
+				$zone_id = $zone_data['id'];
+				break;
+			}
+		}
+		return $zone_id;
+	}
+
 
 	/**
 	 * Checks if the current shipping zone is in the thirtheen.
@@ -112,31 +157,46 @@ class KM_Shipping_Zone {
 	}
 
 	/**
+	 * Checks if the current shipping zone is in the thirtheen.
+	 *
+	 * @param int $zone_id The zone ID.
+	 *
+	 * @return bool
+	 */
+	public function is_zone_in_thirteen( $zone_id = null ) {
+
+		$zone_id = $zone_id ? $zone_id : $this->shipping_zone_id;
+
+		if ( ! is_array( $this->zones_in_thirteen ) || empty( $this->zones_in_thirteen )
+			|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
+			return false;
+		}
+
+		return in_array( $zone_id, $this->zones_in_thirteen, true );
+	}
+
+	/**
 	 * Retrieves the shipping class for a given product.
 	 *
 	 * @param int|WC_Product $product The product ID or product object.
 	 * @return string|false The shipping class slug or false on failure.
 	 */
 	public function get_product_shipping_class( $product ) {
-		// If an ID is passed, get the product object.
+
 		if ( is_numeric( $product ) ) {
 			$product = wc_get_product( $product );
 		}
 
-		// If the product doesn't exist, return false.
 		if ( ! $product instanceof WC_Product ) {
 			return false;
 		}
 
-		// Get the shipping class ID.
 		$shipping_class_id = $product->get_shipping_class_id();
 
-		// If there is no shipping class ID, return false.
 		if ( empty( $shipping_class_id ) ) {
 			return false;
 		}
 
-		// Get the shipping class term.
 		$shipping_class_term = get_term( $shipping_class_id, 'product_shipping_class' );
 
 		// Return the shipping class slug or false if not found.
@@ -149,13 +209,10 @@ class KM_Shipping_Zone {
 	 * @return int|null The shipping zone ID or null if the cookie is not set or the value is invalid.
 	 */
 	public function get_shipping_zone_id_from_cookie() {
-		// Retrieve the 'shipping_zone' cookie value using the KM_Cookie_Handler.
-		$shipping_zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
 
-		// Validate the zone ID to ensure it's a positive integer.
+		$shipping_zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
 		$shipping_zone_id = is_numeric( $shipping_zone_id ) ? (int) $shipping_zone_id : null;
 
-		// Return the zone ID if it is a valid number, null otherwise.
 		return ( $shipping_zone_id > 0 ) ? $shipping_zone_id : null;
 	}
 
@@ -164,9 +221,11 @@ class KM_Shipping_Zone {
 	 *
 	 * @return string|null The name of the shipping zone or null if the zone does not exist.
 	 */
-	public function get_shipping_zone_name() {
+	public function get_shipping_zone_name( $shipping_zone_id = null ) {
 
-		$shipping_zone_id = $this->shipping_zone_id ? $this->shipping_zone_id : $this->get_shipping_zone_id_from_cookie();
+		if ( ! $shipping_zone_id ) {
+			$shipping_zone_id = $this->shipping_zone_id;
+		}
 
 		if ( null === $shipping_zone_id ) {
 			return null;
@@ -181,59 +240,37 @@ class KM_Shipping_Zone {
 	}
 
 	/**
-	 * Checks if the current shipping zone is in the thirtheen.
-	 *
-	 * @return bool True if the shipping zone is in the thirtheen, false otherwise.
-	 */
-	public function is_in_thirteen() {
-
-		$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
-
-		if ( in_array( $shipping_zone_id, $this->zones_in_thirteen ) ) {
-			global $km_is_in_thirteen;
-			$km_is_in_thirteen = true;
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Obtient le nom du produit de livraison associé.
 	 *
 	 * @param WC_Product $product Le produit.
 	 */
-	public function get_related_shipping_product( $product ) {
+	public function get_related_shipping_product( $product, $zone_id = null ) {
 
-		if ( ! $product ) {
-			return;
+		if ( ! $product instanceof WC_Product ) {
+			$product = wc_get_product( $product );
 		}
 
-		// Obtenir la classe de livraison du produit.
 		$shipping_class_id = $product->get_shipping_class_id();
 
 		if ( ! $shipping_class_id ) {
 			return;
 		}
 
-		// Récupérer l'objet de la classe de livraison.
 		$shipping_class_term = get_term( $shipping_class_id, 'product_shipping_class' );
 
 		if ( ! $shipping_class_term || is_wp_error( $shipping_class_term ) ) {
 			return;
 		}
 
-		// Récupérer le nom de la classe de livraison.
 		$shipping_class_name = $shipping_class_term->name;
 
-		// Vérifier si $shipping_class_name contient '²' avant de le remplacer.
 		if ( strpos( $shipping_class_name, '²' ) !== false ) {
 			$shipping_class_name = str_replace( '²', '2', $shipping_class_name );
 		}
 
-		$shipping_product_name = $this->shipping_zone_name . ' ' . $shipping_class_name;
+		$shipping_zone_name    = $this->shipping_zone_name ? $this->shipping_zone_name : $this->get_shipping_zone_name( $zone_id );
+		$shipping_product_name = $shipping_zone_name . ' ' . $shipping_class_name;
 
-		// Récupérer le produit de livraison associé.
 		$args = array(
 			'fields'         => 'ids',
 			'post_type'      => 'product',
@@ -356,6 +393,27 @@ class KM_Shipping_Zone {
 
 		return $found_zone;
 	}
+
+	/**
+	 * Vérifie si le produit est achetable hors de la zone 13.
+	 * Un produit est achetable hors de la zone 13 si il a une classe de livraison et que son prix est supérieur à 0€.
+	 *
+	 * @param WC_Product $product Le produit.
+	 * @return bool Si le produit est achetable hors de la zone 13.
+	 */
+	public function is_product_shippable_out_13( $product, $zone_id = null ) {
+
+		if ( ! $product instanceof WC_Product ) {
+			$product = wc_get_product( $product );
+		}
+
+		if ( ! $product ) {
+			return false;
+		}
+
+		return km_get_shipping_product_price( $product, $zone_id );
+	}
+
 
 	/**
 	 * Add custom fields to shipping zones.

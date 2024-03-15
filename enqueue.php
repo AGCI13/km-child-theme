@@ -56,30 +56,32 @@ function km_front_scripts_enqueue() {
 		);
 	}
 
+	wp_register_style( 'km-tonnage-calculator-style', $css_uri . 'tonnage-calculator.min.css', array(), filemtime( $css_path . 'tonnage-calculator.min.css' ), 'all' );
+	wp_register_script(
+		'km-tonnage-calculator-script',
+		$js_uri . 'tonnage-calculator.min.js',
+		array( 'jquery' ),
+		filemtime( $js_path . 'tonnage-calculator.min.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+
 	if ( is_product() ) {
 		wp_enqueue_style( 'km-product-single-style', $css_uri . 'product-single.min.css', array(), filemtime( $css_path . 'product-single.min.css' ), 'all' );
-		wp_register_script(
-			'add-to-cart-confirmation',
-			$js_uri . 'add-to-cart-confirmation.min.js',
-			array(),
-			filemtime( $js_path . 'add-to-cart-confirmation.min.js' ),
-			array(
-				'in_footer' => true,
-				'strategy'  => 'defer',
-			)
-		);
-		wp_register_style( 'km-tonnage-calculator-style', $css_uri . 'tonnage-calculator.min.css', array(), filemtime( $css_path . 'tonnage-calculator.min.css' ), 'all' );
-		wp_register_script(
-			'km-tonnage-calculator-script',
-			$js_uri . 'tonnage-calculator.min.js',
-			array( 'jquery' ),
-			filemtime( $js_path . 'tonnage-calculator.min.js' ),
-			array(
-				'in_footer' => true,
-				'strategy'  => 'defer',
-			)
-		);
 	}
+
+	wp_register_script(
+		'add-to-cart-confirmation',
+		$js_uri . 'add-to-cart-confirmation.min.js',
+		array(),
+		filemtime( $js_path . 'add-to-cart-confirmation.min.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
 
 	if ( is_product_category() || is_search() ) {
 		wp_register_style( 'km-product-filters-style', $css_uri . 'product-filters.min.css', array(), filemtime( $css_path . 'product-filters.min.css' ), 'all' );
@@ -182,6 +184,7 @@ function km_admin_scripts_enqueue( $hook ) {
 		}
 	}
 
+	wp_register_script( 'google-shopping-script', $js_uri . 'google-shopping.min.js', array(), filemtime( $js_path . 'google-shopping.min.js' ), false );
 	wp_register_script( 'km-ajax-script', $js_uri . 'ajax.min.js', array(), filemtime( $js_path . 'ajax.min.js' ), false );
 	wp_localize_script( 'km-ajax-script', 'km_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 	wp_enqueue_script( 'km-ajax-script' );

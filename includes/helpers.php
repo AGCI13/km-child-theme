@@ -15,8 +15,12 @@ function km_check_product_name( $product_name, $strings, $operation = 'or' ) {
 	$product_name = mb_strtolower( $product_name, 'UTF-8' );
 	$match_count  = 0;
 
+	if ( ! is_array( $strings ) ) {
+		$strings = array( $strings );
+	}
+
 	foreach ( $strings as $string ) {
-		if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) === 0 ) {
+		if ( mb_stripos( $product_name, mb_strtolower( $string, 'UTF-8' ), 0, 'UTF-8' ) !== false ) {
 			if ( 'or' === $operation ) {
 				return true;
 			}
@@ -45,7 +49,6 @@ function km_product_has_category( $product, $categories ) {
 	}
 
 	$product_id = $product->get_id();
-
 	$categories = (array) $categories;
 
 	foreach ( $categories as $category ) {
@@ -63,13 +66,13 @@ function km_product_has_category( $product, $categories ) {
  *
  * @return bool
  */
-function km_is_shipping_zone_in_thirteen() {
+function km_is_shipping_zone_in_thirteen( $zone_id = null ) {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
 	}
 
-	return KM_Shipping_Zone::get_instance()->is_in_thirteen;
+	return KM_Shipping_Zone::get_instance()->is_zone_in_thirteen( $zone_id );
 }
 
 /**
@@ -77,7 +80,7 @@ function km_is_shipping_zone_in_thirteen() {
  *
  * @return int
  */
-function km_get_shipping_zone_id() {
+function km_get_current_shipping_zone_id() {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
@@ -90,7 +93,7 @@ function km_get_shipping_zone_id() {
  *
  * @return string
  */
-function km_get_shipping_postcode() {
+function km_get_current_shipping_postcode() {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
@@ -98,18 +101,17 @@ function km_get_shipping_postcode() {
 	return KM_Shipping_Zone::get_instance()->shipping_postcode;
 }
 
-
 /**
  * Récupère le nom de la zone de livraison.
  *
  * @return string
  */
-function km_get_shipping_zone_name() {
+function km_get_shipping_zone_name( $shipping_zone_id = null ) {
 
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
 	}
-	return KM_Shipping_Zone::get_instance()->shipping_zone_name;
+	return KM_Shipping_Zone::get_instance()->get_shipping_zone_name( $shipping_zone_id );
 }
 
 /**
@@ -125,7 +127,7 @@ function km_get_shipping_dates( $context = 'cart', $min = 0, $max = 0 ) {
 	if ( ! class_exists( 'KM_Shipping_Delays' ) ) {
 		exit( 'KM_Shipping_Delays class does not exist' );
 	}
-	$km_shipping_delays = new KM_Shipping_Delays( km_get_shipping_zone_id(), $context, $min, $max );
+	$km_shipping_delays = new KM_Shipping_Delays( km_get_current_shipping_zone_id(), $context, $min, $max );
 	return $km_shipping_delays->km_display_shipping_dates();
 }
 
@@ -145,6 +147,62 @@ function km_get_ecotaxe_rate( $with_tax = false ) {
 		return KM_Dynamic_Pricing::get_instance()->ecotaxe_rate_incl_taxes;
 	}
 	return KM_Dynamic_Pricing::get_instance()->ecotaxe_rate;
+}
+
+/**
+ * Récupère prix du produit de livraison associé à un produit.
+ *
+ * @param WC_Product|int $product Le produit ou $product_id pour lequel récupérer le prix du produit de livraison.
+ * @param int            $zone_id L'ID de la zone de livraison.
+ * @return float
+ */
+function km_get_shipping_product_price( $product, $zone_id = null ) {
+	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
+		exit( 'KM_Dynamic_Pricing class does not exist' );
+	}
+	return KM_Dynamic_Pricing::get_instance()->get_shipping_product_price( $product, $zone_id );
+}
+
+/**
+ * Modifie le prix d'un produit en fonction de la zone de livraison.
+ *
+ * @param float      $price Le prix du produit.
+ * @param WC_Product $product Le produit.
+ * @param int        $zone_id L'ID de la zone de livraison.
+ *
+ * @return float
+ */
+function km_change_product_price_based_on_shipping_zone( $price, $product, $zone_id ) {
+	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
+		exit( 'KM_Dynamic_Pricing class does not exist' );
+	}
+	KM_Dynamic_Pricing::get_instance()->change_product_price_based_on_shipping_zone( $price, $product, $zone_id );
+}
+
+/**
+ * Vérifie si un produit est expédiable dans un département hors 13.
+ *
+ * @param WC_Product|int $product Le produit ou $product_id à vérifier.
+ *
+ * @return bool
+ */
+function km_is_product_shippable_out_13( $product, $zone_id = null ) {
+	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
+		exit( 'KM_Shipping_Zone class does not exist' );
+	}
+	return KM_Shipping_Zone::get_instance()->is_product_shippable_out_13( $product, $zone_id );
+}
+
+/**
+ * Vérifie si un produit est achetable dans une zone de livraison donnée.
+ *
+ * @param WC_Product|int $product Le produit ou $product_id à vérifier.
+ * @param int            $zone_id L'ID de la zone de livraison.
+ *
+ * @return bool
+ */
+function km_is_purchasable_in_zone( $product, $zone_id ) {
+	return km_is_shipping_zone_in_thirteen( $zone_id ) ? true : km_is_product_shippable_out_13( $product, $zone_id );
 }
 
 /**
@@ -208,11 +266,11 @@ function km_is_big_bag_and_slab( $product ) {
  *
  * @return bool
  */
-function km_is_big_bag_price_decreasing_zone() {
+function km_is_big_bag_price_decreasing_zone( $zone_id = null ) {
 	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
 		exit( 'KM_Big_Bag_Manager class does not exist' );
 	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_price_decreasing_zone();
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_price_decreasing_zone( $zone_id );
 }
 
 /**
@@ -220,11 +278,11 @@ function km_is_big_bag_price_decreasing_zone() {
  *
  * @return bool
  */
-function km_is_big_bag_and_slab_price_decreasing_zone() {
+function km_is_big_bag_and_slab_price_decreasing_zone( $zone_id = null ) {
 	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
 		exit( 'KM_Big_Bag_Manager class does not exist' );
 	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone();
+	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone( $zone_id );
 }
 
 /**
@@ -266,6 +324,20 @@ function km_has_item_with_decreasing_shipping_price_in_cart() {
 	}
 	return KM_Big_Bag_Manager::get_instance()->count_items_with_decreasing_shipping_price_in_cart();
 }
+
+/**
+ * Récupère la quantité de big bag dans le panier.
+ *
+ * @return int
+ */
+function km_get_big_bag_quantity_in_cart( $cart = '' ) {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->get_big_bag_quantity_in_cart( $cart );
+}
+
+
 
 /**
  * Calcule le prix de livraison d'un produit.
