@@ -182,25 +182,21 @@ class KM_Shipping_Zone {
 	 * @return string|false The shipping class slug or false on failure.
 	 */
 	public function get_product_shipping_class( $product ) {
-		// If an ID is passed, get the product object.
+
 		if ( is_numeric( $product ) ) {
 			$product = wc_get_product( $product );
 		}
 
-		// If the product doesn't exist, return false.
 		if ( ! $product instanceof WC_Product ) {
 			return false;
 		}
 
-		// Get the shipping class ID.
 		$shipping_class_id = $product->get_shipping_class_id();
 
-		// If there is no shipping class ID, return false.
 		if ( empty( $shipping_class_id ) ) {
 			return false;
 		}
 
-		// Get the shipping class term.
 		$shipping_class_term = get_term( $shipping_class_id, 'product_shipping_class' );
 
 		// Return the shipping class slug or false if not found.
@@ -213,13 +209,10 @@ class KM_Shipping_Zone {
 	 * @return int|null The shipping zone ID or null if the cookie is not set or the value is invalid.
 	 */
 	public function get_shipping_zone_id_from_cookie() {
-		// Retrieve the 'shipping_zone' cookie value using the KM_Cookie_Handler.
-		$shipping_zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
 
-		// Validate the zone ID to ensure it's a positive integer.
+		$shipping_zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
 		$shipping_zone_id = is_numeric( $shipping_zone_id ) ? (int) $shipping_zone_id : null;
 
-		// Return the zone ID if it is a valid number, null otherwise.
 		return ( $shipping_zone_id > 0 ) ? $shipping_zone_id : null;
 	}
 

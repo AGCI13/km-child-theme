@@ -17,14 +17,14 @@ class KM_Big_Bag_Manager {
 	 *
 	 * @var array
 	 */
-	private $big_bag_decreasing_price_zone = array( 6, 7, 9, 10, 11 );
+	private $big_bag_decreasing_price_zone = array( 5, 6, 7 );
 
 	/**
 	 * The shipping zone IDs where the big bag price is not decreasing.
 	 *
 	 * @var array
 	 */
-	private $big_bag_and_slab_decreasing_price_zone = array( 5, 6, 7, 9, 10, 11 );
+	private $big_bag_and_slab_decreasing_price_zone = array( 5, 6, 7 );
 
 	/**
 	 * The big bag slabs product IDs.
@@ -119,10 +119,10 @@ class KM_Big_Bag_Manager {
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
 			if ( $this->is_big_bag( $product_id ) && $this->is_big_bag_price_decreasing_zone() ) {
-				$total_quantity             = $this->count_big_bag_in_cart;
+				$total_quantity             = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
 				$one_big_bag_shipping_price = $this->one_big_bag_shipping_price ? $this->one_big_bag_shipping_price : $this->get_big_bag_shipping_product_price( $product_id );
 			} elseif ( $this->is_big_bag_and_slab( $product_id ) && $this->is_big_bag_and_slab_price_decreasing_zone() ) {
-				$total_quantity             = $this->count_big_bag_and_slab_in_cart;
+				$total_quantity             = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
 				$one_big_bag_shipping_price = $this->one_big_bag_and_slab_shipping_price ? $this->one_big_bag_and_slab_shipping_price : $this->get_big_bag_shipping_product_price( $cart_item['variation_id'] );
 			} else {
 				continue;
@@ -171,19 +171,21 @@ class KM_Big_Bag_Manager {
 	 * @param array $cart Le panier.
 	 * @return int La quantité de big bag dans le panier.
 	 */
-	public function get_big_bag_quantity_in_cart( $cart ) {
+	public function get_big_bag_quantity_in_cart( $cart = '' ) {
 
-		$count                     = array();
-		$count['big_bag']          = 0;
-		$count['big_bag_and_slab'] = 0;
+		if ( empty( $cart ) ) {
+			$cart = WC()->cart->get_cart();
+		}
+
+		$count = 0;
 
 		foreach ( $cart as $cart_item ) {
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
 			if ( $this->is_big_bag( $product_id ) ) {
-				$count['big_bag'] += $cart_item['quantity'];
+				$count += $cart_item['quantity'];
 			} if ( $this->is_big_bag_and_slab( $product_id ) ) {
-				$count['big_bag_and_slab'] += $cart_item['quantity'];
+				$count += $cart_item['quantity'];
 			}
 		}
 		return $count;
@@ -231,18 +233,25 @@ class KM_Big_Bag_Manager {
 		$shipping_product_name = $this->is_big_bag( $product_id ) ? "{$qty}-big-bag-degressif" : "prix-degressif-bb-dalles-{$qty}";
 		$shipping_product_post = get_page_by_path( $shipping_product_name, OBJECT, 'product' );
 
-		return $shipping_product_post ? wc_get_product( $shipping_product_post->ID ) : null;
+		if ( null === $shipping_product_post ) {
+			return null;
+		}
+
+		return wc_get_product( $shipping_product_post->ID );
 	}
 	/**
 	 * Récupère le prix du produit de livraison associé à un produit.
 	 *
 	 * @param WC_Product $product Le produit pour lequel récupérer le prix du produit de livraison.
 	 * @param int        $qty La quantité de big bags.
-	 * @return int|bool Le prix du produit de livraison ou faux si le produit de livraison n'existe pas.
+	 * @return int|bool Le prix du produit de livra ison ou faux si le produit de livraison n'existe pas.
 	 */
 	public function get_big_bag_shipping_product_price( $product, $qty = 1 ) {
 		$shipping_product = $this->get_big_bag_shipping_product( $product, $qty );
-		return $shipping_product ? floatval( $shipping_product->get_price( 'edit' ) ) : null;
+		if ( ! $shipping_product ) {
+			return null;
+		}
+		return floatval( $shipping_product->get_price( 'edit' ) );
 	}
 
 	/**

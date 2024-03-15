@@ -25,6 +25,10 @@ class KM_Google_Shopping_Exporter {
 	 * Automatically triggered on plugin activation
 	 */
 	public function __construct() {
+
+		if ( ! is_admin() ) {
+			return;
+		}
 		add_action( 'acf/input/admin_head', array( $this, 'register_acf_side_metabox' ), 10 );
 		add_action( 'acf/options_page/save', array( $this, 'handle_generate_csv' ), 10, 2 );
 		add_action( 'wp_ajax_clear_csv_files', array( $this, 'clear_csv_files' ) );

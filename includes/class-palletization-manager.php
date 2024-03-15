@@ -101,7 +101,7 @@ class KM_Palletization_Manager {
 			return 0;
 		}
 
-		// Calculer le nombre de palettes nécessaires en fonction de la quantité
+		// Calculer le nombre de palettes nécessaires en fonction de la quantité.
 		$additional_pallets = ceil( ( $quantity - $pallet_from_quantity + 1 ) / $quantity_per_pallet );
 
 		return $additional_pallets;
@@ -186,7 +186,7 @@ class KM_Palletization_Manager {
 	 */
 	private function remove_pallet_from_cart( $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-			if ( $cart_item['product_id'] == $this->pallet_product_id ) {
+			if ( (int) $cart_item['product_id'] === $this->pallet_product_id ) {
 				$cart->remove_cart_item( $cart_item_key );
 				return;
 			}
@@ -223,14 +223,14 @@ class KM_Palletization_Manager {
 
 			// Si le produit nécessite des palettes.
 			if ( ! empty( $quantity_per_pallet ) ) {
-				$pallet_from_quantity         = $pallet_from_quantity ?: 1;
-				$required_pallets_for_product = $this->calculate_required_pallets( $quantity, $quantity_per_pallet, $pallet_from_quantity );
+				$pallet_from_quantity         = $pallet_from_quantity ? $pallet_from_quantity : 1;
+				$required_pallets_for_product = (int) $this->calculate_required_pallets( $quantity, $quantity_per_pallet, $pallet_from_quantity );
 				$total_pallets_required      += $required_pallets_for_product;
 			}
 		}
 
 		// Supprime le produit "Palette" si aucun autre produit ne nécessite des palettes.
-		if ( $total_pallets_required == 0 ) {
+		if ( 0 === $total_pallets_required ) {
 			$this->remove_pallet_from_cart( $cart );
 		}
 
@@ -362,7 +362,6 @@ class KM_Palletization_Manager {
 	 * @param string $cart_item_key La clé de l'article dans le panier.
 	 * @return string Le nom de l'article avec les métadonnées de palette.
 	 */
-
 	public function display_custom_meta_data_in_cart( $item_name, $cart_item, $cart_item_key ) {
 
 		// Récupération des métadonnées du produit.

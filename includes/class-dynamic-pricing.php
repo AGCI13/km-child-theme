@@ -166,8 +166,24 @@ class KM_Dynamic_Pricing {
 			return $price;
 		}
 
-		if ( ( ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone( $zone_id ) ) ||
-		( km_is_big_bag_and_slab_price_decreasing_zone( $zone_id ) && km_is_big_bag_and_slab( $product ) ) ) ) {
+		$price = $this->calculate_shipping_price( $price, $product, $zone_id );
+
+		return $price;
+	}
+
+	/**
+	 * Calcule le prix de livraison du produit.
+	 * Si le produit est dans une zone de livraison spécifique, le prix de livraison est ajouté au prix du produit.
+	 *
+	 * @param float      $price Le prix du produit.
+	 * @param WC_Product $product Le produit.
+	 * @param int        $zone_id L'ID de la zone de livraison.
+	 * @return float Le prix du produit.
+	 */
+	private function calculate_shipping_price( $price, $product, $zone_id ) {
+
+		if ( ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone( $zone_id ) )
+		|| ( km_is_big_bag_and_slab( $product ) && km_is_big_bag_and_slab_price_decreasing_zone( $zone_id ) ) ) {
 			$shipping_product = km_get_big_bag_shipping_product( $product );
 		} else {
 			$shipping_product = km_get_related_shipping_product( $product );
@@ -179,7 +195,6 @@ class KM_Dynamic_Pricing {
 				$price += $shipping_price;
 			}
 		}
-
 		return $price;
 	}
 

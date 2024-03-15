@@ -326,6 +326,20 @@ function km_has_item_with_decreasing_shipping_price_in_cart() {
 }
 
 /**
+ * Récupère la quantité de big bag dans le panier.
+ *
+ * @return int
+ */
+function km_get_big_bag_quantity_in_cart( $cart = '' ) {
+	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
+		exit( 'KM_Big_Bag_Manager class does not exist' );
+	}
+	return KM_Big_Bag_Manager::get_instance()->get_big_bag_quantity_in_cart( $cart );
+}
+
+
+
+/**
  * Calcule le prix de livraison d'un produit.
  *
  * @param string $method L'identifiant de la méthode de livraison.

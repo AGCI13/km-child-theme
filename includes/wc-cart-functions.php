@@ -112,23 +112,26 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 		return;
 	}
 
+	$big_bag_quantity = km_get_big_bag_quantity_in_cart();
+
 	$new_price_html = '';
 
 	$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
-	if ( $cart_item['quantity'] > 1 && ( ( km_is_big_bag( $product_id ) && km_is_big_bag_price_decreasing_zone() ) ||
-		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product_id ) ) ) ) {
-		$product                = wc_get_product( $product_id );
-		$initial_price          = $product->get_price();
-		$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );
+	if ( $big_bag_quantity > 1 && ( km_is_big_bag( $product_id ) && km_is_big_bag_price_decreasing_zone() ) ||
+		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product_id ) ) ) {
+			$product                = wc_get_product( $product_id );
+			$initial_price          = $product->get_price();
+			$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );
 
 		if ( 'subtotal' === $context && is_float( $initial_price_incl_tax ) && $initial_price_incl_tax > 0 ) {
 			$initial_price_incl_tax *= $cart_item['quantity'];
 		}
 
-		$new_price_html .= '<del>'
-		. wc_price( $initial_price_incl_tax )
-		. '</del> ';
+			$new_price_html .= '<del>'
+			. wc_price( $initial_price_incl_tax )
+			. '</del> ';
+
 	}
 
 	$new_price_html .= $price_html;
@@ -170,6 +173,41 @@ function km_change_product_line_subtotal( $subtotal_html, $cart_item, $cart_item
 }
 add_filter( 'woocommerce_cart_item_subtotal', 'km_change_product_line_subtotal', 10, 3 );
 
+
+/**
+ * Affiche les informations relatives au big bag sous le panier
+ *
+ * @return void
+ */
+function km_shipping_delays_jo_message() {
+	if ( ! is_cart() ) {
+		return;
+	}
+
+	$current_postcode = km_get_current_shipping_postcode();
+
+	if ( ! in_array( substr( (string) $current_postcode, 0, 2 ), array( '28', '45', '75', '77', '78', '91', '92', '93', '94', '95' ), true ) ) {
+		return;
+	}
+
+	$today = new DateTime();
+	$start = new DateTime( '2024-07-01' );
+	$end   = new DateTime( '2024-09-10' );
+
+	if ( $today < $start || $today > $end ) {
+		return;
+	}
+	?>
+	<tr class="km-cart-info-row">
+		<td colspan="100%">
+			<div class="km-cart-info-wrapper km-delay-jo-message">	
+				<?php esc_html_e( 'Pendant les épreuves des Jeux Olympiques, se déroulant du 26 juillet au 11 août, et des Jeux Paralympiques, du 28 août au 8 septembre, la région Île-de-France connaîtra un ralentissement du délai de livraison.', 'kingmateriaux' ); ?>
+			</div>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'woocommerce_cart_contents', 'km_shipping_delays_jo_message', 70 );
 
 /**
  * Affiche les informations relatives au big bag sous le panier
@@ -260,7 +298,6 @@ add_filter( 'woocommerce_cart_totals_order_total_html', 'km_add_ecotax_to_order_
 /**
  * --------------- START RECAP ----------------------
  */
-
 function km_display_shipping_info_text() {
 	if ( is_admin() || ! is_a( WC()->cart, 'WC_Cart' ) ) {
 		return;

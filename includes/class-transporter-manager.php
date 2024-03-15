@@ -111,9 +111,35 @@ class KM_Transporter_Manager {
 
 		if ( array_key_exists( $transp_slug, $this->transporters ) && file_exists( $file ) ) {
 			require_once $file;
+			$this->add_transporter_jo_message( $order_id, $transp_slug );
 		} else {
 			return '<p>' . esc_html__( 'We have finished processing your order.', 'woocommerce' ) . '</p>';
 		}
+	}
+
+	function add_transporter_jo_message( $order_id, $transp_slug ) {
+
+		if ( ! in_array( $transp_slug, array( 'cargomatic', 'khuene', 'fragner' ), true ) ) {
+			return;
+		}
+
+		$today = new DateTime();
+		$start = new DateTime( '2024-07-01' );
+		$end   = new DateTime( '2024-09-10' );
+
+		if ( $today < $start || $today > $end ) {
+			return;
+		}
+
+		$order = wc_get_order( $order_id );
+
+		$shipping_postcode = $order->get_shipping_postcode();
+
+		if ( ! in_array( substr( (string) $shipping_postcode, 0, 2 ), array( '28', '45', '75', '77', '78', '91', '92', '93', '94', '95' ), true ) ) {
+			return;
+		}
+
+		require_once get_stylesheet_directory() . '/templates/emails/transporters/jo-notice.php';
 	}
 
 	/**
