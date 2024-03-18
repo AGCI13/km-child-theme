@@ -103,13 +103,9 @@ class KM_Big_Bag_Manager {
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
 			if ( $this->is_big_bag( $product_id ) ) {
-				$total_quantity             = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
 				$one_big_bag_shipping_price = $this->one_big_bag_shipping_price ? $this->one_big_bag_shipping_price : $this->get_big_bag_shipping_product_price( $product_id );
-				error_log( var_export( $one_big_bag_shipping_price, true ) );
 			} elseif ( $this->is_big_bag_and_slab( $product_id ) ) {
-				$total_quantity             = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
 				$one_big_bag_shipping_price = $this->one_big_bag_and_slab_shipping_price ? $this->one_big_bag_and_slab_shipping_price : $this->get_big_bag_shipping_product_price( $cart_item['variation_id'] );
-				error_log( var_export( $one_big_bag_shipping_price, true ) );
 			} else {
 				continue;
 			}
@@ -118,10 +114,10 @@ class KM_Big_Bag_Manager {
 				continue;
 			}
 
+			$total_quantity          = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
 			$big_bags_shipping_price = $this->calculate_big_bags_shipping_price( $product_id, $total_quantity, $one_big_bag_shipping_price );
 			$raw_item_price          = floatval( $cart_item['data']->get_price( 'edit' ) );
 			$new_price               = $raw_item_price + ( $big_bags_shipping_price / $total_quantity ) - $one_big_bag_shipping_price;
-			error_log( var_export( $new_price, true ) );
 
 			$cart_item['data']->set_price( $new_price );
 		}

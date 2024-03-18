@@ -140,3 +140,9 @@ function km_filter_menu_items( $items, $args ) {
 	return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'km_filter_menu_items', 10, 2 );
+
+function register_my_query_vars( $vars ) {
+	$vars[] = 'force-recalc-prices'; // Ajouter la query_var personnalisée
+	return $vars;
+}
+add_filter( 'query_vars', 'register_my_query_vars' );

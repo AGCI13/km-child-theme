@@ -80,6 +80,8 @@ class KM_Dynamic_Pricing {
 		 */
 	private $current_shipping_zone_id;
 
+	private $is_big_bag_decreasing_zone;
+
 	/**
 	 * Constructor.
 	 *
@@ -92,6 +94,7 @@ class KM_Dynamic_Pricing {
 		$this->quantity_discount_msg_html = '<div class="km-include-shipping">' . esc_html__( 'Tarifs dégressifs en fonction des quantités (visible uniquement dans le panier)', 'kingmateriaux' ) . '</div>';
 		$this->is_in_thirteen             = km_is_shipping_zone_in_thirteen();
 		$this->current_shipping_zone_id   = km_get_current_shipping_zone_id();
+		$this->is_big_bag_decreasing_zone = km_is_big_bag_price_decreasing_zone( $this->current_shipping_zone_id );
 
 		$this->register();
 	}
@@ -107,8 +110,8 @@ class KM_Dynamic_Pricing {
 		}
 
 		add_filter( 'woocommerce_is_purchasable', array( $this, 'handle_product_purchasability' ), 10, 2 );
-		add_filter( 'woocommerce_product_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
-		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'change_product_price_based_on_shipping_zone' ), 10, 2 );
+		add_filter( 'woocommerce_get_price', array( $this, 'get_product_price_based_on_shipping_zone' ), 10, 2 );
+		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'get_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 98, 2 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'maybe_display_include_shipping_html' ), 99, 2 );
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
@@ -158,10 +161,9 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return float Le prix du produit.
 	 */
-	public function change_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
+	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
 
-		// Required with discount plugin.
-		if ( 0 === $price || '0' === $price ) {
+		if ( ! $price ) {
 			return $price;
 		}
 
@@ -169,49 +171,28 @@ class KM_Dynamic_Pricing {
 			$zone_id = $this->current_shipping_zone_id;
 		}
 
-		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) {
+		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) { // Si la zone de livraison est la 13.
 			if ( $this->product_has_ecotax_meta( $product ) ) {
 				$price += $this->ecotaxe_rate;
 			}
-			return $price;
-		}
-
-		return $this->get_localized_product_price( $price, $product, $zone_id );
-	}
-
-	/**
-	 * Récupère le prix du produit localisé dans la meta du produit ou le calcule
-	 *
-	 * @param float      $price Le prix du produit.
-	 * @param WC_Product $product Le produit.
-	 * @param int        $zone_id L'ID de la zone de livraison.
-	 * @return float Le prix du produit.
-	 */
-	private function get_localized_product_price( $price, $product, $zone_id ) {
-
-		$product_id = $product->get_id();
-
-		if ( ! get_query_var( 'force-recalc-prices' ) && ! get_post_meta( $product_id, '_atoonext_sync', true ) ) {
-			$localized_product_price = get_post_meta( $product_id, '_price_zone_' . $zone_id, true );
-		}
-
-		if ( $localized_product_price && is_numeric( $localized_product_price ) ) {
-			return $localized_product_price;
+		} elseif ( defined( 'DOING_AJAX' ) || did_action( 'woocommerce_before_calculate_totals' ) ) {
+			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
 		} else {
-			return $this->calculate_shipping_price( $price, $product, $zone_id );
+			$price = $this->get_localized_product_price( $price, $product, $zone_id );
 		}
+
+		return $price;
 	}
 
 	/**
-	 * Calcule le prix de livraison du produit.
-	 * Si le produit est dans une zone de livraison spécifique, le prix de livraison est ajouté au prix du produit.
+	 * Calcule le prix du produit localisé.
 	 *
 	 * @param float      $price Le prix du produit.
 	 * @param WC_Product $product Le produit.
 	 * @param int        $zone_id L'ID de la zone de livraison.
 	 * @return float Le prix du produit.
 	 */
-	private function calculate_shipping_price( $price, $product, $zone_id ) {
+	private function calculate_localized_product_price( $price, $product, $zone_id ) {
 
 		if ( km_is_big_bag_price_decreasing_zone( $zone_id ) && ( km_is_big_bag( $product )
 		|| ( km_is_big_bag_and_slab( $product ) ) ) ) {
@@ -228,8 +209,35 @@ class KM_Dynamic_Pricing {
 			$shipping_price = $shipping_product->get_price( 'edit' );
 			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
-				update_post_meta( $product->get_id(), '_price_zone_' . $zone_id, $price );
+
+				if ( ! defined( 'DOING_AJAX' ) || ! did_action( 'woocommerce_before_calculate_totals' ) ) {
+					update_post_meta( $product->get_id(), '_price_zone_' . $zone_id, $price );
+				}
 			}
+		}
+		return $price;
+	}
+
+	/**
+	 * Récupère le prix du produit localisé dans la meta du produit ou le calcule
+	 *
+	 * @param float      $price Le prix du produit.
+	 * @param WC_Product $product Le produit.
+	 * @param int        $zone_id L'ID de la zone de livraison.
+	 * @return float Le prix du produit.
+	 */
+	private function get_localized_product_price( $price, $product, $zone_id ) {
+
+		$product_id = $product->get_id();
+
+		if ( ! get_post_meta( $product_id, '_atoonext_sync', true ) ) {
+			$localized_product_price = get_post_meta( $product_id, '_price_zone_' . $zone_id, true );
+		}
+
+		if ( $localized_product_price && is_numeric( $localized_product_price ) ) {
+			$price = $localized_product_price;
+		} else {
+			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
 		}
 		return $price;
 	}
@@ -273,19 +281,6 @@ class KM_Dynamic_Pricing {
 		}
 
 		return $price;
-	}
-
-
-	/**
-	 * Change les prix des variations de produit en fonction de la zone de livraison.
-	 *
-	 * @param array      $price Les prix des variations de produit.
-	 * @param WC_Product $variation La variation de produit.
-	 * @param WC_Product $product Le produit.
-	 * @return array Les prix des variations de produit.
-	 */
-	public function change_variation_prices_based_on_shipping_zone( $price, $variation, $product ) {
-		return $this->change_product_price_based_on_shipping_zone( $price, $product );
 	}
 
 	/**
@@ -557,7 +552,6 @@ class KM_Dynamic_Pricing {
 
 		return false;
 	}
-
 
 	/**
 	 * Retourne le montant total de l'écotaxe dans le panier.

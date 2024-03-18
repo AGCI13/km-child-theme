@@ -126,10 +126,12 @@ class KM_Google_Shopping_Exporter {
 					continue;
 				}
 
+				$product_price = km_get_product_price_based_on_shipping_zone( $proc_product->get_price( 'edit' ), $proc_product, $shipping_zone_id );
+
 				if ( 'primary_flow' === $flow_type ) {
-					$products_data[] = $this->generate_primary_flow_data( $proc_product, $shipping_zone_id, $shipping_product_price );
+					$products_data[] = $this->generate_primary_flow_data( $proc_product, $shipping_zone_id, $product_price );
 				} elseif ( 'secondary_flow' === $flow_type ) {
-					$products_data[] = $this->generate_secondary_flow_data( $proc_product, $shipping_zone_id, $shipping_zone_name, $shipping_product_price );
+					$products_data[] = $this->generate_secondary_flow_data( $proc_product, $shipping_zone_id, $shipping_zone_name, $product_price, $shipping_product_price );
 				}
 			}
 		}
@@ -137,15 +139,12 @@ class KM_Google_Shopping_Exporter {
 		return $products_data;
 	}
 
-	private function generate_primary_flow_data( $product, $shipping_zone_id, $shipping_product_price ) {
-
-		$product_price = $shipping_product_price ? $product->get_price() + $shipping_product_price : $product->get_price();
-		$product_price = (string) $product_price . ' EUR';
+	private function generate_primary_flow_data( $product, $shipping_zone_id, $product_price ) {
 
 		return array(
 			'titre'          => $product->get_name(),
 			'id'             => $product->get_sku(),
-			'prix'           => $product_price,
+			'prix'           => (string) $product_price . ' EUR',
 			'prix_soldé'     => $this->get_calculated_price( (float) $product->get_sale_price(), $product, $shipping_zone_id ),
 			'état'           => 'neuf',
 			'disponibilité'  => $product->is_in_stock() ? 'En stock' : 'En rupture de stock',
@@ -158,22 +157,21 @@ class KM_Google_Shopping_Exporter {
 		);
 	}
 
-	private function generate_secondary_flow_data( $product, $shipping_zone_id, $shipping_zone_name, $shipping_product_price ) {
+	private function generate_secondary_flow_data( $product, $shipping_zone_id, $shipping_zone_name, $product_price, $shipping_product_price ) {
 
-		$product_price = $shipping_product_price ? $product->get_price() + $shipping_product_price : $product->get_price();
-		$product_price = (string) $product_price . ' EUR';
+		$shipping_product_price = $shipping_product_price ? (string) $shipping_product_price . ' EUR' : 'FR:::0.00 EUR';
 
 		return array(
 			'id'         => $product->get_sku(),
 			'region_id'  => $shipping_zone_name,
-			'prix'       => $product_price,
+			'prix'       => (string) $product_price . ' EUR',
 			'prix_soldé' => $this->get_calculated_price( (float) $product->get_sale_price(), $product, $shipping_zone_id ),
-			'livraison'  => $shipping_product_price ? $shipping_product_price : 'FR:::0.00 EUR',
+			'livraison'  => $shipping_product_price,
 		);
 	}
 
 	private function get_calculated_price( $product_price, $product, $zone_id ) {
-		return km_change_product_price_based_on_shipping_zone( $product_price, $product, $zone_id );
+		return km_get_product_price_based_on_shipping_zone( $product_price, $product, $zone_id );
 	}
 
 	public function get_filtered_product_ids( $excluded_categories, $excluded_products ) {
