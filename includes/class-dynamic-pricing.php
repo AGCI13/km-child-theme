@@ -153,11 +153,6 @@ class KM_Dynamic_Pricing {
 	 */
 	public function change_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
 
-		// Required with discount plugin.
-		if ( 0 === $price || '0' === $price ) {
-			return $price;
-		}
-
 		if ( $this->product_has_ecotax_meta( $product ) ) {
 				$price += $this->ecotaxe_rate;
 		}
@@ -191,7 +186,7 @@ class KM_Dynamic_Pricing {
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
-			if ( is_numeric( $shipping_price ) ) {
+			if ( is_numeric( $shipping_price ) && $shipping_price >= 1 ) {
 				$price += $shipping_price;
 			}
 		}
