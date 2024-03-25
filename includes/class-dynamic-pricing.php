@@ -163,10 +163,6 @@ class KM_Dynamic_Pricing {
 	 */
 	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
 
-		if ( ! $price ) {
-			return $price;
-		}
-
 		if ( is_null( $zone_id ) ) {
 			$zone_id = $this->current_shipping_zone_id;
 		}
@@ -239,6 +235,7 @@ class KM_Dynamic_Pricing {
 		} else {
 			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
 		}
+
 		return $price;
 	}
 

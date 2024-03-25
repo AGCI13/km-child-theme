@@ -126,7 +126,11 @@ class KM_Google_Shopping_Exporter {
 					continue;
 				}
 
-				$product_price = km_get_product_price_based_on_shipping_zone( $proc_product->get_price( 'edit' ), $proc_product, $shipping_zone_id );
+				$product_price = km_get_product_price_based_on_shipping_zone( (float) $proc_product->get_price(), $proc_product, (int) $fields['zone_id'] );
+
+				if ( ! $product_price ) {
+					continue;
+				}
 
 				if ( 'primary_flow' === $flow_type ) {
 					$products_data[] = $this->generate_primary_flow_data( $proc_product, $shipping_zone_id, $product_price );
