@@ -110,7 +110,7 @@ class KM_Dynamic_Pricing {
 		}
 
 		add_filter( 'woocommerce_is_purchasable', array( $this, 'handle_product_purchasability' ), 10, 2 );
-		add_filter( 'woocommerce_get_price', array( $this, 'get_product_price_based_on_shipping_zone' ), 10, 2 );
+		add_filter( 'woocommerce_product_get_price', array( $this, 'get_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_product_variation_get_price', array( $this, 'get_product_price_based_on_shipping_zone' ), 10, 2 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'adjust_simple_product_price_html' ), 98, 2 );
 		add_filter( 'woocommerce_get_price_html', array( $this, 'maybe_display_include_shipping_html' ), 99, 2 );
