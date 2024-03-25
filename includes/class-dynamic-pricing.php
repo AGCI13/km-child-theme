@@ -167,12 +167,12 @@ class KM_Dynamic_Pricing {
 			$zone_id = $this->current_shipping_zone_id;
 		}
 
-		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) { // Si la zone de livraison est la 13.
+		if ( km_is_shipping_zone_in_thirteen( $zone_id ) ) {
 			if ( $this->product_has_ecotax_meta( $product ) ) {
 				$price += $this->ecotaxe_rate;
 			}
-		} elseif ( defined( 'DOING_AJAX' ) || did_action( 'woocommerce_before_calculate_totals' ) ) {
-			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
+		} elseif ( did_action( 'woocommerce_before_calculate_totals' ) && km_is_big_bag_price_decreasing_zone( $zone_id ) && ( km_is_big_bag( $product ) || km_is_big_bag_and_slab( $product ) ) ) {
+			$price = $this->calculate_localized_product_price( $price, $product, $zone_id, true );
 		} else {
 			$price = $this->get_localized_product_price( $price, $product, $zone_id );
 		}
@@ -188,10 +188,9 @@ class KM_Dynamic_Pricing {
 	 * @param int        $zone_id L'ID de la zone de livraison.
 	 * @return float Le prix du produit.
 	 */
-	private function calculate_localized_product_price( $price, $product, $zone_id ) {
+	private function calculate_localized_product_price( $price, $product, $zone_id, $is_big_bag = false ) {
 
-		if ( km_is_big_bag_price_decreasing_zone( $zone_id ) && ( km_is_big_bag( $product )
-		|| ( km_is_big_bag_and_slab( $product ) ) ) ) {
+		if ( true === $is_big_bag || ( km_is_big_bag( $product ) || ( km_is_big_bag_and_slab( $product ) ) ) ) {
 			$shipping_product = km_get_big_bag_shipping_product( $product );
 		} else {
 			$shipping_product = km_get_related_shipping_product( $product );
