@@ -78,8 +78,8 @@ class KM_Shipping_Methods {
 	/**
 	 * Calculate shipping cost based on weight for 'VRAC A LA TONNE' products.
 	 *
-	 * @param string $shipping_method_id The name of the shipping method.
-	 * @param string $shipping_method_name The ID of the shipping method.
+	 * @param string $shipping_method_id The ID of the shipping method.
+	 * @param string $shipping_method_name The name of the shipping method.
 	 *
 	 * @return float Total shipping cost.
 	 */
@@ -122,7 +122,7 @@ class KM_Shipping_Methods {
 		$weight_class_name         = array_keys( $this->weight_classes )[ $weight_index ];
 		$delivery_option_full_name = km_get_shipping_zone_name() . ' ' . $shipping_method_name . ' - ' . $weight_class_name;
 
-		$shipping_product = $this->get_shipping_product( $delivery_option_full_name );
+		$shipping_product = km_get_product_from_title( $delivery_option_full_name );
 
 		if ( ! $shipping_product ) {
 			return array( 'price_excl_tax' => 0 );
@@ -147,37 +147,6 @@ class KM_Shipping_Methods {
 			'ugs'            => $shipping_product->get_sku(),
 			'weight_class'   => $weight_index,
 		);
-	}
-
-	/**
-	 * Calcule le prix de la livraison en fonction du poids du panier.
-	 *
-	 * @param string $shipping_product_name Le nom du produit de livraison.
-	 * @return object le produit de livraison
-	 */
-	private function get_shipping_product( $shipping_product_name ) {
-
-		if ( ! $shipping_product_name ) {
-			return;
-		}
-
-		// Récupérer le produit de livraison associé.
-		$args = array(
-			'fields'         => 'ids', // Ce qu'on demande à recupérer.
-			'post_type'      => 'product',
-			'post_status'    => array( 'private' ),
-			'posts_per_page' => 1,
-			'title'          => $shipping_product_name,
-			'exact'          => true,
-		);
-
-		$shipping_products_posts = get_posts( $args );
-
-		if ( ! $shipping_products_posts ) {
-			return;
-		}
-
-		return wc_get_product( $shipping_products_posts[0] );
 	}
 
 	/**
@@ -271,6 +240,10 @@ class KM_Shipping_Methods {
 		foreach ( $package['contents'] as $item ) {
 			$product = $item['data'];
 
+			if ( $product->is_type( 'variation' ) ) {
+				$product_id = $product->get_parent_id();
+			}
+
 			$is_location_big_bag = km_product_has_category( $product, 'location-big-bag' );
 
 			if ( ! $is_location_big_bag ) {
@@ -283,7 +256,7 @@ class KM_Shipping_Methods {
 				$only_location_bennes = false;
 			}
 
-			$is_geotextile = km_check_product_name( $product->get_name(), 'géotextile' );
+			$is_geotextile = ( km_check_product_name( $product->get_name(), 'géotextile' ) && ! in_array( $product_id, array( 96772, 96749 ), true ) );
 
 			if ( ! $is_geotextile ) {
 				$only_included_geotextile = false;

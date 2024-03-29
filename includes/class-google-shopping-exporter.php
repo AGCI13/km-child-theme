@@ -51,19 +51,23 @@ class KM_Google_Shopping_Exporter {
 		// Processus pour les flux principaux.
 		if ( isset( $fields['primary_flows'] ) && ! empty( $fields['primary_flows'] ) ) {
 			foreach ( $fields['primary_flows'] as $primary_flow ) {
-				$shipping_zone_name                = $this->sanitize_shipping_zone_name( $primary_flow['zone_id'] );
-				$flows_data[ $shipping_zone_name ] = $this->generate_flow_data( 'primary_flow', $primary_flow, $secondary_flow['zone_id'] );
+				$shipping_zone_name = km_get_shipping_zone_name( $primary_flow['zone_id'] );
+				if ( ! $shipping_zone_name ) {
+					continue;
+				}
+				$flows_data[ $shipping_zone_name ] = $this->generate_flow_data( 'primary_flow', $primary_flow, $primary_flow['zone_id'] );
 			}
 		}
 
 		// Processus pour les flux secondaires.
 		if ( isset( $fields['secondary_flows'] ) && ! empty( $fields['secondary_flows'] ) ) {
 			foreach ( $fields['secondary_flows'] as $secondary_flow ) {
-				$shipping_zone_name = $this->sanitize_shipping_zone_name( $secondary_flow['zone_id'] );
+				$zone_id            = (int) $secondary_flow['zone_id'];
+				$shipping_zone_name = km_get_shipping_zone_name( $zone_id );
 				if ( ! $shipping_zone_name ) {
 					continue;
 				}
-				$flows_data[ $shipping_zone_name ] = $this->generate_flow_data( 'secondary_flow', $secondary_flow, $secondary_flow['zone_id'], $shipping_zone_name );
+				$flows_data[ $shipping_zone_name ] = $this->generate_flow_data( 'secondary_flow', $secondary_flow, $zone_id );
 			}
 		}
 
@@ -82,16 +86,7 @@ class KM_Google_Shopping_Exporter {
 		}
 	}
 
-	private function sanitize_shipping_zone_name( $zone_id ) {
-		$shipping_zone_name = km_get_shipping_zone_name( $zone_id );
-		if ( ! $shipping_zone_name ) {
-			return false;
-		}
-		return strtoupper( str_replace( array( ' ', '-', '_' ), '', sanitize_title( $shipping_zone_name ) ) );
-	}
-
-	private function generate_flow_data( $flow_type, $fields, $shipping_zone_id, $shipping_zone_name = '' ) {
-
+	private function generate_flow_data( $flow_type, $fields, $shipping_zone_id ) {
 		if ( ! $fields || ! is_array( $fields ) || empty( $fields ) ) {
 			return array();
 		}
@@ -100,56 +95,89 @@ class KM_Google_Shopping_Exporter {
 		$products_data = array();
 
 		foreach ( $product_ids as $product_id ) {
-
 			$product = wc_get_product( $product_id );
+
 			if ( ! $product ) {
 				continue;
 			}
 
-			$products_to_process = array( $product );
-
 			if ( $product->is_type( 'variable' ) ) {
-				$products_to_process = array_merge( $products_to_process, $product->get_children() );
-			}
-
-			foreach ( $products_to_process as $proc_product_id ) {
-
-				$shipping_product_price = km_get_shipping_product_price( $proc_product_id, (int) $fields['zone_id'] );
-
-				if ( ! km_is_shipping_zone_in_thirteen() && ! $shipping_product_price ) {
-					continue;
+				$variations = $product->get_available_variations();
+				foreach ( $variations as $variation ) {
+					$var_product = wc_get_product( $variation['variation_id'] );
+					if ( $var_product ) {
+						$processed_product = $this->process_product( $var_product, $flow_type, $shipping_zone_id );
+						if ( $processed_product ) {
+							$products_data[] = $processed_product;
+						}
+					}
 				}
-
-				$proc_product = wc_get_product( $proc_product_id );
-
-				if ( ! $proc_product || $proc_product->is_type( 'variable' ) ) {
-					continue;
-				}
-
-				$product_price = km_get_product_price_based_on_shipping_zone( (float) $proc_product->get_price(), $proc_product, (int) $fields['zone_id'] );
-
-				if ( ! $product_price ) {
-					continue;
-				}
-
-				if ( 'primary_flow' === $flow_type ) {
-					$products_data[] = $this->generate_primary_flow_data( $proc_product, $shipping_zone_id, $product_price );
-				} elseif ( 'secondary_flow' === $flow_type ) {
-					$products_data[] = $this->generate_secondary_flow_data( $proc_product, $shipping_zone_id, $shipping_zone_name, $product_price, $shipping_product_price );
+			} else {
+				$processed_product = $this->process_product( $product, $flow_type, $shipping_zone_id );
+				if ( $processed_product ) {
+					$products_data[] = $processed_product;
 				}
 			}
 		}
-
 		return $products_data;
 	}
 
-	private function generate_primary_flow_data( $product, $shipping_zone_id, $product_price ) {
+	private function process_product( $product, $flow_type, $shipping_zone_id ) {
+
+		$product_price_incl_tax      = wc_get_price_including_tax( $product );
+		$product_sale_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $product->get_sale_price() ) );
+
+		if ( ! $product_price_incl_tax ) {
+			return;
+		}
+
+		if ( $product->get_meta( '_has_ecotax', true ) ) {
+			$eco_tax_rate                 = km_get_ecotaxe_rate();
+			$product_price_incl_tax      += $eco_tax_rate;
+			$product_sale_price_incl_tax += $eco_tax_rate;
+		}
+
+		if ( km_is_shipping_zone_in_thirteen( $shipping_zone_id ) ) {
+
+			$shipping_methods = array( 'Option 1', 'Option 1 Express', 'Option 2', 'Option 2 Express' );
+
+			foreach ( $shipping_methods as $shipping_method ) {
+				$product_title    = km_get_shipping_zone_name( $shipping_zone_id ) . ' ' . $shipping_method . ' - 0 a 2 T';
+				$shipping_product = km_get_product_from_title( $product_title );
+
+				if ( $shipping_product instanceof WC_Product && 0 < $shipping_product->get_price() ) {
+					break;
+				}
+			}
+			$shipping_price = $shipping_product instanceof WC_Product ? wc_get_price_including_tax( $shipping_product ) : 0;
+		} else {
+			$shipping_product = km_get_related_shipping_product( $product, $shipping_zone_id );
+			$shipping_price   = $shipping_product ? wc_get_price_including_tax( $shipping_product ) : 0;
+
+			if ( ! $shipping_price ) {
+				return;
+			}
+			$product_price_incl_tax      += $shipping_price;
+			$product_sale_price_incl_tax += $shipping_price;
+		}
+
+		$product_price      = number_format( $product_price_incl_tax, 2, '.', '' );
+		$product_sale_price = number_format( $product_sale_price_incl_tax, 2, '.', '' );
+
+		if ( 'primary_flow' === $flow_type ) {
+			return $this->generate_primary_flow_data( $product, $product_price, $product_sale_price );
+		} elseif ( 'secondary_flow' === $flow_type ) {
+			return $this->generate_secondary_flow_data( $product, $product_price, $product_sale_price, $shipping_zone_id, number_format( $shipping_price, 2, '.', '' ) );
+		}
+	}
+
+	private function generate_primary_flow_data( $product, $product_price, $product_sale_price ) {
 
 		return array(
 			'titre'          => $product->get_name(),
 			'id'             => $product->get_sku(),
 			'prix'           => (string) $product_price . ' EUR',
-			'prix_soldé'     => $this->get_calculated_price( (float) $product->get_sale_price(), $product, $shipping_zone_id ),
+			'prix_soldé'     => (string) ( $product_sale_price ? $product_sale_price : $product_price ) . ' EUR',
 			'état'           => 'neuf',
 			'disponibilité'  => $product->is_in_stock() ? 'En stock' : 'En rupture de stock',
 			'description'    => $product->get_description(),
@@ -161,21 +189,15 @@ class KM_Google_Shopping_Exporter {
 		);
 	}
 
-	private function generate_secondary_flow_data( $product, $shipping_zone_id, $shipping_zone_name, $product_price, $shipping_product_price ) {
-
-		$shipping_product_price = $shipping_product_price ? (string) $shipping_product_price . ' EUR' : 'FR:::0.00 EUR';
+	private function generate_secondary_flow_data( $product, $product_price, $product_sale_price, $shipping_zone_id, $shipping_price = '' ) {
 
 		return array(
 			'id'         => $product->get_sku(),
-			'region_id'  => $shipping_zone_name,
+			'region_id'  => km_get_shipping_zone_name( $shipping_zone_id ),
 			'prix'       => (string) $product_price . ' EUR',
-			'prix_soldé' => $this->get_calculated_price( (float) $product->get_sale_price(), $product, $shipping_zone_id ),
-			'livraison'  => $shipping_product_price,
+			'prix_soldé' => (string) ( $product_sale_price ? $product_sale_price : $product_price ) . ' EUR',
+			'livraison'  => $shipping_price . ' EUR',
 		);
-	}
-
-	private function get_calculated_price( $product_price, $product, $zone_id ) {
-		return km_get_product_price_based_on_shipping_zone( $product_price, $product, $zone_id );
 	}
 
 	public function get_filtered_product_ids( $excluded_categories, $excluded_products ) {

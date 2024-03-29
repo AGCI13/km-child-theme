@@ -166,9 +166,9 @@ class KM_Shipping_Zone {
 	public function is_zone_in_thirteen( $zone_id = null ) {
 
 		$zone_id = $zone_id ? $zone_id : $this->shipping_zone_id;
-
+		
 		if ( ! is_array( $this->zones_in_thirteen ) || empty( $this->zones_in_thirteen )
-			|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
+		|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
 			return false;
 		}
 
@@ -262,13 +262,17 @@ class KM_Shipping_Zone {
 			return;
 		}
 
+		if ( ! $zone_id ) {
+			$zone_id = $this->get_shipping_zone_id();
+		}
+
 		$shipping_class_name = $shipping_class_term->name;
 
 		if ( strpos( $shipping_class_name, '²' ) !== false ) {
 			$shipping_class_name = str_replace( '²', '2', $shipping_class_name );
 		}
 
-		$shipping_zone_name    = $this->shipping_zone_name ? $this->shipping_zone_name : $this->get_shipping_zone_name( $zone_id );
+		$shipping_zone_name    = $this->get_shipping_zone_name( $zone_id );
 		$shipping_product_name = $shipping_zone_name . ' ' . $shipping_class_name;
 
 		$args = array(

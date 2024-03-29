@@ -161,7 +161,7 @@ class KM_Dynamic_Pricing {
 	 * @param WC_Product $product Le produit.
 	 * @return float Le prix du produit.
 	 */
-	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
+	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null, $force_recalc = false ) {
 
 		if ( is_null( $zone_id ) ) {
 			$zone_id = $this->current_shipping_zone_id;
@@ -173,6 +173,8 @@ class KM_Dynamic_Pricing {
 			}
 		} elseif ( did_action( 'woocommerce_before_calculate_totals' ) && km_is_big_bag_price_decreasing_zone( $zone_id ) && ( km_is_big_bag( $product ) || km_is_big_bag_and_slab( $product ) ) ) {
 			$price = $this->calculate_localized_product_price( $price, $product, $zone_id, true );
+		} elseif ( true === $force_recalc ) {
+			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
 		} else {
 			$price = $this->get_localized_product_price( $price, $product, $zone_id );
 		}
@@ -204,12 +206,13 @@ class KM_Dynamic_Pricing {
 			$shipping_price = $shipping_product->get_price( 'edit' );
 			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
-
-				if ( ! defined( 'DOING_AJAX' ) || ! did_action( 'woocommerce_before_calculate_totals' ) ) {
-					update_post_meta( $product->get_id(), '_price_zone_' . $zone_id, $price );
-				}
 			}
 		}
+
+		if ( ! did_action( 'woocommerce_before_calculate_totals' ) ) {
+			$this->update_localized_product_price( $product, $zone_id, $price );
+		}
+
 		return $price;
 	}
 
@@ -223,10 +226,8 @@ class KM_Dynamic_Pricing {
 	 */
 	private function get_localized_product_price( $price, $product, $zone_id ) {
 
-		$product_id = $product->get_id();
-
-		if ( ! get_post_meta( $product_id, '_atoonext_sync', true ) ) {
-			$localized_product_price = get_post_meta( $product_id, '_price_zone_' . $zone_id, true );
+		if ( ! $product->get_meta( '_atoonext_sync', true ) ) {
+			$localized_product_price = $product->get_meta( '_price_zone_' . $zone_id, true );
 		}
 
 		if ( $localized_product_price && is_numeric( $localized_product_price ) ) {
@@ -236,6 +237,24 @@ class KM_Dynamic_Pricing {
 		}
 
 		return $price;
+	}
+
+	/**
+	 * Met à jour le prix du produit localisé.
+	 * Supprime également la meta _atoonext_sync si elle existe.
+	 *
+	 * @param WC_Product $product Le produit.
+	 * @param int        $zone_id L'ID de la zone de livraison.
+	 * @param float      $price Le prix du produit.
+	 * @return void
+	 */
+	private function update_localized_product_price( $product, $zone_id, $price ) {
+		$product_id = $product->get_id();
+		$check      = update_post_meta( $product_id, '_price_zone_' . $zone_id, $price );
+
+		if ( is_int( $check ) && $check > 0 ) {
+			$check = delete_post_meta( $product_id, '_atoonext_sync' );
+		}
 	}
 
 	/**
@@ -295,10 +314,8 @@ class KM_Dynamic_Pricing {
 			return $price;
 		}
 
-		$price_range = get_post_meta( $product->get_id(), '_price_range_' . $this->current_shipping_zone_id, true );
-
-		if ( $price_range ) {
-			return $price_range;
+		if ( ! $product->get_meta( '_atoonext_sync', true ) && $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true ) ) {
+			return $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true );
 		}
 
 		foreach ( $product->get_available_variations() as $variation ) {
