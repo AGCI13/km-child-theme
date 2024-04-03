@@ -64,7 +64,7 @@
     transform: translateX(-50%);
 }
 
-.zip_code_label {
+.postcode_label {
     text-align: center;
     color: red;
     margin-bottom:0;

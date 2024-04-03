@@ -78,7 +78,7 @@ class KM_Google_Shopping_Exporter {
 
 		if ( ! empty( $csv_files ) ) {
 
-			$csv_archive = $this->zip_csv_files( $csv_files );
+			$csv_archive = $this->postcode_csv_files( $csv_files );
 
 			if ( ! empty( $csv_archive ) ) {
 				$this->clean_tmp_directory();
@@ -240,22 +240,22 @@ class KM_Google_Shopping_Exporter {
 		return $file_path;
 	}
 
-	private function zip_csv_files( $csv_files ) {
+	private function postcode_csv_files( $csv_files ) {
 		if ( ! $this->current_date_time ) {
 			$this->current_date_time = current_time( 'Ymd-H\hi-s' );
 		}
 
-		$zip_file_path = $this->upload_dir . '/google-shopping-' . $this->current_date_time . '.zip';
+		$postcode_file_path = $this->upload_dir . '/google-shopping-' . $this->current_date_time . '.postcode';
 
-		$zip = new ZipArchive();
-		if ( $zip->open( $zip_file_path, ZipArchive::CREATE ) === true ) {
+		$postcode = new ZipArchive();
+		if ( $postcode->open( $postcode_file_path, ZipArchive::CREATE ) === true ) {
 			foreach ( $csv_files as $file ) {
 				if ( is_string( $file ) && file_exists( $file ) ) {
-					$zip->addFile( $file, basename( $file ) );
+					$postcode->addFile( $file, basename( $file ) );
 				}
 			}
-			$zip->close();
-			return $zip_file_path;
+			$postcode->close();
+			return $postcode_file_path;
 		}
 
 		return false;
@@ -281,7 +281,7 @@ class KM_Google_Shopping_Exporter {
 	}
 
 	public function display_acf_side_metabox() {
-		$csv_files = glob( $this->upload_dir . '/*.zip' );
+		$csv_files = glob( $this->upload_dir . '/*.postcode' );
 
 		wp_enqueue_script( 'google-shopping-script' );
 
@@ -307,7 +307,7 @@ class KM_Google_Shopping_Exporter {
 	}
 
 	public function clear_csv_files() {
-		$csv_files = glob( $this->upload_dir . '/*.zip' );
+		$csv_files = glob( $this->upload_dir . '/*.postcode' );
 		foreach ( $csv_files as $csv_file ) {
 			$deleted[] = unlink( $csv_file );
 		}

@@ -61,9 +61,21 @@ if ( ! function_exists( 'setup_kingmateriaux_theme' ) ) {
 	}
 }
 
-add_action(
-	'woocommerce_init',
-	function () {
+
+add_action( 'woocommerce_init', 'km_force_wc_session_start' );
+function km_force_wc_session_start() {
+	if ( is_user_logged_in() || is_admin() ) {
+		return;
+	}
+
+	if ( isset( WC()->session ) ) {
+		if ( ! WC()->session->has_session() ) {
+			WC()->session->set_customer_session_cookie( true );
+		}
+	}
+}
+
+
 		require_once 'includes/wc-common-functions.php';
 		require_once 'includes/wc-cart-functions.php';
 		require_once 'includes/wc-order-functions.php';
@@ -106,5 +118,14 @@ add_action(
 		KM_Transporter_Manager::get_instance();
 		KM_Big_Bag_Manager::get_instance();
 		KM_Google_Shopping_Exporter::get_instance();
+
+		add_action( 'init', 'remove_need_refresh_cookie' );
+
+function remove_need_refresh_cookie() {
+	// Vérifie si le cookie need_refresh existe
+	if ( isset( $_COOKIE['need_refresh'] ) ) {
+		// Supprime le cookie en le définissant avec une date d'expiration dans le passé
+		unset( $_COOKIE['need_refresh'] );
+		setcookie( 'need_refresh', '', time() - 3600, '/' );
 	}
-);
+}

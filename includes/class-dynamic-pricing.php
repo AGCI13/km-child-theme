@@ -116,7 +116,7 @@ class KM_Dynamic_Pricing {
 		add_filter( 'woocommerce_get_price_html', array( $this, 'maybe_display_include_shipping_html' ), 99, 2 );
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
 		add_filter( 'woocommerce_available_variation', array( $this, 'disable_variation_if_no_shipping_product' ), 10, 3 );
-		add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
+		add_action( 'wp', array( $this, 'set_prices_on_postcode_or_zone_missing' ) );
 	}
 
 	/**
@@ -124,7 +124,7 @@ class KM_Dynamic_Pricing {
 	 *
 	 * @return void
 	 */
-	public function set_prices_on_zip_or_zone_missing() {
+	public function set_prices_on_postcode_or_zone_missing() {
 		if ( $this->current_shipping_zone_id ) {
 			return;
 		}

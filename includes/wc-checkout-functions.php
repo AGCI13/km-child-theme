@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return void
  */
 function km_override_checkout_init(): void {
-	if ( isset( $_COOKIE['zip_code'] ) ) {
-		$_POST['shipping_postcode'] = explode( '-', $_COOKIE['zip_code'] )[0];
+	if ( isset( $_COOKIE['postcode'] ) ) {
+		$_POST['shipping_postcode'] = explode( '-', $_COOKIE['postcode'] )[0];
 	}
 }
 add_action( 'woocommerce_checkout_init', 'km_override_checkout_init' );

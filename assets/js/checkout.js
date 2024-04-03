@@ -75,18 +75,18 @@ jQuery(document).ready(function ($) {
             const cleanedShippingCountry = shippingCountry.value.trim();
             const cleanedShippingPostcode = shippingPostcode.value.trim();
             const shippingInputZipcode = cleanedShippingPostcode + '-' + cleanedShippingCountry;
-            const cookieZipCode = getCookie('zip_code').trim();
+            const cookieZipCode = getCookie('postcode').trim();
             const shippingPostcodeInput = document.getElementById('shipping_postcode');
             const nonce = document.querySelector('#nonce_postcode');
 
-            //If billing_postcode is equal to cookie zip_code, return
+            //If billing_postcode is equal to cookie postcode, return
             if (!nonce || shippingInputZipcode === cookieZipCode) {
                 resolve();
                 return;
             }
 
             const data = {
-                zip: cleanedShippingPostcode,
+                postcode: cleanedShippingPostcode,
                 country: cleanedShippingCountry,
                 nonce_postcode: nonce.value,
             };
@@ -94,7 +94,7 @@ jQuery(document).ready(function ($) {
             kmAjaxCall('postcode_submission_handler', data)
                 .then(response => {
                     if (response.success) {
-                        setCookie('zip_code', shippingInputZipcode, 30);
+                        setCookie('postcode', shippingInputZipcode, 30);
                         setCookie('shipping_zone', response.data, 30);
                         document.querySelector('.modal_pc_open_btn').textContent = cleanedShippingPostcode;
                     } else {

@@ -30,8 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</p>
 					<div class="km-form-fields">
 						<input class="country" name="country" type="hidden" value="FR">
-						<input class="zip_code" name="zip_code" type="text" maxlength="5" placeholder="Code postal" required>
-						<span for="zip_code" class="zip_code_label" class="km-error"></span>
+						<input class="postcode" name="postcode" type="text" maxlength="5" placeholder="Code postal" required>
+						<span for="postcode" class="postcode_label" class="km-error"></span>
 						<?php wp_nonce_field( 'postcode_submission_handler', 'nonce_postcode' ); ?>
 						<div class="modal-actions inline">
 							<button class="btn-confirm btn btn-primary">
@@ -41,5 +41,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 					</div>
 				</form>
-			</div>
+		</div>
 </div>

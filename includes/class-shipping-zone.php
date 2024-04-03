@@ -67,37 +67,58 @@ class KM_Shipping_Zone {
 	 * and to prevent creating multiple instances through the `new` keyword.
 	 */
 	private function __construct() {
-		$this->shipping_zone_id = $this->get_shipping_zone_id();
-		$this->get_zip_and_country_from_cookie();
 
-		$this->shipping_zone_name = $this->get_shipping_zone_name();
-		$this->is_in_thirteen     = $this->is_zone_in_thirteen();
+		add_action( 'woocommerce_init', array( $this, 'init' ) );
 
-		$this->register();
+		$this->register_front_hooks();
+		$this->register_admin_hooks();
+		$this->register_ajax_handlers();
 	}
 
+	public function init() {
+		$this->shipping_zone_id = $this->get_shipping_zone_id();
+		error_log( var_export( $this->shipping_zone_id, true ) );
+		$this->shipping_postcode = $this->get_shipping_postcode_from_session();
+		error_log( var_export( $this->shipping_postcode, true ) );
+		$this->shipping_zone_name = $this->get_shipping_zone_name();
+		$this->is_in_thirteen     = $this->is_zone_in_thirteen();
+	}
 
 	/**
 	 * Register hooks
 	 *
 	 * @return void
 	 */
-	public function register() {
-		add_action( 'wp_ajax_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
-		add_action( 'wp_ajax_nopriv_postcode_submission_handler', array( $this, 'postcode_submission_handler' ) );
-		add_action( 'wp_ajax_save_shipping_delays_handler', array( $this, 'save_shipping_delays_handler' ) );
-		add_action( 'admin_footer', array( $this, 'add_custom_shipping_zone_fields' ) );
+	public function register_front_hooks() {
 		add_action( 'wp_footer', array( $this, 'modal_postcode_html' ) );
 	}
 
-	private function get_shipping_zone_id() {
+	/**
+	 * Register hooks
+	 *
+	 * @return void
+	 */
+	public function register_admin_hooks() {
+		if ( ! is_admin() ) {
+			return;
+		}
+		add_action( 'admin_footer', array( $this, 'add_custom_shipping_zone_fields' ) );
+	}
+
+
+	public function register_ajax_handlers() {
+		add_action( 'wp_ajax_save_shipping_delays_handler', array( $this, 'save_shipping_delays_handler' ) );
+		add_action( 'wp_ajax_store_in_wc_session', array( $this, 'store_in_wc_session_handler' ) );
+		add_action( 'wp_ajax_nopriv_store_in_wc_session', array( $this, 'store_in_wc_session_handler' ) );
+	}
+
+	public function get_shipping_zone_id() {
 		$shipping_zone_id = $this->maybe_get_zone_url_id();
 
 		if ( $shipping_zone_id ) {
-			setcookie( 'shipping_zone', $shipping_zone_id, time() + ( 86400 * 30 ), '/' );
-			setcookie( 'zip_code', '', time() + ( 86400 * 30 ), '/' );
+			WC()->session->set( 'shipping_zone', $shipping_zone_id );
 		} elseif ( ! $this->shipping_zone_id ) {
-			$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
+			$shipping_zone_id = $this->get_shipping_zone_from_session();
 		}
 
 		return $shipping_zone_id;
@@ -132,28 +153,36 @@ class KM_Shipping_Zone {
 		return $zone_id;
 	}
 
-
 	/**
-	 * Checks if the current shipping zone is in the thirtheen.
+	 * Récupère le code postal et le pays à partir de la session WooCommerce.
 	 *
-	 * @return string
+	 * @return bool
 	 */
-	public function get_zip_and_country_from_cookie() {
-		if ( ! isset( $_COOKIE['zip_code'] ) || empty( $_COOKIE['zip_code'] ) ) {
+	public function get_shipping_postcode_from_session() {
+		if ( ! isset( WC()->session ) ) {
 			return false;
 		}
-		$postcode = sanitize_text_field( wp_unslash( $_COOKIE['zip_code'] ) );
-
-		$postcode = explode( '-', $postcode );
-
-		if ( ! isset( $postcode[0] ) || empty( $postcode[0] ) || ! isset( $postcode[1] ) || empty( $postcode[1] ) ) {
+		$postcode = WC()->session->get( 'postcode' );
+		if ( empty( $postcode ) ) {
+			return false;
+		}
+		return $postcode;
+	}
+	/**
+	 * Récupère le code postal et le pays à partir de la session WooCommerce.
+	 *
+	 * @return bool
+	 */
+	public function get_shipping_zone_from_session() {
+		if ( ! isset( WC()->session ) ) {
 			return false;
 		}
 
-		$this->shipping_postcode = $postcode[0];
-		$this->country_code      = $postcode[1];
-
-		return true;
+		$shipping_zone = WC()->session->get( 'shipping_zone' );
+		if ( empty( $shipping_zone ) ) {
+			return false;
+		}
+		return $shipping_zone;
 	}
 
 	/**
@@ -166,7 +195,7 @@ class KM_Shipping_Zone {
 	public function is_zone_in_thirteen( $zone_id = null ) {
 
 		$zone_id = $zone_id ? $zone_id : $this->shipping_zone_id;
-		
+
 		if ( ! is_array( $this->zones_in_thirteen ) || empty( $this->zones_in_thirteen )
 		|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
 			return false;
@@ -201,19 +230,6 @@ class KM_Shipping_Zone {
 
 		// Return the shipping class slug or false if not found.
 		return ( ! is_wp_error( $shipping_class_term ) && $shipping_class_term ) ? $shipping_class_term->slug : false;
-	}
-
-	/**
-	 * Retrieves the shipping zone ID from the 'shipping_zone' cookie.
-	 *
-	 * @return int|null The shipping zone ID or null if the cookie is not set or the value is invalid.
-	 */
-	public function get_shipping_zone_id_from_cookie() {
-
-		$shipping_zone_id = isset( $_COOKIE['shipping_zone'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['shipping_zone'] ) ) : null;
-		$shipping_zone_id = is_numeric( $shipping_zone_id ) ? (int) $shipping_zone_id : null;
-
-		return ( $shipping_zone_id > 0 ) ? $shipping_zone_id : null;
 	}
 
 	/**
@@ -300,7 +316,7 @@ class KM_Shipping_Zone {
 	}
 
 	/**
-	 * Ajax callback to get the shipping zone ID from a zip code.
+	 * Ajax callback to get the shipping zone ID from a postcode code.
 	 *
 	 * @return void | json
 	 */
@@ -324,6 +340,23 @@ class KM_Shipping_Zone {
 		}
 	}
 
+	public function store_in_wc_session_handler() {
+		check_ajax_referer( 'postcode_submission_handler', 'nonce_postcode' );
+
+		if ( ! isset( $_POST['postcode'] ) || empty( $_POST['postcode'] ) ) {
+			wp_send_json_error( array( 'message' => 'Données manquantes.' ) );
+		}
+
+		$postcode = sanitize_text_field( wp_unslash( $_POST['postcode'] ) );
+
+		WC()->session->set( 'postcode', $postcode );
+		WC()->session->set( 'shipping_zone', $this->get_shipping_zone_id_from_postcode( $postcode ) );
+
+		setcookie( 'need_refresh', '1', time() + 60, '/' );
+
+		wp_send_json_success( array( 'message' => 'Informations stockées avec succès.' ) );
+	}
+
 	/**
 	 * Validate the postcode form data.
 	 *
@@ -332,7 +365,7 @@ class KM_Shipping_Zone {
 	 */
 	public function validate_postcode_form_data() {
 
-		$postcode = isset( $_POST['zip'] ) && ! empty( $_POST['zip'] ) ? wp_unslash( $_POST['zip'] ) : '';
+		$postcode = isset( $_POST['postcode'] ) && ! empty( $_POST['postcode'] ) ? wp_unslash( $_POST['postcode'] ) : '';
 		$postcode = sanitize_text_field( $postcode );
 
 		if ( empty( $postcode ) ) {
@@ -370,7 +403,7 @@ class KM_Shipping_Zone {
 	/**
 	 * Gets the shipping zone ID from a postcode.
 	 *
-	 * @param string $postcode The zip code.
+	 * @param string $postcode The postcode code.
 	 * @return int|null The shipping zone ID or null if no zone is found.
 	 */
 	public function get_shipping_zone_id_from_postcode( $postcode ) {
@@ -383,8 +416,8 @@ class KM_Shipping_Zone {
 
 			foreach ( $zone_locations as $location ) {
 				if ( strpos( $location->code, '...' ) !== false ) {
-					list($start_zip, $end_zip) = explode( '...', $location->code );
-					if ( $postcode >= $start_zip && $postcode <= $end_zip ) {
+					list($start_postcode, $end_postcode) = explode( '...', $location->code );
+					if ( $postcode >= $start_postcode && $postcode <= $end_postcode ) {
 						$found_zone = $zone_data['id'];
 						break 2; // Break out of both foreach loops.
 					}
@@ -417,7 +450,6 @@ class KM_Shipping_Zone {
 
 		return km_get_shipping_product_price( $product, $zone_id );
 	}
-
 
 	/**
 	 * Add custom fields to shipping zones.
@@ -494,12 +526,12 @@ class KM_Shipping_Zone {
 	 */
 	public function modal_postcode_html() {
 
+		$shipping_zone_id = $this->shipping_zone_id ? $this->shipping_zone_id : WC()->session->get( 'shipping_zone' );
+
 		$active = '';
-		if ( ! $this->shipping_zone_id && ( is_home() || is_front_page() || is_product() || is_product_category() ) ) {
+		if ( ! $shipping_zone_id && ( is_home() || is_front_page() || is_product() || is_product_category() ) ) {
 			$active = 'active';
 		}
-
-		$shipping_zone_id = $this->shipping_zone_id ? $this->shipping_zone_id : $this->get_shipping_zone_id_from_cookie();
 
 		// requiert le template.
 		require_once get_stylesheet_directory() . '/templates/modals/postcode.php';

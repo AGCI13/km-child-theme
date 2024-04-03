@@ -22,7 +22,7 @@ class Postcode_Form_Widget extends \Elementor\Widget_Base {
 		$zone_id  = km_get_current_shipping_zone_id();
 		?>
 		<div class="header_postcode">
-			<?php if ( $postcode && $postcode ) : ?>
+			<?php if ( $postcode && $zone_id ) : ?>
 				<p><?php esc_html_e( 'Code postal', 'kingmateriaux' ); ?> : <span class="btn-link modal_pc_open_btn"><?php echo esc_html( $postcode ); ?></span></p>
 			<?php elseif ( $zone_id ) : ?>
 				<p><?php esc_html_e( 'Pour affiner les tarifs', 'kingmateriaux' ); ?> : <span class="btn-link modal_pc_open_btn"><?php esc_html_e( 'Rentrez votre code postal', 'kingmateriaux' ); ?></span></p>
