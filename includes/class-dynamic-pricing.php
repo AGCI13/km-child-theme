@@ -287,10 +287,10 @@ class KM_Dynamic_Pricing {
 
 				$price .= $this->include_shipping_html;
 
-				if ( is_product() && km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone() ) {
+				if ( is_product() && km_is_big_bag_price_decreasing_zone() && ( km_is_big_bag( $product ) || km_is_big_bag_and_slab( $product ) ) ) {
 					$price .= $this->quantity_discount_msg_html;
 				}
-			} elseif ( km_is_big_bag( $product ) && km_is_big_bag_price_decreasing_zone() ) {
+			} elseif ( km_is_big_bag_price_decreasing_zone() && ( km_is_big_bag( $product ) || km_is_big_bag_and_slab( $product ) ) ) {
 				$price .= $this->quantity_discount_msg_html;
 			}
 		}

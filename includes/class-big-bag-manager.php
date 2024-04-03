@@ -183,8 +183,7 @@ class KM_Big_Bag_Manager {
 	public function is_big_bag( $product ) {
 		$product_id = $product instanceof WC_Product ? $product->get_id() : $product;
 
-		if ( has_term( 'location-big-bag', 'product_cat', $product_id ) ||
-			( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product ) ) ) {
+		if ( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product ) ) {
 			return true;
 		}
 		return false;
