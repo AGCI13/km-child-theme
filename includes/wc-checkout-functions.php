@@ -262,14 +262,10 @@ function km_display_shipping_dates( $chosen_method ) {
 		return;
 	}
 	?>
-		<div class="km-checkout-shipping-info">	
-			<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
-			<?php echo esc_html( $shipping_dates ); ?>
-			<input type="hidden" name="shipping_dates" value="<?php echo esc_html( $shipping_dates ); ?>">
-		</div>
+	<input type="hidden" name="shipping_dates" value="<?php echo esc_html( $shipping_dates ); ?>">
 	<?php
 }
-// add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
+add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
 
 /**
  * Ajout une case à chocher pour s'inscrire à la newsletter sur la page de paiement
