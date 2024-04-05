@@ -262,7 +262,7 @@ class KM_Shipping_Methods {
 				$only_included_geotextile = false;
 			}
 
-			$is_echantillons = km_product_has_category( $product, 'echantillons' );
+			$is_echantillons = km_check_product_name( $product->get_name(), 'échantillon' );
 			if ( ! $is_echantillons ) {
 				$only_included_echantillons = false;
 			}

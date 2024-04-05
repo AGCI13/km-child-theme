@@ -64,6 +64,7 @@ class KM_Google_Shopping_Exporter {
 			foreach ( $fields['secondary_flows'] as $secondary_flow ) {
 				$zone_id            = (int) $secondary_flow['zone_id'];
 				$shipping_zone_name = km_get_shipping_zone_name( $zone_id );
+
 				if ( ! $shipping_zone_name ) {
 					continue;
 				}
@@ -137,6 +138,8 @@ class KM_Google_Shopping_Exporter {
 			$product_sale_price_incl_tax += $eco_tax_rate;
 		}
 
+		$shipping_price = 0;
+
 		if ( km_is_shipping_zone_in_thirteen( $shipping_zone_id ) ) {
 
 			$shipping_methods = array( 'Option 1', 'Option 1 Express', 'Option 2', 'Option 2 Express' );
@@ -151,14 +154,14 @@ class KM_Google_Shopping_Exporter {
 			}
 			$shipping_price = $shipping_product instanceof WC_Product ? wc_get_price_including_tax( $shipping_product ) : 0;
 		} else {
-			$shipping_product = km_get_related_shipping_product( $product, $shipping_zone_id );
-			$shipping_price   = $shipping_product ? wc_get_price_including_tax( $shipping_product ) : 0;
+			$shipping_product      = km_get_related_shipping_product( $product, $shipping_zone_id );
+			$shipping_price_out_13 = $shipping_product ? wc_get_price_including_tax( $shipping_product ) : 0;
 
-			if ( ! $shipping_price ) {
+			if ( ! $shipping_price_out_13 ) {
 				return;
 			}
-			$product_price_incl_tax      += $shipping_price;
-			$product_sale_price_incl_tax += $shipping_price;
+			$product_price_incl_tax      += $shipping_price_out_13;
+			$product_sale_price_incl_tax += $shipping_price_out_13;
 		}
 
 		$product_price      = number_format( $product_price_incl_tax, 2, '.', '' );
