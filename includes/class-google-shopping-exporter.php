@@ -92,7 +92,7 @@ class KM_Google_Shopping_Exporter {
 			return array();
 		}
 
-		$product_ids   = $this->get_filtered_product_ids( $fields['excluded_categories'], $fields['excluded_products'] );
+		$product_ids   = $this->get_filtered_product_ids( $fields['include_product_cat'], $fields['include_product'] );
 		$products_data = array();
 
 		foreach ( $product_ids as $product_id ) {
@@ -203,18 +203,39 @@ class KM_Google_Shopping_Exporter {
 		);
 	}
 
-	public function get_filtered_product_ids( $excluded_categories, $excluded_products ) {
+	public function get_filtered_product_ids( $included_categories, $included_products ) {
+
+		if ( empty( $included_categories ) && empty( $included_products ) ) {
+			return array();
+		}
+
 		$args = array(
-			'limit'            => -1,
-			'return'           => 'ids',
-			'status'           => 'publish',
-			'orderby'          => 'title',
-			'order'            => 'ASC',
-			'category__not_in' => $excluded_categories ? $excluded_categories : array(),
-			'exclude'          => $excluded_products ? $excluded_products : array(),
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'post_type'      => 'product',
+			'post_status'    => 'publish',
+			'orderby'        => 'title',
+			'order'          => 'ASC',
 		);
 
-		return wc_get_products( $args );
+		if ( ! empty( $included_categories ) ) {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_cat',
+					'field'    => 'term_id',
+					'terms'    => $included_categories,
+				),
+			);
+		}
+
+		if ( ! empty( $included_products ) ) {
+			$args['post__in'] = $included_products;
+		}
+		error_log( var_export( $included_products, true ) );
+
+		$query    = new WP_Query();
+		$products = $query->query( $args );
+		return $products;
 	}
 
 	private function generate_csv_files( $zone_name, $data ) {
