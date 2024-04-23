@@ -91,11 +91,14 @@ class KM_Shipping_Zone {
 	}
 
 	private function get_shipping_zone_id() {
-		$shipping_zone_id = $this->maybe_get_zone_url_id();
+		if ( ! $this->shipping_zone_id ) {
+			$shipping_zone_id = $this->maybe_get_zone_url_id();
+		}
 
 		if ( $shipping_zone_id ) {
 			setcookie( 'shipping_zone', $shipping_zone_id, time() + ( 86400 * 30 ), '/' );
 			setcookie( 'zip_code', '', time() + ( 86400 * 30 ), '/' );
+			$this->shipping_zone_id = $shipping_zone_id;
 		} elseif ( ! $this->shipping_zone_id ) {
 			$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
 		}
@@ -166,7 +169,7 @@ class KM_Shipping_Zone {
 	public function is_zone_in_thirteen( $zone_id = null ) {
 
 		$zone_id = $zone_id ? $zone_id : $this->shipping_zone_id;
-		
+
 		if ( ! is_array( $this->zones_in_thirteen ) || empty( $this->zones_in_thirteen )
 		|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
 			return false;

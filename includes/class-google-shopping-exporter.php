@@ -55,7 +55,7 @@ class KM_Google_Shopping_Exporter {
 				if ( ! $shipping_zone_name ) {
 					continue;
 				}
-				$flows_data[ $shipping_zone_name ] = $this->generate_flow_data( 'primary_flow', $primary_flow, $primary_flow['zone_id'] );
+				$flows_data[ 'primaire-' . $shipping_zone_name ] = $this->generate_flow_data( 'primary_flow', $primary_flow, $primary_flow['zone_id'] );
 			}
 		}
 
@@ -68,7 +68,7 @@ class KM_Google_Shopping_Exporter {
 				if ( ! $shipping_zone_name ) {
 					continue;
 				}
-				$flows_data[ $shipping_zone_name ] = $this->generate_flow_data( 'secondary_flow', $secondary_flow, $zone_id );
+				$flows_data[ 'secondaire-' . $shipping_zone_name ] = $this->generate_flow_data( 'secondary_flow', $secondary_flow, $zone_id );
 			}
 		}
 
@@ -156,6 +156,7 @@ class KM_Google_Shopping_Exporter {
 		} else {
 			$shipping_product      = km_get_related_shipping_product( $product, $shipping_zone_id );
 			$shipping_price_out_13 = $shipping_product ? wc_get_price_including_tax( $shipping_product ) : 0;
+			error_log( var_export( $shipping_price_out_13, true ) );
 
 			if ( ! $shipping_price_out_13 ) {
 				return;
@@ -167,14 +168,22 @@ class KM_Google_Shopping_Exporter {
 		$product_price      = number_format( $product_price_incl_tax, 2, '.', '' );
 		$product_sale_price = number_format( $product_sale_price_incl_tax, 2, '.', '' );
 
+		$permalink = $product->get_permalink();
+
+		if ( strpos( $permalink, '?' ) !== false ) {
+			$permalink .= '&region_id=' . $shipping_zone_id;
+		} else {
+			$permalink .= '?region_id=' . $shipping_zone_id;
+		}
+
 		if ( 'primary_flow' === $flow_type ) {
-			return $this->generate_primary_flow_data( $product, $product_price, $product_sale_price );
+			return $this->generate_primary_flow_data( $product, $product_price, $product_sale_price, $permalink );
 		} elseif ( 'secondary_flow' === $flow_type ) {
-			return $this->generate_secondary_flow_data( $product, $product_price, $product_sale_price, $shipping_zone_id, number_format( $shipping_price, 2, '.', '' ) );
+			return $this->generate_secondary_flow_data( $product, $product_price, $product_sale_price, $shipping_zone_id, $permalink, number_format( $shipping_price, 2, '.', '' ) );
 		}
 	}
 
-	private function generate_primary_flow_data( $product, $product_price, $product_sale_price ) {
+	private function generate_primary_flow_data( $product, $product_price, $product_sale_price, $permalink ) {
 
 		return array(
 			'titre'          => $product->get_name(),
@@ -184,7 +193,7 @@ class KM_Google_Shopping_Exporter {
 			'état'           => 'neuf',
 			'disponibilité'  => $product->is_in_stock() ? 'En stock' : 'En rupture de stock',
 			'description'    => $product->get_description(),
-			'lien'           => $product->get_permalink(),
+			'lien'           => $permalink,
 			'lien_image'     => wp_get_attachment_url( $product->get_image_id() ),
 			'marque'         => 'Kingmatériaux',
 			'livraison'      => 'FR:::0.00 EUR',
@@ -192,7 +201,7 @@ class KM_Google_Shopping_Exporter {
 		);
 	}
 
-	private function generate_secondary_flow_data( $product, $product_price, $product_sale_price, $shipping_zone_id, $shipping_price = '' ) {
+	private function generate_secondary_flow_data( $product, $product_price, $product_sale_price, $shipping_zone_id, $permalink, $shipping_price = '' ) {
 
 		return array(
 			'id'         => $product->get_sku(),
@@ -231,7 +240,6 @@ class KM_Google_Shopping_Exporter {
 		if ( ! empty( $included_products ) ) {
 			$args['post__in'] = $included_products;
 		}
-		error_log( var_export( $included_products, true ) );
 
 		$query    = new WP_Query();
 		$products = $query->query( $args );

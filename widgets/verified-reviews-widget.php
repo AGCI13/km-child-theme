@@ -21,6 +21,10 @@ class Verified_Reviews_Widget extends \Elementor\Widget_Base {
 
 		global $product;
 
+		if ( ! function_exists( 'ntav_get_netreviews_average' ) || ! function_exists( 'ntav_addStars' ) ) {
+			return;
+		}
+
 		if ( ! $product ) {
 			$product = wc_get_product( get_the_ID() );
 			if ( ! $product instanceof WC_Product ) {
