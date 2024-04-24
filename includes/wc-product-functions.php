@@ -202,52 +202,6 @@ function km_add_body_class_for_products_with_tonnage_calculator( $classes ) {
 	return $classes;
 }
 
-/**
- * Ajoute un champ personnalisé pour désactiver une variation dans le 13
- *
- * @param int    $loop
- * @param array  $variation_data
- * @param object $variation
- * @return void
- */
-function km_add_custom_field_to_variations( $loop, $variation_data, $variation ) {
-		// Eco-taxe.
-		woocommerce_wp_checkbox(
-			array(
-				'id'      => '_has_ecotax[' . $loop . ']',
-				'label'   => 'Cette variation de produit a une éco-taxe',
-				'value'   => get_post_meta( $variation->ID, '_has_ecotax', true ),
-				'cbvalue' => '1',
-			)
-		);
-	// Créer une case à cocher
-	woocommerce_wp_checkbox(
-		array(
-			'id'    => '_disable_variation_in_13[' . $loop . ']',
-			'label' => 'Désactiver cette variation dans le 13',
-			'value' => get_post_meta( $variation->ID, '_disable_variation_in_13', true ),
-		)
-	);
-}
-add_action( 'woocommerce_variation_options', 'km_add_custom_field_to_variations', 10, 3 );
-/**
- * Enregistre la valeur du champ personnalisé pour désactiver une variation dans le 13
- *
- * @param int $variation_id
- * @param int $i
- * @return void
- */
-function km_save_custom_field_variations( $variation_id, $i ) {
-	// Eco-taxe.
-	$ecotax_checkbox_value = isset( $_POST['_has_ecotax'][ $i ] );
-	update_post_meta( $variation_id, '_has_ecotax', $ecotax_checkbox_value );
-
-	$checkbox_value = isset( $_POST['_disable_variation_in_13'][ $i ] ) ? 'yes' : 'no';
-	update_post_meta( $variation_id, '_disable_variation_in_13', $checkbox_value );
-}
-add_action( 'woocommerce_save_product_variation', 'km_save_custom_field_variations', 10, 2 );
-
-
 
 /**
  * Vérifie si le prix d'un produit woocommerce a chang& lors de sa modification et si oui ajoute la meta _atoonext_sync

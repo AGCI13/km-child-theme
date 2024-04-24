@@ -80,6 +80,7 @@ class KM_Dynamic_Pricing {
 		 */
 	private $current_shipping_zone_id;
 
+
 	private $is_big_bag_decreasing_zone;
 
 	/**
@@ -162,6 +163,10 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix du produit.
 	 */
 	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null, $force_recalc = false ) {
+
+		if ( ! empty( $product->get_meta( 'is_free_product' ) ) ) {
+			return $price;
+		}
 
 		if ( is_null( $zone_id ) ) {
 			$zone_id = $this->current_shipping_zone_id;

@@ -131,7 +131,6 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 			$new_price_html .= '<del>'
 			. wc_price( $initial_price_incl_tax )
 			. '</del> ';
-
 	}
 
 	$new_price_html .= $price_html;
@@ -436,3 +435,28 @@ function km_add_ecotax_to_cart_item( $cart_item_data, $product_id, $variation_id
 	return $cart_item_data;
 }
 add_filter( 'woocommerce_add_cart_item_data', 'km_add_ecotax_to_cart_item', 10, 3 );
+
+/**
+ * Gère le cas ou un produit est gratuit
+ * 
+ * @param WC_Cart $cart
+ * @return void
+ */
+function km_manage_cart_free_product_price( $cart ) {
+	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		return;
+	}
+
+	if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
+		return;
+	}
+
+	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		if ( 'Free' === $cart_item['wdr_free_product'] ) {
+			$cart_item['data']->set_price( 0 );
+			$cart_item['data']->update_meta_data( 'is_free_product', true );
+			$cart_item['data']->save();
+		}
+	}
+}
+add_action( 'woocommerce_before_calculate_totals', 'km_manage_cart_free_product_price', 20, 1 );

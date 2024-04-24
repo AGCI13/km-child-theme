@@ -18,7 +18,7 @@
   margin-right: 10px;
 }
 
-.transp-label{
+.transp-label {
   text-transform: uppercase;
 }
 
@@ -228,4 +228,38 @@ th#date {
 
 .transporter-item:hover {
   background-color: #f0f0f0;
+}
+
+.km-variation-custom-fields .options_group,
+#woocommerce-product-data .wc-metaboxes-wrapper .km-variation-custom-fields .wc-radios {
+  display: flex;
+  gap: 0 0.5rem;
+  flex-wrap: wrap;
+}
+
+#woocommerce-product-data .wc-metaboxes-wrapper .km-variation-custom-fields .wc-radios {
+  margin-bottom: 0;
+  padding: 0
+}
+
+.km-variation-custom-fields .options_group {
+  margin-bottom: 10px;
+}
+
+.km-variation-custom-fields p.form-field, .km-variation-custom-fields .wc-radios li {
+  margin: 0;
+}
+
+.km-variation-custom-fields label {
+  margin-left: .3rem;
+}
+
+.km-variation-custom-fields legend {
+  font-weight: 500 !important;
+  margin-bottom: 7px;
+}
+
+.km-variation-custom-fields .info {
+  margin-bottom: 7px;
+  font-style: italic;
 }

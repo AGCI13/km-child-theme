@@ -81,6 +81,7 @@ add_action(
 		require_once 'includes/class-palletization-manager.php';
 		require_once 'includes/class-transporter-manager.php';
 		require_once 'includes/class-big-bag-manager.php';
+		require_once 'includes/wc-product-variation-functions.php';
 
 		require_once 'includes/class-shipping-methods.php';
 		require_once 'includes/shipping-methods/class-shipping-method-1.php';

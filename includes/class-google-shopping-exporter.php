@@ -156,7 +156,6 @@ class KM_Google_Shopping_Exporter {
 		} else {
 			$shipping_product      = km_get_related_shipping_product( $product, $shipping_zone_id );
 			$shipping_price_out_13 = $shipping_product ? wc_get_price_including_tax( $shipping_product ) : 0;
-			error_log( var_export( $shipping_price_out_13, true ) );
 
 			if ( ! $shipping_price_out_13 ) {
 				return;
@@ -168,7 +167,7 @@ class KM_Google_Shopping_Exporter {
 		$product_price      = number_format( $product_price_incl_tax, 2, '.', '' );
 		$product_sale_price = number_format( $product_sale_price_incl_tax, 2, '.', '' );
 
-		$permalink = $product->get_permalink();
+		$permalink = str_replace( 'https://km.agci.dev/', 'https://kingmateriaux.com/', $product->get_permalink() );
 
 		if ( strpos( $permalink, '?' ) !== false ) {
 			$permalink .= '&region_id=' . $shipping_zone_id;
