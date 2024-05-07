@@ -277,6 +277,10 @@ class KM_Shipping_Zone {
 
 		$shipping_zone_name    = $this->get_shipping_zone_name( $zone_id );
 		$shipping_product_name = $shipping_zone_name . ' ' . $shipping_class_name;
+		error_log( var_export( $product->get_id(), true ) );
+		if ( 96336 === $product->get_id() ) {
+			error_log( var_export( $shipping_product_name, true ) );
+		}
 
 		$args = array(
 			'fields'         => 'ids',
@@ -287,13 +291,13 @@ class KM_Shipping_Zone {
 			'exact'          => true,
 		);
 
-		$shipping_products_posts = get_posts( $args );
+		$shipping_product_id = get_posts( $args );
 
-		if ( ! $shipping_products_posts ) {
+		if ( ! $shipping_product_id || ! is_array( $shipping_product_id ) || empty( $shipping_product_id ) ){
 			return;
 		}
 
-		$shipping_product = wc_get_product( $shipping_products_posts[0] );
+		$shipping_product = wc_get_product( $shipping_product_id[0] );
 
 		if ( ! $shipping_product ) {
 			return;

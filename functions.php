@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Fonctions du thème.
+ *
+ * @package kingmateriaux
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -60,6 +64,10 @@ if ( ! function_exists( 'setup_kingmateriaux_theme' ) ) {
 		require_once 'includes/taxonomies/product-taxo-uses.php';
 	}
 }
+
+error_log( var_export( 'Functions.php called', true ) );
+// Error log $_SERVER['REQUEST_URI']
+error_log( var_export( $_SERVER['REQUEST_URI'], true ) );
 
 add_action(
 	'woocommerce_init',

@@ -83,6 +83,8 @@ class KM_Dynamic_Pricing {
 
 	private $is_big_bag_decreasing_zone;
 
+	private $calculated_prices = array();
+
 	/**
 	 * Constructor.
 	 *
@@ -164,6 +166,13 @@ class KM_Dynamic_Pricing {
 	 */
 	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null, $force_recalc = false ) {
 
+		$product_id = $product->get_id();
+		$cache_key  = $product_id . '_' . $zone_id;
+
+		if ( ! $force_recalc && isset( $this->calculated_prices[ $cache_key ] ) ) {
+			return $this->calculated_prices[ $cache_key ];
+		}
+
 		if ( ! empty( $product->get_meta( 'is_free_product' ) ) ) {
 			return $price;
 		}
@@ -183,7 +192,6 @@ class KM_Dynamic_Pricing {
 		} else {
 			$price = $this->get_localized_product_price( $price, $product, $zone_id );
 		}
-
 		return $price;
 	}
 
@@ -196,8 +204,7 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix du produit.
 	 */
 	private function calculate_localized_product_price( $price, $product, $zone_id, $is_big_bag = false ) {
-
-		if ( true === $is_big_bag || ( km_is_big_bag( $product ) || ( km_is_big_bag_and_slab( $product ) ) ) ) {
+		if ( km_is_big_bag_price_decreasing_zone( $zone_id ) && ( true === $is_big_bag || ( km_is_big_bag( $product ) || ( km_is_big_bag_and_slab( $product ) ) ) ) ) {
 			$shipping_product = km_get_big_bag_shipping_product( $product );
 		} else {
 			$shipping_product = km_get_related_shipping_product( $product );
@@ -209,6 +216,7 @@ class KM_Dynamic_Pricing {
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
+
 			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
 			}
