@@ -181,11 +181,28 @@ class KM_Big_Bag_Manager {
 	 * @return bool Vrai si le produit est un big bag, faux sinon.
 	 */
 	public function is_big_bag( $product ) {
-		$product_id = $product instanceof WC_Product ? $product->get_id() : $product;
+		$product = $product instanceof WC_Product ? $product : wc_get_product( $product );
 
-		if ( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product ) ) {
+		if ( $product->is_type( 'variation' ) ) {
+			$product_id   = $product->get_parent_id();
+			$variation_id = $product->get_id();
+		} else {
+			$product_id = $product->get_id();
+		}
+
+		$variation_type = get_field( '_product_type', $variation_id );
+		if ( 'big_bag' === $variation_type ) {
 			return true;
 		}
+
+		$product_type = get_field( '_product_type', $product_id );
+		if ( 'big_bag' === $product_type ) {
+			return true;
+		}
+
+		// if ( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product ) ) {
+		// return true;
+		// }
 		return false;
 	}
 
@@ -200,12 +217,24 @@ class KM_Big_Bag_Manager {
 		$product = $product instanceof WC_Product ? $product : wc_get_product( $product );
 
 		if ( $product->is_type( 'variation' ) ) {
-			$product_id = $product->get_parent_id();
+			$product_id   = $product->get_parent_id();
+			$variation_id = $product->get_id();
 		} else {
 			$product_id = $product->get_id();
 		}
 
-		return in_array( $product_id, $this->big_bag_slabs_ids, true );
+		$variation_type = get_field( '_product_type', $variation_id );
+		if ( 'big_bag_and_slab' === $variation_type ) {
+			return true;
+		}
+
+		$product_type = get_field( '_product_type', $product_id );
+		if ( 'big_bag_and_slab' === $product_type ) {
+			return true;
+		}
+
+		return false;
+		// return in_array( $product_id, $this->big_bag_slabs_ids, true );
 	}
 
 	/**

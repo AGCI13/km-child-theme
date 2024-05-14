@@ -120,8 +120,6 @@ function km_send_data_to_cloudops( $name = '', $email, $opt, $source ) {
 	// create a new cURL resource.
 	$ch = curl_init();
 
-	// error_log( var_export( "https://cloud.web.kingmateriaux.com/woo-subscriptions?woo=$user_id&email=$email&name=$name&opt=$opt&source=$source", true ) );
-
 	// set URL and other appropriate options.
 	curl_setopt( $ch, CURLOPT_URL, "https://cloud.web.kingmateriaux.com/woo-subscriptions?woo=$user_id&email=$email&name=$name&opt=$opt&source=$source" );
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );

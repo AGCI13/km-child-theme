@@ -73,12 +73,13 @@ class KM_Dynamic_Pricing {
 	 */
 	private $is_in_thirteen;
 
-	/**
-	 * Return true if the shipping zone is 13.
-	 *
-	 * @var int
-	 */
+		/**
+		 * Return true if the shipping zone is 13.
+		 *
+		 * @var int
+		 */
 	private $current_shipping_zone_id;
+
 
 	private $is_big_bag_decreasing_zone;
 
@@ -143,9 +144,11 @@ class KM_Dynamic_Pricing {
 	 * @return array Les données de la variation.
 	 */
 	public function disable_variation_if_no_shipping_product( $variation_data, $product, $variation ) {
+
 		if ( ( ! $this->is_in_thirteen && ! $this->get_shipping_product_price( $variation ) )
-			|| ( $this->is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
-			|| ( $this->is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_shipping_zone_name() ) ) ) ) {
+		|| ( $this->is_in_thirteen && 'yes' === get_post_meta( $variation->get_id(), '_disable_variation_in_13', true ) )
+		|| ( $this->is_in_thirteen && false !== stripos( $product->get_name(), 'benne' ) && false === stripos( sanitize_title( $variation->get_name() ), str_replace( ' ', '-', km_get_shipping_zone_name() ) ) ) ) {
+
 			// Désactiver la variation si aucun produit de livraison n'est disponible ou si le prix est 0.
 			$variation_data['is_purchasable']      = false;
 			$variation_data['variation_is_active'] = false;
@@ -162,6 +165,7 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix du produit.
 	 */
 	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null, $force_recalc = false ) {
+
 		$product_id = $product->get_id();
 		$cache_key  = $product_id . '_' . $zone_id;
 
@@ -234,6 +238,7 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix du produit.
 	 */
 	private function get_localized_product_price( $price, $product, $zone_id ) {
+
 		if ( ! $product->get_meta( '_atoonext_sync', true ) ) {
 			$localized_product_price = $product->get_meta( '_price_zone_' . $zone_id, true );
 		}
@@ -273,8 +278,9 @@ class KM_Dynamic_Pricing {
 	 * @return string Le prix du produit.
 	 */
 	public function adjust_simple_product_price_html( $price, $product ) {
+
 		if ( is_product() && $this->product_has_ecotax_meta( $product )
-			&& ( $product->is_type( 'simple' ) || $product->is_type( 'variation' ) ) ) {
+		&& ( $product->is_type( 'simple' ) || $product->is_type( 'variation' ) ) ) {
 			$price .= $this->ecotaxe_info_html;
 		}
 		return $price;
@@ -313,6 +319,7 @@ class KM_Dynamic_Pricing {
 	 * @return string La fourchette de prix du produit.
 	 */
 	public function adjust_variable_product_price_html( $price, $product ) {
+
 		$prices      = array();
 		$has_ecotaxe = false;
 
@@ -375,6 +382,14 @@ class KM_Dynamic_Pricing {
 
 		$sales_area = get_post_meta( $product_id, '_product_sales_area', true );
 
+		// Vérifiez si les options de la variation doivent prendre le pas sur celles du produit
+		if ( $product->is_type( 'variation' ) ) {
+			$variation_sales_area = get_post_meta( $product_id, '_product_sales_area', true );
+			if ( $variation_sales_area && $variation_sales_area !== 'undefined' ) {
+				$sales_area = $variation_sales_area;
+			}
+		}
+
 		if ( ! $this->is_sales_area_allowed( $sales_area, $product_id ) ) {
 			$this->modify_product_status( $product_id, 'unpurchasable' );
 			return false;
@@ -415,8 +430,16 @@ class KM_Dynamic_Pricing {
 
 			$sales_area = get_post_meta( $variation_id, '_product_sales_area', true );
 
-			if ( $is_variation_purchasable && $this->is_sales_area_allowed( $sales_area, $variation_id ) ) {
-				$all_variations_unpurchasable = false;
+			// Si les options de variation existent et ne sont pas 'undefined', elles prennent le pas sur les options du produit
+			if ( $sales_area && $sales_area !== 'undefined' ) {
+				if ( $is_variation_purchasable && $this->is_sales_area_allowed( $sales_area, $variation_id ) ) {
+					$all_variations_unpurchasable = false;
+				}
+			} else {
+				$product_sales_area = get_post_meta( $product_id, '_product_sales_area', true );
+				if ( $is_variation_purchasable && $this->is_sales_area_allowed( $product_sales_area, $product_id ) ) {
+					$all_variations_unpurchasable = false;
+				}
 			}
 		}
 
@@ -460,6 +483,7 @@ class KM_Dynamic_Pricing {
 		}
 	}
 
+
 	/**
 	 * Détermine si une variation est achetable.
 	 *
@@ -467,6 +491,7 @@ class KM_Dynamic_Pricing {
 	 * @return bool True si la variation est achetable, false sinon.
 	 */
 	private function is_variation_purchasable( $variation ) {
+
 		if ( ! $this->is_in_thirteen ) {
 			return $this->get_shipping_product_price( $variation ) ? true : false;
 		}
@@ -502,7 +527,8 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Affiche un message au lieu du prix du produit.
 	 *
-	 * @param string     $price Le prix du produit.
+	 * @param string     $price Le prix du produi
+	 *      t.
 	 * @param WC_Product $product Le produit.
 	 * @return string Le prix du produit.
 	 */
@@ -544,6 +570,7 @@ class KM_Dynamic_Pricing {
 	 * @return bool Retourne true si un produit de livraison existe et que son prix est supérieur à 0€, false sinon.
 	 */
 	public function get_shipping_product_price( $product, $zone_id = null ) {
+
 		$shipping_product = km_get_related_shipping_product( $product, $zone_id );
 
 		if ( ! $shipping_product ) {
@@ -580,6 +607,7 @@ class KM_Dynamic_Pricing {
 	 * @return bool Si le produit à une meta _has_ecotax.
 	 */
 	public function product_has_ecotax_meta( $product ) {
+
 		$ecotax = get_post_meta( $product->get_id(), '_has_ecotax', true );
 
 		if ( ! empty( $ecotax ) && 'yes' === $ecotax ) {
@@ -602,6 +630,7 @@ class KM_Dynamic_Pricing {
 		$items = 'cart' === $context ? WC()->cart->get_cart() : WC()->order->get_items();
 
 		foreach ( $items as $item ) {
+
 			if ( $item['_has_ecotax'] ) {
 				$total_ecotaxe += $this->ecotaxe_rate_incl_taxes * $item['quantity'];
 			}

@@ -65,10 +65,6 @@ if ( ! function_exists( 'setup_kingmateriaux_theme' ) ) {
 	}
 }
 
-error_log( var_export( 'Functions.php called', true ) );
-// Error log $_SERVER['REQUEST_URI']
-error_log( var_export( $_SERVER['REQUEST_URI'], true ) );
-
 add_action(
 	'woocommerce_init',
 	function () {

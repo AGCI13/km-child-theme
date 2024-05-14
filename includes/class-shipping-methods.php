@@ -241,7 +241,10 @@ class KM_Shipping_Methods {
 			$product = $item['data'];
 
 			if ( $product->is_type( 'variation' ) ) {
-				$product_id = $product->get_parent_id();
+				$product_id   = $product->get_parent_id();
+				$variation_id = $product->get_id();
+			} else {
+				$product_id = $product->get_id();
 			}
 
 			$is_location_big_bag = km_product_has_category( $product, 'location-big-bag' );
@@ -256,8 +259,9 @@ class KM_Shipping_Methods {
 				$only_location_bennes = false;
 			}
 
-			$is_geotextile = ( km_check_product_name( $product->get_name(), 'géotextile' ) && ! in_array( $product_id, array( 96772, 96749 ), true ) );
+			// $is_geotextile = ( km_check_product_name( $product->get_name(), 'géotextile' ) && ! in_array( $product_id, array( 96772, 96749 ), true ) );
 
+			$is_geotextile = get_field( '_product_type', $variation_id ) === 'geotextile' || get_field( '_product_type', $product_id ) === 'geotextile';
 			if ( ! $is_geotextile ) {
 				$only_included_geotextile = false;
 			}

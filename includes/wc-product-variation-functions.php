@@ -65,7 +65,7 @@ function add_custom_fields_to_variations( $loop, $variation_data, $variation ) {
 	);
 
 	// Custom sales area.
-	echo '<fieldset class="form-field"><legend>' . esc_html__( 'Zone de vente personnalisée(s)', 'woocommerce' ) . '</legend>'
+	echo '<fieldset class="form-field _custom_product_shipping_zones[' . $variation->ID . ']"><legend>' . esc_html__( 'Zone de vente personnalisée(s)', 'woocommerce' ) . '</legend>'
 	. '<p class="info">' . esc_html__( 'Si une case est cochée, prendra le pas sur les options générales du produit.', 'woocommerce' ) . '</p>'
 	. '<div class="options_group">';
 	$custom_product_shipping_zones = get_post_meta( $variation->ID, '_custom_product_shipping_zones', true );
@@ -185,7 +185,7 @@ function add_custom_fields_to_variations( $loop, $variation_data, $variation ) {
  */
 function save_custom_fields_variations( $post_id, $i ) {
 
-	$ecotax_checkbox_value = isset( $_POST['_has_ecotax'][ $post_id ] ) ? 'yes' : 'no';
+	$ecotax_checkbox_value = sanitize_text_field( $_POST['_has_ecotax'][ $post_id ] );
 	update_post_meta( $post_id, '_has_ecotax', $ecotax_checkbox_value );
 
 	$product_type = isset( $_POST['_product_type'][ $post_id ] ) ? sanitize_text_field( $_POST['_product_type'][ $post_id ] ) : 'other';

@@ -185,6 +185,10 @@ function km_admin_scripts_enqueue( $hook ) {
 		if ( 'shop_order' === $post->post_type ) {
 			wp_enqueue_script( 'km-orders-script', $js_uri . 'wc-orders.min.js', array(), filemtime( $js_path . 'wc-orders.min.js' ), true );
 		}
+
+		if ( 'product' === $post->post_type ) {
+			wp_enqueue_script( 'wc-product-admin', $js_uri . 'wc-product-admin.min.js', array(), filemtime( $js_path . 'wc-product-admin.min.js' ), true );
+		}
 	}
 
 	wp_register_script( 'google-shopping-script', $js_uri . 'google-shopping.min.js', array(), filemtime( $js_path . 'google-shopping.min.js' ), false );
