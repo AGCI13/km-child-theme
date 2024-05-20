@@ -128,7 +128,7 @@ function km_get_shipping_dates( $context = 'cart', $min = 0, $max = 0 ) {
 		exit( 'KM_Shipping_Delays class does not exist' );
 	}
 	$km_shipping_delays = new KM_Shipping_Delays( km_get_current_shipping_zone_id(), $context, $min, $max );
-	return $km_shipping_delays->km_display_shipping_dates();
+	return $km_shipping_delays->display_shipping_dates();
 }
 
 

@@ -65,7 +65,7 @@ function add_custom_fields_to_variations( $loop, $variation_data, $variation ) {
 	);
 
 	// Custom sales area.
-	echo '<fieldset class="form-field _custom_product_shipping_zones[' . $variation->ID . ']"><legend>' . esc_html__( 'Zone de vente personnalisée(s)', 'woocommerce' ) . '</legend>'
+	echo '<fieldset class="form-field _custom_product_shipping_zones[' . esc_html( $variation->ID ) . ']"><legend>' . esc_html__( 'Zone de vente personnalisée(s)', 'woocommerce' ) . '</legend>'
 	. '<p class="info">' . esc_html__( 'Si une case est cochée, prendra le pas sur les options générales du produit.', 'woocommerce' ) . '</p>'
 	. '<div class="options_group">';
 	$custom_product_shipping_zones = get_post_meta( $variation->ID, '_custom_product_shipping_zones', true );
@@ -100,80 +100,93 @@ function add_custom_fields_to_variations( $loop, $variation_data, $variation ) {
 	echo '</div></fieldset>';
 
 	// Shipping methods.
-		echo '<fieldset class="form-field"><legend>' . esc_html__( 'Méthodes d\'expédition', 'woocommerce' ) . '</legend>'
+	echo '<fieldset class="form-field"><legend>' . esc_html__( 'Méthodes d\'expédition', 'woocommerce' ) . '</legend>'
 		. '<p class="info">' . esc_html__( 'Si une case est cochée, prendra le pas sur les options générales du produit.', 'woocommerce' ) . '</p>'
 		. '<div class="options_group">';
-		$shipping_methods_values = get_post_meta( $variation->ID, '_product_shipping_methods', true );
-		$shipping_methods_values = is_array( $shipping_methods_values ) ? $shipping_methods_values : array();
-		$shipping_methods        = array(
-			'drive'          => __( 'Drive', 'woocommerce' ),
-			'option1'        => __( 'Option 1', 'woocommerce' ),
-			'option2'        => __( 'Option 2', 'woocommerce' ),
-			'option1express' => __( 'Option 1 Express', 'woocommerce' ),
-			'option2express' => __( 'Option 2 Express', 'woocommerce' ),
-			'included'       => __( 'Incluse', 'woocommerce' ),
-			'dumpster'       => __( 'Benne', 'woocommerce' ),
+	$shipping_methods_values = get_post_meta( $variation->ID, '_product_shipping_methods', true );
+	$shipping_methods_values = is_array( $shipping_methods_values ) ? $shipping_methods_values : array();
+	$shipping_methods        = array(
+		'drive'          => __( 'Drive', 'woocommerce' ),
+		'option1'        => __( 'Option 1', 'woocommerce' ),
+		'option2'        => __( 'Option 2', 'woocommerce' ),
+		'option1express' => __( 'Option 1 Express', 'woocommerce' ),
+		'option2express' => __( 'Option 2 Express', 'woocommerce' ),
+		'out13'          => __( 'Hors 13', 'woocommerce' ),
+		'included'       => __( 'Incluse', 'woocommerce' ),
+		'dumpster'       => __( 'Benne', 'woocommerce' ),
+	);
+	foreach ( $shipping_methods as $key => $label ) {
+		woocommerce_wp_checkbox(
+			array(
+				'id'      => '_product_shipping_methods_' . $key . '[' . $variation->ID . ']',
+				'label'   => $label,
+				'cbvalue' => $key,
+				'value'   => in_array( $key, $shipping_methods_values, true ) ? $key : false,
+			)
 		);
-		foreach ( $shipping_methods as $key => $label ) {
-			woocommerce_wp_checkbox(
-				array(
-					'id'      => '_product_shipping_methods_' . $key . '[' . $variation->ID . ']',
-					'label'   => $label,
-					'cbvalue' => $key,
-					'value'   => in_array( $key, $shipping_methods_values, true ) ? $key : false,
-				)
-			);
-		}
-		echo '</div></fieldset>';
+	}
+	echo '</div></fieldset>';
 
-		echo '<fieldset class="form-field"><legend>' . esc_html__( 'Délais de livraison de Mars à Août', 'woocommerce' ) . '</legend>'
+	echo '<fieldset class="form-field"><legend>' . esc_html__( 'Délais de livraison de Mars à Août', 'woocommerce' ) . '</legend>'
 		. '<div class="options_group">';
-		// Custom fields for shipping delays min and max
-		$shipping_delay_min_hs = get_post_meta( $variation->ID, '_min_shipping_days_hs', true );
-		woocommerce_wp_text_input(
-			array(
-				'id'    => '_min_shipping_days_hs[' . $variation->ID . ']',
-				'label' => __( 'Délai de livraison minimum en jours', 'woocommerce' ),
-				'value' => $shipping_delay_min_hs,
-			)
-		);
+	// Custom fields for shipping delays min and max
+	$shipping_delay_min_hs = get_post_meta( $variation->ID, 'min_shipping_days_hs', true );
+	woocommerce_wp_text_input(
+		array(
+			'id'    => 'min_shipping_days_hs[' . $variation->ID . ']',
+			'label' => __( 'Délai de livraison minimum en jours', 'woocommerce' ),
+			'value' => $shipping_delay_min_hs,
+		)
+	);
 
-		$shipping_delay_max_hs = get_post_meta( $variation->ID, '_max_shipping_days_hs', true );
-		woocommerce_wp_text_input(
-			array(
-				'id'    => '_max_shipping_days_hs[' . $variation->ID . ']',
-				'label' => __( 'Délai de livraison maximum en jours', 'woocommerce' ),
-				'value' => $shipping_delay_max_hs,
-			)
-		);
+	$shipping_delay_max_hs = get_post_meta( $variation->ID, 'max_shipping_days_hs', true );
+	woocommerce_wp_text_input(
+		array(
+			'id'    => 'max_shipping_days_hs[' . $variation->ID . ']',
+			'label' => __( 'Délai de livraison maximum en jours', 'woocommerce' ),
+			'value' => $shipping_delay_max_hs,
+		)
+	);
 
-		echo '</div></fieldset>';
+	echo '</div></fieldset>';
 
-		echo '<fieldset class="form-field"><legend>' . esc_html__( 'Délais de livraison de Septembre à Février', 'woocommerce' ) . '</legend>'
+	echo '<fieldset class="form-field"><legend>' . esc_html__( 'Délais de livraison de Septembre à Février', 'woocommerce' ) . '</legend>'
 		. '<div class="options_group">';
 
-		// Custom fields for shipping delays min and max
-		$shipping_delay_min_ls = get_post_meta( $variation->ID, '_min_shipping_days_ls', true );
-		woocommerce_wp_text_input(
-			array(
-				'id'    => '_min_shipping_days_ls[' . $variation->ID . ']',
-				'label' => __( 'Délai de livraison minimum en jours', 'woocommerce' ),
-				'value' => $shipping_delay_min_ls,
-				'',
-			)
-		);
+	// Custom fields for shipping delays min and max
+	$shipping_delay_min_ls = get_post_meta( $variation->ID, 'min_shipping_days_ls', true );
+	woocommerce_wp_text_input(
+		array(
+			'id'    => 'min_shipping_days_ls[' . $variation->ID . ']',
+			'label' => __( 'Délai de livraison minimum en jours', 'woocommerce' ),
+			'value' => $shipping_delay_min_ls,
+		)
+	);
 
-		$shipping_delay_max_ls = get_post_meta( $variation->ID, '_max_shipping_days_ls', true );
-		woocommerce_wp_text_input(
-			array(
-				'id'    => '_max_shipping_days_ls[' . $variation->ID . ']',
-				'label' => __( 'Délai de livraison maximum en jours', 'woocommerce' ),
-				'value' => $shipping_delay_max_ls,
-			)
-		);
+	$shipping_delay_max_ls = get_post_meta( $variation->ID, 'max_shipping_days_ls', true );
+	woocommerce_wp_text_input(
+		array(
+			'id'    => 'max_shipping_days_ls[' . $variation->ID . ']',
+			'label' => __( 'Délai de livraison maximum en jours', 'woocommerce' ),
+			'value' => $shipping_delay_max_ls,
+		)
+	);
 
-		echo '</div></fieldset>';
-		echo '</div>';
+	echo '</div></fieldset>';
+
+	echo '<fieldset class="form-field"><legend>' . esc_html__( 'Délais de prépration Drive (en jours)', 'woocommerce' ) . '</legend>'
+		. '<div class="options_group">';
+
+	// Custom fields for drive preparation delays
+	$drive_delay = get_post_meta( $variation->ID, 'drive_preparation_days', true );
+	woocommerce_wp_text_input(
+		array(
+			'id'    => 'drive_preparation_days[' . $variation->ID . ']',
+			'value' => $drive_delay,
+		)
+	);
+	echo '</div></fieldset>';
+	echo '</div>';
 }
 
 /**
@@ -184,15 +197,24 @@ function add_custom_fields_to_variations( $loop, $variation_data, $variation ) {
  * @return void
  */
 function save_custom_fields_variations( $post_id, $i ) {
+	$meta_keys = array(
+		'_has_ecotax'            => isset( $_POST['_has_ecotax'][ $post_id ] ) ? sanitize_text_field( $_POST['_has_ecotax'][ $post_id ] ) : 'undefined',
+		'_product_type'          => isset( $_POST['_product_type'][ $post_id ] ) ? sanitize_text_field( $_POST['_product_type'][ $post_id ] ) : 'undefined',
+		'_product_sales_area'    => isset( $_POST['_product_sales_area'][ $post_id ] ) ? sanitize_text_field( $_POST['_product_sales_area'][ $post_id ] ) : 'undefined',
+		'min_shipping_days_hs'   => isset( $_POST['min_shipping_days_hs'][ $post_id ] ) ? sanitize_text_field( $_POST['min_shipping_days_hs'][ $post_id ] ) : '',
+		'max_shipping_days_hs'   => isset( $_POST['max_shipping_days_hs'][ $post_id ] ) ? sanitize_text_field( $_POST['max_shipping_days_hs'][ $post_id ] ) : '',
+		'min_shipping_days_ls'   => isset( $_POST['min_shipping_days_ls'][ $post_id ] ) ? sanitize_text_field( $_POST['min_shipping_days_ls'][ $post_id ] ) : '',
+		'max_shipping_days_ls'   => isset( $_POST['max_shipping_days_ls'][ $post_id ] ) ? sanitize_text_field( $_POST['max_shipping_days_ls'][ $post_id ] ) : '',
+		'drive_preparation_days' => isset( $_POST['drive_preparation_days'][ $post_id ] ) ? sanitize_text_field( $_POST['drive_preparation_days'][ $post_id ] ) : '',
+	);
 
-	$ecotax_checkbox_value = sanitize_text_field( $_POST['_has_ecotax'][ $post_id ] );
-	update_post_meta( $post_id, '_has_ecotax', $ecotax_checkbox_value );
-
-	$product_type = isset( $_POST['_product_type'][ $post_id ] ) ? sanitize_text_field( $_POST['_product_type'][ $post_id ] ) : 'other';
-	update_post_meta( $post_id, '_product_type', $product_type );
-
-	$sales_area = isset( $_POST['_product_sales_area'][ $post_id ] ) ? sanitize_text_field( $_POST['_product_sales_area'][ $post_id ] ) : 'all';
-	update_post_meta( $post_id, '_product_sales_area', $sales_area );
+	foreach ( $meta_keys as $key => $value ) {
+		if ( 'undefined' === $value || $value === '' ) {
+			delete_post_meta( $post_id, $key );
+		} else {
+			update_post_meta( $post_id, $key, $value );
+		}
+	}
 
 	$custom_product_shipping_zones     = array();
 	$all_custom_product_shipping_zones = array( 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
@@ -201,7 +223,11 @@ function save_custom_fields_variations( $post_id, $i ) {
 			$custom_product_shipping_zones[] = $zone;
 		}
 	}
-	update_post_meta( $post_id, '_custom_product_shipping_zones', $custom_product_shipping_zones );
+	if ( empty( $custom_product_shipping_zones ) ) {
+		delete_post_meta( $post_id, '_custom_product_shipping_zones' );
+	} else {
+		update_post_meta( $post_id, '_custom_product_shipping_zones', $custom_product_shipping_zones );
+	}
 
 	$shipping_methods     = array();
 	$all_shipping_methods = array(
@@ -218,17 +244,9 @@ function save_custom_fields_variations( $post_id, $i ) {
 			$shipping_methods[] = $method;
 		}
 	}
-	update_post_meta( $post_id, '_product_shipping_methods', $shipping_methods );
-
-	$shipping_delay_min_hs = isset( $_POST['_min_shipping_days_hs'][ $post_id ] ) ? sanitize_text_field( $_POST['_min_shipping_days_hs'][ $post_id ] ) : '';
-	update_post_meta( $post_id, '_min_shipping_days_hs', $shipping_delay_min_hs );
-
-	$shipping_delay_max_hs = isset( $_POST['_max_shipping_days_hs'][ $post_id ] ) ? sanitize_text_field( $_POST['_max_shipping_days_hs'][ $post_id ] ) : '';
-	update_post_meta( $post_id, '_max_shipping_days_hs', $shipping_delay_max_hs );
-
-	$shipping_delay_min_ls = isset( $_POST['_min_shipping_days_ls'][ $post_id ] ) ? sanitize_text_field( $_POST['_min_shipping_days_ls'][ $post_id ] ) : '';
-	update_post_meta( $post_id, '_min_shipping_days_ls', $shipping_delay_min_ls );
-
-	$shipping_delay_max_ls = isset( $_POST['_max_shipping_days_ls'][ $post_id ] ) ? sanitize_text_field( $_POST['_max_shipping_days_ls'][ $post_id ] ) : '';
-	update_post_meta( $post_id, '_max_shipping_days_ls', $shipping_delay_max_ls );
+	if ( empty( $shipping_methods ) ) {
+		delete_post_meta( $post_id, '_product_shipping_methods' );
+	} else {
+		update_post_meta( $post_id, '_product_shipping_methods', $shipping_methods );
+	}
 }

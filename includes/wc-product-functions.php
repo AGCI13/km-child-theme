@@ -96,10 +96,9 @@ function km_add_custom_body_class_for_unpurchasable_products( $classes ) {
 add_filter( 'body_class', 'km_add_custom_body_class_for_unpurchasable_products' );
 
 /**
- * Ajoute une classe au body pour les produits avec délais de livraison
+ * Affiche les délais de livraison sur la page produit.
  *
- * @param array $classes Les classes du body.
- * @return array Les classes du body.
+ * @param int $product_id L'ID du produit.
  */
 function km_display_shipping_dates_on_product_page( $product_id ) {
 
@@ -109,39 +108,18 @@ function km_display_shipping_dates_on_product_page( $product_id ) {
 	if ( ! $product || ! $product->is_purchasable() ) {
 		return; // Si le produit n'est pas achetable, ne rien afficher.
 	}
-	$product_id = $product->get_id();
 
 	// Récupérer l'ID de la zone de livraison.
 	$shipping_zone_id = km_get_current_shipping_zone_id();
 
-	// Vérifier si des délais de livraison personnalisés sont définis via ACF.
-	$custom_delays_hs = get_field( 'product_shipping_delays_product_shipping_delays_hs', $product_id );
-	$custom_delays_ls = get_field( 'product_shipping_delays_product_shipping_delays_ls', $product_id );
+	// Déterminer le contexte (product page).
+	$context = 'product';
 
-	// Déterminer la saison actuelle.
-	$current_month  = date( 'n' );
-	$is_high_season = $current_month >= 3 && $current_month <= 8; // De Mars à Août.
+	// Créer une instance de la classe KM_Shipping_Delays.
+	$shipping_delays = new KM_Shipping_Delays( $shipping_zone_id, $context );
 
-	// Récupérer les délais de livraison en fonction de la saison et des données personnalisées.
-	$min_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['min_shipping_days_hs'] ) ?? get_option( 'min_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['min_shipping_days_ls'] ) ? get_option( 'min_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['min_shipping_days_ls'] );
-	$max_shipping_days = $is_high_season ? ( empty( $custom_delays_hs['max_shipping_days_hs'] ) ?? get_option( 'max_shipping_days_hs_' . $shipping_zone_id ) ) : ( empty( $custom_delays_ls['max_shipping_days_ls'] ) ? get_option( 'max_shipping_days_ls_' . $shipping_zone_id ) : $custom_delays_ls['max_shipping_days_ls'] );
-
-	// Vérifier si les informations sont disponibles.
-	if ( empty( $min_shipping_days ) && empty( $max_shipping_days ) ) {
-		return; // Si les deux sont manquants, ne rien afficher.
-	}
-
-	// Construire le message à afficher.
-	$delivery_message = 'Délais de livraison de ';
-	if ( ! empty( $min_shipping_days ) && ! empty( $max_shipping_days ) ) {
-		$delivery_message .= $min_shipping_days . ' à ' . $max_shipping_days . ' jours.';
-	} elseif ( ! empty( $min_shipping_days ) ) {
-		$delivery_message .= $min_shipping_days . ' jours minimum.';
-	} elseif ( ! empty( $max_shipping_days ) ) {
-		$delivery_message .= $max_shipping_days . ' jours maximum.';
-	}
-
-	echo '<div class="km-product-delivery-delay">' . esc_html( $delivery_message ) . '</div>';
+	// Afficher les délais de livraison.
+	echo $shipping_delays->display_shipping_dates();
 }
 
 /**

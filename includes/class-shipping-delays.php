@@ -1,5 +1,4 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -7,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles dynamic pricing based on shipping zones and classes in WooCommerce.
  */
-
 class KM_Shipping_Delays {
 
 	/**
@@ -40,17 +38,17 @@ class KM_Shipping_Delays {
 	 *
 	 * @return string
 	 */
-	public function km_display_shipping_dates() {
+	public function display_shipping_dates() {
 
 		if ( 'cart' === $this->context ) {
-			$longuest_delays = $this->calculate_longest_delays_for_cart();
+			$longest_delays = $this->calculate_longest_delays_for_cart();
 		} elseif ( 'product' === $this->context ) {
-			$longuest_delays = $this->calculate_longest_delays_for_product( get_the_ID() );
+			$longest_delays = $this->calculate_longest_delays_for_product( get_the_ID() );
 		} else {
 			return;
 		}
 
-		return $this->generate_delay_html( $longuest_delays );
+		return $this->generate_delay_html( $longest_delays );
 	}
 
 	/**
@@ -69,10 +67,13 @@ class KM_Shipping_Delays {
 		}
 
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
-			$delays                = $this->get_shipping_delays( $cart_item['product_id'] );
+			$product_id = $cart_item['data']->get_id();
+			$delays     = $this->get_shipping_delays( $product_id );
+
 			$longest_delays['min'] = max( $longest_delays['min'], $delays['min'] );
 			$longest_delays['max'] = max( $longest_delays['max'], $delays['max'] );
 		}
+
 		return $longest_delays;
 	}
 
@@ -137,18 +138,29 @@ class KM_Shipping_Delays {
 	 * @return array
 	 */
 	private function get_shipping_delays( $product_id ) {
-		$season                = $this->get_current_season();
-		$shipping_zone_delays  = $this->get_zone_delays( $season );
-		$custom_product_delays = $this->get_product_delays( $product_id, $season );
+		$season               = $this->get_current_season();
+		$shipping_zone_delays = $this->get_zone_delays( $season );
 
-		$shipping_zone_min_delays = min( $shipping_zone_delays['min'], $shipping_zone_delays['max'] );
-		$shipping_zone_max_delays = max( $shipping_zone_delays['min'], $shipping_zone_delays['max'] );
+		// Vérifier si le produit est une variation et récupérer les délais de la variation si disponibles
+		$product = wc_get_product( $product_id );
+		if ( $product->is_type( 'variation' ) ) {
+			$variation_id            = $product->get_id();
+			$custom_variation_delays = $this->get_variation_delays( $variation_id, $season );
 
-		$custom_product_min_delays = min( $custom_product_delays['min'], $custom_product_delays['max'] );
-		$custom_product_max_delays = max( $custom_product_delays['min'], $custom_product_delays['max'] );
+			// Si les délais de la variation sont définis, les utiliser
+			if ( $custom_variation_delays['min'] !== 0 || $custom_variation_delays['max'] !== 0 ) {
+				return $custom_variation_delays;
+			}
 
-		$min_delay = max( $shipping_zone_min_delays, $custom_product_min_delays );
-		$max_delay = max( $shipping_zone_max_delays, $custom_product_max_delays );
+			// Sinon, utiliser les délais du produit parent
+			$parent_id             = $product->get_parent_id();
+			$custom_product_delays = $this->get_product_delays( $parent_id, $season );
+		} else {
+			$custom_product_delays = $this->get_product_delays( $product_id, $season );
+		}
+
+		$min_delay = max( $shipping_zone_delays['min'], $custom_product_delays['min'] );
+		$max_delay = max( $shipping_zone_delays['max'], $custom_product_delays['max'] );
 
 		return array(
 			'min' => $min_delay,
@@ -184,6 +196,24 @@ class KM_Shipping_Delays {
 	}
 
 	/**
+	 * Récupère les délais de livraison personnalisés pour une variation donnée.
+	 *
+	 * @param int    $variation_id L'ID de la variation.
+	 * @param string $season       La saison.
+	 *
+	 * @return array
+	 */
+	private function get_variation_delays( $variation_id, $season ) {
+		$min_delay = get_post_meta( $variation_id, "min_shipping_days_{$season}", true );
+		$max_delay = get_post_meta( $variation_id, "max_shipping_days_{$season}", true );
+
+		return array(
+			'min' => (int) ( $min_delay ? $min_delay : 0 ),
+			'max' => (int) ( $max_delay ? $max_delay : 0 ),
+		);
+	}
+
+	/**
 	 * Récupère les délais de livraison personnalisés pour un produit donné.
 	 *
 	 * @param int    $product_id L'ID du produit.
@@ -192,9 +222,21 @@ class KM_Shipping_Delays {
 	 * @return array
 	 */
 	private function get_product_delays( $product_id, $season ) {
-		$custom_delays = get_field( "product_shipping_delays_product_shipping_delays_{$season}", $product_id );
-		$min_delay     = $custom_delays[ 'min_shipping_days_' . $season ] ?? 0;
-		$max_delay     = $custom_delays[ 'max_shipping_days_' . $season ] ?? 0;
+		$custom_delays = get_field( 'product_shipping_delays', $product_id );
+
+		$min_delay = 0;
+		$max_delay = 0;
+
+		if ( $custom_delays ) {
+			if ( $season === 'hs' ) {
+				$min_delay = isset( $custom_delays['product_shipping_delays_hs']['min_shipping_days_hs'] ) ? $custom_delays['product_shipping_delays_hs']['min_shipping_days_hs'] : 0;
+				$max_delay = isset( $custom_delays['product_shipping_delays_hs']['max_shipping_days_hs'] ) ? $custom_delays['product_shipping_delays_hs']['max_shipping_days_hs'] : 0;
+			} else {
+				$min_delay = isset( $custom_delays['product_shipping_delays_ls']['min_shipping_days_ls'] ) ? $custom_delays['product_shipping_delays_ls']['min_shipping_days_ls'] : 0;
+				$max_delay = isset( $custom_delays['product_shipping_delays_ls']['max_shipping_days_ls'] ) ? $custom_delays['product_shipping_delays_ls']['max_shipping_days_ls'] : 0;
+			}
+		}
+
 		return array(
 			'min' => (int) $min_delay,
 			'max' => (int) $max_delay,

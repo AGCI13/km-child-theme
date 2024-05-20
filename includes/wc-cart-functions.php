@@ -259,7 +259,7 @@ function km_cart_shipping_delays_info() {
 	?>
 	<tr class="km-cart-info-row">
 		<td colspan="100%" class="km-cart-info-row">
-			<div class="km-cart-info-wrapper km-shipping-delay-message">	
+			<div class="km-cart-info-wrapper km-shipping-delay-message">    
 				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
 				<?php echo esc_html( km_get_shipping_dates() ); ?>
 			</div>
@@ -267,8 +267,8 @@ function km_cart_shipping_delays_info() {
 	</tr>
 	<?php
 }
-
 add_action( 'woocommerce_cart_contents', 'km_cart_shipping_delays_info', 90 );
+
 
 /**
  * Ajoute le montant de l'éco-taxe au total de la commande
@@ -438,7 +438,7 @@ add_filter( 'woocommerce_add_cart_item_data', 'km_add_ecotax_to_cart_item', 10, 
 
 /**
  * Gère le cas ou un produit est gratuit
- * 
+ *
  * @param WC_Cart $cart
  * @return void
  */

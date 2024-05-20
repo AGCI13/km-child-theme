@@ -3,10 +3,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
-/**
- * Handles dynamic pricing based on shipping zones and classes in WooCommerce.
- */
 class KM_Shipping_Methods {
 
 	use SingletonTrait;
@@ -27,7 +23,6 @@ class KM_Shipping_Methods {
 		'0 A 2 T'   => array( 0, 2 ),
 	);
 
-
 	/**
 	 * KM_Shipping_Methods constructor.
 	 */
@@ -44,7 +39,7 @@ class KM_Shipping_Methods {
 	}
 
 	/**
-	 * Ajoute les méthodes de livraison
+	 * Ajoute les méthodes de livraison.
 	 *
 	 * @param array $methods Les méthodes de livraison.
 	 * @return array
@@ -101,13 +96,13 @@ class KM_Shipping_Methods {
 			$product_weight = (int) $product->get_weight() * $cart_item['quantity'];
 
 			// Vérifiez si le produit n'est pas une 'benne'.
-			if ( stripos( $product_name, 'benne' ) === false ) {
+			if ( false === stripos( $product_name, 'benne' ) ) {
 				$total_weight += $product_weight;
 			}
 
-			if ( stripos( $product_name, 'vrac' ) !== false ) {
+			if ( false !== stripos( $product_name, 'vrac' ) ) {
 				++$vrac_count;
-			} elseif ( stripos( $product_name, 'Plaque de plâtre' ) !== false ) {
+			} elseif ( false !== stripos( $product_name, 'Plaque de plâtre' ) ) {
 				$cart_has_plasterboard = true;
 			} else {
 				++$other_product_count;
@@ -199,7 +194,7 @@ class KM_Shipping_Methods {
 		$total_tons = $total_weight / 1000; // Convertir en tonnes.
 
 		// if total weight is > 60 tonnes then return.
-		if ( $total_tons > 60 ) {
+		if ( 60 < $total_tons ) {
 			$total_tons = 60;
 		}
 
@@ -222,6 +217,35 @@ class KM_Shipping_Methods {
 	}
 
 	/**
+	 * Récupère les méthodes de livraison autorisées pour un produit ou une variation.
+	 *
+	 * @param WC_Product $product Le produit ou la variation.
+	 * @return array Les méthodes de livraison autorisées.
+	 */
+	private function get_allowed_shipping_methods( $product ) {
+		// Check if the product is a variation
+		if ( $product->is_type( 'variation' ) ) {
+			$variation_id               = $product->get_id();
+			$shipping_methods_variation = get_post_meta( $variation_id, '_product_shipping_methods', true );
+			error_log( var_export( $shipping_methods_variation, true ) );
+			if ( ! empty( $shipping_methods_variation ) && is_array( $shipping_methods_variation ) ) {
+				return $shipping_methods_variation;
+			}
+		}
+
+		// Fallback to the parent product's shipping methods
+		$product_id               = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+		$shipping_methods_product = get_post_meta( $product_id, '_product_shipping_methods', true );
+		error_log( var_export( $shipping_methods_product, true ) );
+		if ( ! empty( $shipping_methods_product ) && is_array( $shipping_methods_product ) ) {
+			return $shipping_methods_product;
+		}
+
+		return array();
+	}
+
+
+	/**
 	 * Filtre les méthodes d'expédition en fonction des produits dans le panier.
 	 *
 	 * @param array $rates Les méthodes d'expédition.
@@ -229,70 +253,27 @@ class KM_Shipping_Methods {
 	 * @return array
 	 */
 	public function filter_shipping_methods( $rates, $package ) {
+		$allowed_methods = array();
 
-		$only_included_shipping_products = true;
-		$only_included_big_bag           = true;
-		$only_included_geotextile        = true;
-		$only_location_bennes            = true;
-		$only_included_echantillons      = true;
-
-		$i = 0;
 		foreach ( $package['contents'] as $item ) {
-			$product = $item['data'];
+			$product                  = $item['data'];
+			$product_shipping_methods = $this->get_allowed_shipping_methods( $product );
 
-			if ( $product->is_type( 'variation' ) ) {
-				$product_id   = $product->get_parent_id();
-				$variation_id = $product->get_id();
-			} else {
-				$product_id = $product->get_id();
-			}
-
-			$is_location_big_bag = km_product_has_category( $product, 'location-big-bag' );
-
-			if ( ! $is_location_big_bag ) {
-				$only_included_big_bag = false;
-			}
-
-			$is_location_bennes = km_product_has_category( $product, 'location-bennes' );
-
-			if ( ! $is_location_bennes ) {
-				$only_location_bennes = false;
-			}
-
-			// $is_geotextile = ( km_check_product_name( $product->get_name(), 'géotextile' ) && ! in_array( $product_id, array( 96772, 96749 ), true ) );
-
-			$is_geotextile = get_field( '_product_type', $variation_id ) === 'geotextile' || get_field( '_product_type', $product_id ) === 'geotextile';
-			if ( ! $is_geotextile ) {
-				$only_included_geotextile = false;
-			}
-
-			$is_echantillons = km_check_product_name( $product->get_name(), 'échantillon' );
-			if ( ! $is_echantillons ) {
-				$only_included_echantillons = false;
-			}
-
-			if ( ! $is_location_big_bag && ! $is_location_bennes && ! $is_geotextile && ! $is_echantillons ) {
-				$only_included_shipping_products = false;
+			if ( ! empty( $product_shipping_methods ) && is_array( $product_shipping_methods ) ) {
+				$allowed_methods = array_merge( $allowed_methods, $product_shipping_methods );
 			}
 		}
 
+		// Si aucune méthode autorisée n'est spécifiée, ne filtre pas les méthodes.
+		if ( empty( $allowed_methods ) ) {
+			return $rates;
+		}
+
+		$allowed_methods = array_unique( $allowed_methods );
+
 		foreach ( $rates as $rate_id => $rate ) {
-
-			if ( ( $only_included_shipping_products && ! in_array( $rate_id, array( 'included', 'drive' ), true ) ) ||
-			( ! $only_included_shipping_products && ( 'included' === $rate_id ) ) ) {
+			if ( ! in_array( $rate->method_id, $allowed_methods, true ) ) {
 				unset( $rates[ $rate_id ] );
-			}
-
-			if ( ! $only_location_bennes && 'dumpster' === $rate_id ) {
-				unset( $rates[ $rate_id ] );
-			}
-
-			if ( $only_location_bennes && 'drive' === $rate_id ) {
-				unset( $rates[ $rate_id ] );
-			}
-
-			if ( $only_included_big_bag && 'included' === $rate_id ) {
-				$rate->label = 'Livraison par Colissimo';
 			}
 		}
 
