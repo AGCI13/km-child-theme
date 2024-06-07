@@ -91,11 +91,14 @@ class KM_Shipping_Zone {
 	}
 
 	private function get_shipping_zone_id() {
-		$shipping_zone_id = $this->maybe_get_zone_url_id();
+		if ( ! $this->shipping_zone_id ) {
+			$shipping_zone_id = $this->maybe_get_zone_url_id();
+		}
 
 		if ( $shipping_zone_id ) {
 			setcookie( 'shipping_zone', $shipping_zone_id, time() + ( 86400 * 30 ), '/' );
 			setcookie( 'zip_code', '', time() + ( 86400 * 30 ), '/' );
+			$this->shipping_zone_id = $shipping_zone_id;
 		} elseif ( ! $this->shipping_zone_id ) {
 			$shipping_zone_id = $this->get_shipping_zone_id_from_cookie();
 		}
@@ -168,7 +171,7 @@ class KM_Shipping_Zone {
 		$zone_id = $zone_id ? $zone_id : $this->shipping_zone_id;
 
 		if ( ! is_array( $this->zones_in_thirteen ) || empty( $this->zones_in_thirteen )
-			|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
+		|| ! is_numeric( $zone_id ) || $zone_id <= 0 ) {
 			return false;
 		}
 
@@ -262,13 +265,17 @@ class KM_Shipping_Zone {
 			return;
 		}
 
+		if ( ! $zone_id ) {
+			$zone_id = $this->get_shipping_zone_id();
+		}
+
 		$shipping_class_name = $shipping_class_term->name;
 
 		if ( strpos( $shipping_class_name, '²' ) !== false ) {
 			$shipping_class_name = str_replace( '²', '2', $shipping_class_name );
 		}
 
-		$shipping_zone_name    = $this->shipping_zone_name ? $this->shipping_zone_name : $this->get_shipping_zone_name( $zone_id );
+		$shipping_zone_name    = $this->get_shipping_zone_name( $zone_id );
 		$shipping_product_name = $shipping_zone_name . ' ' . $shipping_class_name;
 
 		$args = array(
@@ -280,13 +287,13 @@ class KM_Shipping_Zone {
 			'exact'          => true,
 		);
 
-		$shipping_products_posts = get_posts( $args );
+		$shipping_product_id = get_posts( $args );
 
-		if ( ! $shipping_products_posts ) {
+		if ( ! $shipping_product_id || ! is_array( $shipping_product_id ) || empty( $shipping_product_id ) ) {
 			return;
 		}
 
-		$shipping_product = wc_get_product( $shipping_products_posts[0] );
+		$shipping_product = wc_get_product( $shipping_product_id[0] );
 
 		if ( ! $shipping_product ) {
 			return;

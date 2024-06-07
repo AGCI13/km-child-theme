@@ -54,6 +54,7 @@ if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
 
+km_maybe_show_email_banner_anniversary();
 /*
  * @hooked WC_Emails::email_footer() Output the email footer
  */

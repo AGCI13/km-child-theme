@@ -80,10 +80,32 @@ function km_get_drive_available_days() {
 	$unavailable_dates       = isset( $drive_settings['unavailable_dates'] ) ? $drive_settings['unavailable_dates'] : '';
 	$unavailable_dates_array = ! empty( $unavailable_dates ) ? explode( ',', $unavailable_dates ) : array();
 
-	$drive_day_offset = isset( $drive_settings['day_offset'] ) ? intval( $drive_settings['day_offset'] ) : 0;
-	$offset           = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : $drive_day_offset;
+	$default_day_offset = isset( $drive_settings['day_offset'] ) ? intval( $drive_settings['day_offset'] ) : 0;
+	$day_num            = isset( $drive_settings['day_num'] ) && is_numeric( $drive_settings['day_num'] ) ? intval( $drive_settings['day_num'] ) : 20;
 
-	$day_num = isset( $drive_settings['day_num'] ) && is_numeric( $drive_settings['day_num'] ) ? intval( $drive_settings['day_num'] ) : 20;
+	// Find the highest drive preparation days from the cart items
+	$drive_preparation_days = $default_day_offset;
+	foreach ( WC()->cart->get_cart() as $cart_item ) {
+		$product_id   = $cart_item['data']->get_id();
+		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : null;
+
+		// Check for variation meta first
+		if ( $variation_id ) {
+			$preparation_days = get_post_meta( $variation_id, 'drive_preparation_days', true );
+		}
+
+		// If no variation meta or no variation, check product meta
+		if ( empty( $preparation_days ) ) {
+			$preparation_days = get_post_meta( $product_id, 'drive_preparation_days', true );
+		}
+
+		// Use the highest preparation days value
+		if ( ! empty( $preparation_days ) ) {
+			$drive_preparation_days = max( $drive_preparation_days, intval( $preparation_days ) );
+		}
+	}
+
+	$offset = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : $drive_preparation_days;
 
 	for ( $i = $offset; $i < $offset + $day_num; $i++ ) {
 		$date           = strtotime( '+' . $i . ' days' );
@@ -262,14 +284,10 @@ function km_display_shipping_dates( $chosen_method ) {
 		return;
 	}
 	?>
-		<div class="km-checkout-shipping-info">	
-			<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
-			<?php echo esc_html( $shipping_dates ); ?>
-			<input type="hidden" name="shipping_dates" value="<?php echo esc_html( $shipping_dates ); ?>">
-		</div>
+	<input type="hidden" name="shipping_dates" value="<?php echo esc_html( $shipping_dates ); ?>">
 	<?php
 }
-// add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
+add_action( 'km_after_shipping_rate', 'km_display_shipping_dates', 20, 1 );
 
 /**
  * Ajout une case à chocher pour s'inscrire à la newsletter sur la page de paiement
@@ -315,3 +333,81 @@ function km_order_pay_without_login( $allcaps, $caps, $args ) {
 }
 add_filter( 'user_has_cap', 'km_order_pay_without_login', 9999, 3 );
 add_filter( 'woocommerce_order_email_verification_required', '__return_false', 9999 );
+
+
+function display_drive_calendar() {
+	?>
+	<div class="drive-datetimepicker">
+		<h3><?php esc_html_e( 'Sélectionnez une date*', 'kingmateriaux' ); ?></h3>
+			<div class="drive-datepicker-day">	
+				<ul class="day-list">
+					<?php echo km_get_drive_available_days(); ?>
+				</ul>
+				<div class="load-more-days modal-actions inline">
+					<button class="btn-confirm btn btn-secondary">
+						<span class="btn-confirm-label">
+							<?php esc_html_e( '+ de jours', 'kingmateriaux' ); ?>
+						</span>
+						<span class="btn-confirm-loader"></span>
+					</button>
+				</div>
+				<p id="drive-date-wrapper" class="form-row must-validate validate-required">
+					<span class="woocommerce-input-wrapper">
+						<label for="drive-date"><?php esc_html_e( 'Date d\'enlèvement au Drive', 'kingmateriaux' ); ?></label>	
+						<input type="hidden" name="drive_date" class="input-text drive_date" value="">
+					</span>
+				</p>
+			</div>
+			
+			<h3><?php esc_html_e( 'Sélectionnez un créneau horaire*', 'kingmateriaux' ); ?></h3>
+				<div class="drive-datepicker-time shopengine_woocommerce_shipping_methods">
+					<!-- Morning Slots -->
+					<div class="time-slot morning">
+					<h4>Matin</h4>
+						<div class="slots">
+							<div class="slot" data-time="07h00">07h00</div>
+							<div class="slot" data-time="07h30">07h30</div>
+							<div class="slot" data-time="08h00">08h00</div>
+							<div class="slot" data-time="08h30">08h30</div>
+							<div class="slot" data-time="09h00">09h00</div>
+							<div class="slot" data-time="09h30">09h30</div>
+							<div class="slot" data-time="10h00">10h00</div>
+							<div class="slot" data-time="10h30">10h30</div>
+							<div class="slot" data-time="11h00">11h00</div>
+							<div class="slot" data-time="11h30">11h30</div>
+					</div>
+				</div>
+				<!-- Afternoon Slots -->
+				<div class="time-slot afternoon">
+					<h4>Après-midi</h4>
+					<div class="slots">
+						<div class="slot" data-time="13h00">13h00</div>
+						<div class="slot" data-time="13h30">13h30</div>
+						<div class="slot" data-time="14h00">14h00</div>
+						<div class="slot" data-time="14h30">14h30</div>
+						<div class="slot" data-time="15h00">15h00</div>
+						<div class="slot" data-time="15h30">15h30</div>
+						<div class="slot" data-time="16h00">16h00</div>
+						<div class="slot" data-time="16h30">16h30</div>
+						<div class="slot" data-time="17h00">17h00</div>
+					</div>
+				</div>
+					<p id="drive-time-wrapper"  class="form-row must-validate validate-required">
+						<label for="drive-time"><?php esc_html_e( 'Heure d\'enlèvement Drive', 'kingmateriaux' ); ?></label>
+						<span class="woocommerce-input-wrapper">
+							<input type="hidden" name="drive_time" class="input-text drive_time" value="">
+						</span>
+					</p>
+				</div>
+
+				<?php if ( $drive_method_settings['location'] ) : ?>
+				<div class="drive-location-adress">
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/img/location-pin.svg' ); ?>" alt="King Drive pin">
+						<?php echo wp_kses_post( wpautop( $drive_method_settings['location'] ) ); ?>
+				</div>
+					<?php endif; ?>
+			</div>
+		</div>
+	<?php
+}
+add_action( 'km_after_drive_method', 'display_drive_calendar' );

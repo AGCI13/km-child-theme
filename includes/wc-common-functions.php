@@ -106,6 +106,30 @@ function km_get_bacs_account_details_html() {
 	return $output;
 }
 
+function km_get_product_from_title( $product_title ) {
+
+	if ( ! $product_title ) {
+		return;
+	}
+
+	$args = array(
+		'fields'         => 'ids',
+		'post_type'      => 'product',
+		'post_status'    => array( 'private' ),
+		'posts_per_page' => 1,
+		'title'          => $product_title,
+		'exact'          => true,
+	);
+
+	$shipping_products_posts = get_posts( $args );
+
+	if ( ! $shipping_products_posts ) {
+		return;
+	}
+
+	return wc_get_product( $shipping_products_posts[0] );
+}
+
 /**
  * Filtrer les éléments de menus en fonction de la zone de livraison.
  *
@@ -140,3 +164,17 @@ function km_filter_menu_items( $items, $args ) {
 	return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'km_filter_menu_items', 10, 2 );
+
+function km_register_force_price_calculation_query_vars( $vars ) {
+	$vars[] = 'force-recalc-prices';
+	return $vars;
+}
+add_filter( 'query_vars', 'km_register_force_price_calculation_query_vars' );
+
+function km_maybe_show_email_banner_anniversary() {
+	if ( strtotime( gmdate( 'Y-m-d' ) ) >= strtotime( '2024-04-01' ) && strtotime( gmdate( 'Y-m-d' ) ) <= strtotime( '2024-04-30' ) ) {
+		?>
+		<a href="https://kingmateriaux.com/wp-content/uploads/2024/03/reglement-KM-concours-7-ans.pdf"><img style="margin-bottom:40px;" src="<?php	echo esc_url( get_stylesheet_directory_uri() . '/assets/img/email-banner-anniversary-offer.jpg' ); ?>"></a>
+		<?php
+	}
+}

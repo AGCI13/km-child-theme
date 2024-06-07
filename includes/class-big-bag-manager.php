@@ -20,13 +20,6 @@ class KM_Big_Bag_Manager {
 	private $big_bag_decreasing_price_zone = array( 5, 6, 7 );
 
 	/**
-	 * The shipping zone IDs where the big bag price is not decreasing.
-	 *
-	 * @var array
-	 */
-	private $big_bag_and_slab_decreasing_price_zone = array( 5, 6, 7 );
-
-	/**
 	 * The big bag slabs product IDs.
 	 *
 	 * @var array
@@ -91,16 +84,6 @@ class KM_Big_Bag_Manager {
 		return in_array( $zone_id, $this->big_bag_decreasing_price_zone, true );
 	}
 
-	/**
-	 * Check if the decreasing price can apply to big bags and slabs for the current shipping zone.
-	 *
-	 * @return bool
-	 */
-	public function is_big_bag_and_slab_price_decreasing_zone( $zone_id = null ) {
-		$zone_id = $zone_id ? $zone_id : km_get_current_shipping_zone_id();
-		return in_array( $zone_id, $this->big_bag_and_slab_decreasing_price_zone, true );
-	}
-
 	/***
 	 * Adjust cart item prices based on big bags shipping price.
 	 *
@@ -108,21 +91,20 @@ class KM_Big_Bag_Manager {
 	 */
 	public function adjust_cart_item_prices( $cart ) {
 
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) || did_action( 'woocommerce_before_calculate_totals' ) >= 2
-		|| ! $this->count_items_with_decreasing_shipping_price_in_cart() ) {
+		if ( ( is_admin() && ! defined( 'DOING_AJAX' ) ) || did_action( 'woocommerce_before_calculate_totals' ) >= 2
+		|| ! $this->is_big_bag_price_decreasing_zone() || ! $this->count_items_with_decreasing_shipping_price_in_cart() ) {
 			return;
 		}
+
 		$cart_content = $cart->get_cart();
 
 		foreach ( $cart_content as $cart_item ) {
 
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
-			if ( $this->is_big_bag( $product_id ) && $this->is_big_bag_price_decreasing_zone() ) {
-				$total_quantity             = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
+			if ( $this->is_big_bag( $product_id ) ) {
 				$one_big_bag_shipping_price = $this->one_big_bag_shipping_price ? $this->one_big_bag_shipping_price : $this->get_big_bag_shipping_product_price( $product_id );
-			} elseif ( $this->is_big_bag_and_slab( $product_id ) && $this->is_big_bag_and_slab_price_decreasing_zone() ) {
-				$total_quantity             = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
+			} elseif ( $this->is_big_bag_and_slab( $product_id ) ) {
 				$one_big_bag_shipping_price = $this->one_big_bag_and_slab_shipping_price ? $this->one_big_bag_and_slab_shipping_price : $this->get_big_bag_shipping_product_price( $cart_item['variation_id'] );
 			} else {
 				continue;
@@ -132,6 +114,7 @@ class KM_Big_Bag_Manager {
 				continue;
 			}
 
+			$total_quantity          = $this->count_big_bag_in_cart + $this->count_big_bag_and_slab_in_cart;
 			$big_bags_shipping_price = $this->calculate_big_bags_shipping_price( $product_id, $total_quantity, $one_big_bag_shipping_price );
 			$raw_item_price          = floatval( $cart_item['data']->get_price( 'edit' ) );
 			$new_price               = $raw_item_price + ( $big_bags_shipping_price / $total_quantity ) - $one_big_bag_shipping_price;
@@ -198,10 +181,29 @@ class KM_Big_Bag_Manager {
 	 * @return bool Vrai si le produit est un big bag, faux sinon.
 	 */
 	public function is_big_bag( $product ) {
-		$product_id = $product instanceof WC_Product ? $product->get_id() : $product;
+		$product = $product instanceof WC_Product ? $product : wc_get_product( $product );
 
-		return has_term( 'location-big-bag', 'product_cat', $product_id ) ||
-				( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product_id ) );
+		if ( $product->is_type( 'variation' ) ) {
+			$product_id   = $product->get_parent_id();
+			$variation_id = $product->get_id();
+		} else {
+			$product_id = $product->get_id();
+		}
+
+		$variation_type = get_field( '_product_type', $variation_id );
+		if ( 'big_bag' === $variation_type ) {
+			return true;
+		}
+
+		$product_type = get_field( '_product_type', $product_id );
+		if ( 'big_bag' === $product_type ) {
+			return true;
+		}
+
+		// if ( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product ) ) {
+		// return true;
+		// }
+		return false;
 	}
 
 	/**
@@ -215,12 +217,24 @@ class KM_Big_Bag_Manager {
 		$product = $product instanceof WC_Product ? $product : wc_get_product( $product );
 
 		if ( $product->is_type( 'variation' ) ) {
-			$product_id = $product->get_parent_id();
+			$product_id   = $product->get_parent_id();
+			$variation_id = $product->get_id();
 		} else {
 			$product_id = $product->get_id();
 		}
 
-		return in_array( $product_id, $this->big_bag_slabs_ids, true );
+		$variation_type = get_field( '_product_type', $variation_id );
+		if ( 'big_bag_and_slab' === $variation_type ) {
+			return true;
+		}
+
+		$product_type = get_field( '_product_type', $product_id );
+		if ( 'big_bag_and_slab' === $product_type ) {
+			return true;
+		}
+
+		return false;
+		// return in_array( $product_id, $this->big_bag_slabs_ids, true );
 	}
 
 	/**
@@ -260,21 +274,18 @@ class KM_Big_Bag_Manager {
 	 * @return bool
 	 */
 	public function count_items_with_decreasing_shipping_price_in_cart() {
-		$cart = WC()->cart->get_cart();
 
-		// Pré-déterminer les zones de prix décroissant pour éviter des appels répétés à ces vérifications dans la boucle.
-		$is_big_bag_price_decreasing_zone          = $this->is_big_bag_price_decreasing_zone();
-		$is_big_bag_and_slab_price_decreasing_zone = $this->is_big_bag_and_slab_price_decreasing_zone();
+		$cart = WC()->cart->get_cart();
 
 		foreach ( $cart as $cart_item ) {
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
 			// Vérifier si le produit est un big bag ou un big bag et dalle et si la zone actuelle permet un prix décroissant.
-			if ( ( $this->is_big_bag( $product_id ) && $is_big_bag_price_decreasing_zone ) ) {
+			if ( ( $this->is_big_bag( $product_id ) ) ) {
 				$this->count_big_bag_in_cart += $cart_item['quantity'];
 			}
 
-			if ( ( $this->is_big_bag_and_slab( $product_id ) && $is_big_bag_and_slab_price_decreasing_zone ) ) {
+			if ( ( $this->is_big_bag_and_slab( $product_id ) ) ) {
 				$this->count_big_bag_and_slab_in_cart += $cart_item['quantity'];
 			}
 		}

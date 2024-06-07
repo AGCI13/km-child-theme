@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Fonctions du thème.
+ *
+ * @package kingmateriaux
+ */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -75,12 +79,16 @@ add_action(
 
 		require_once 'includes/class-singleton-trait.php';
 		require_once 'includes/class-dynamic-pricing.php';
+		// error_log( __FILE__ . ' : ' . var_export( 'CALLED includes/class-dynamic-pricing.php', true ) );
+		// // Error log server request
+		// error_log( __FILE__ . ' : ' . var_export( $_SERVER['REQUEST_URI'], true ) );
 		require_once 'includes/class-shipping-zone.php';
 		require_once 'includes/class-shipping-delays.php';
 		require_once 'includes/class-order-processing.php';
 		require_once 'includes/class-palletization-manager.php';
 		require_once 'includes/class-transporter-manager.php';
 		require_once 'includes/class-big-bag-manager.php';
+		require_once 'includes/wc-product-variation-functions.php';
 
 		require_once 'includes/class-shipping-methods.php';
 		require_once 'includes/shipping-methods/class-shipping-method-1.php';
@@ -108,3 +116,4 @@ add_action(
 		KM_Google_Shopping_Exporter::get_instance();
 	}
 );
+

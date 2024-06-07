@@ -128,7 +128,7 @@ function km_get_shipping_dates( $context = 'cart', $min = 0, $max = 0 ) {
 		exit( 'KM_Shipping_Delays class does not exist' );
 	}
 	$km_shipping_delays = new KM_Shipping_Delays( km_get_current_shipping_zone_id(), $context, $min, $max );
-	return $km_shipping_delays->km_display_shipping_dates();
+	return $km_shipping_delays->display_shipping_dates();
 }
 
 
@@ -172,11 +172,11 @@ function km_get_shipping_product_price( $product, $zone_id = null ) {
  *
  * @return float
  */
-function km_change_product_price_based_on_shipping_zone( $price, $product, $zone_id ) {
+function km_get_product_price_based_on_shipping_zone( $price, $product, $zone_id, $force_recal = false ) {
 	if ( ! class_exists( 'KM_Dynamic_Pricing' ) ) {
 		exit( 'KM_Dynamic_Pricing class does not exist' );
 	}
-	KM_Dynamic_Pricing::get_instance()->change_product_price_based_on_shipping_zone( $price, $product, $zone_id );
+	return KM_Dynamic_Pricing::get_instance()->get_product_price_based_on_shipping_zone( $price, $product, $zone_id, $force_recal );
 }
 
 /**
@@ -212,11 +212,11 @@ function km_is_purchasable_in_zone( $product, $zone_id ) {
  *
  * @return WC_Product
  */
-function km_get_related_shipping_product( $product ) {
+function km_get_related_shipping_product( $product, $zone_id = null ) {
 	if ( ! class_exists( 'KM_Shipping_Zone' ) ) {
 		exit( 'KM_Shipping_Zone class does not exist' );
 	}
-	return KM_Shipping_Zone::get_instance()->get_related_shipping_product( $product );
+	return KM_Shipping_Zone::get_instance()->get_related_shipping_product( $product, $zone_id );
 }
 
 /**
@@ -274,18 +274,6 @@ function km_is_big_bag_price_decreasing_zone( $zone_id = null ) {
 }
 
 /**
- * Vérifie on se trouve dans une zone ou soit les big bag soit les dalles ont un tarif dégressif
- *
- * @return bool
- */
-function km_is_big_bag_and_slab_price_decreasing_zone( $zone_id = null ) {
-	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
-		exit( 'KM_Big_Bag_Manager class does not exist' );
-	}
-	return KM_Big_Bag_Manager::get_instance()->is_big_bag_and_slab_price_decreasing_zone( $zone_id );
-}
-
-/**
  * Vérifie si un big bag est dans le panier
  *
  * @return bool
@@ -304,7 +292,7 @@ function km_product_has_decreasing_shipping_price_in_cart() {
  *
  * @return WC_Product
  */
-function km_get_big_bag_shipping_product( $product, ) {
+function km_get_big_bag_shipping_product( $product ) {
 
 	if ( ! class_exists( 'KM_Big_Bag_Manager' ) ) {
 		exit( 'KM_Big_Bag_Manager class does not exist' );

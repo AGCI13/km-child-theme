@@ -123,6 +123,10 @@ function km_front_scripts_enqueue() {
 		wp_localize_script( 'km-cart-script', 'themeObject', array( 'themeUrl' => get_stylesheet_directory_uri() ) );
 	}
 
+	if ( is_checkout() || is_page( 49 ) ) {
+		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.min.css', array(), filemtime( $css_path . 'checkout.min.css' ), 'all' );
+	}
+
 	if ( is_checkout() ) {
 		wp_enqueue_script(
 			'km-registration-script',
@@ -134,7 +138,6 @@ function km_front_scripts_enqueue() {
 				'strategy'  => 'defer',
 			)
 		);
-		wp_enqueue_style( 'km-checkout-style', $css_uri . 'checkout.min.css', array(), filemtime( $css_path . 'checkout.min.css' ), 'all' );
 		wp_enqueue_style( 'km-datetimepicker-style', $css_uri . 'datetimepicker.min.css', array(), filemtime( $css_path . 'datetimepicker.min.css' ), 'all' );
 		wp_enqueue_script(
 			'km-checkout-script',
@@ -181,6 +184,10 @@ function km_admin_scripts_enqueue( $hook ) {
 	if ( 'post.php' == $hook || 'post-new.php' == $hook ) {
 		if ( 'shop_order' === $post->post_type ) {
 			wp_enqueue_script( 'km-orders-script', $js_uri . 'wc-orders.min.js', array(), filemtime( $js_path . 'wc-orders.min.js' ), true );
+		}
+
+		if ( 'product' === $post->post_type ) {
+			wp_enqueue_script( 'wc-product-admin', $js_uri . 'wc-product-admin.min.js', array(), filemtime( $js_path . 'wc-product-admin.min.js' ), true );
 		}
 	}
 

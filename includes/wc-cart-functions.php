@@ -118,8 +118,8 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 
 	$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
-	if ( $big_bag_quantity > 1 && ( km_is_big_bag( $product_id ) && km_is_big_bag_price_decreasing_zone() ) ||
-		( km_is_big_bag_and_slab_price_decreasing_zone() && km_is_big_bag_and_slab( $product_id ) ) ) {
+	if ( $big_bag_quantity > 1 && km_is_big_bag_price_decreasing_zone() && ( km_is_big_bag( $product_id ) ||
+		km_is_big_bag_and_slab( $product_id ) ) ) {
 			$product                = wc_get_product( $product_id );
 			$initial_price          = $product->get_price();
 			$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );
@@ -131,7 +131,6 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 			$new_price_html .= '<del>'
 			. wc_price( $initial_price_incl_tax )
 			. '</del> ';
-
 	}
 
 	$new_price_html .= $price_html;
@@ -260,7 +259,7 @@ function km_cart_shipping_delays_info() {
 	?>
 	<tr class="km-cart-info-row">
 		<td colspan="100%" class="km-cart-info-row">
-			<div class="km-cart-info-wrapper km-shipping-delay-message">	
+			<div class="km-cart-info-wrapper km-shipping-delay-message">    
 				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
 				<?php echo esc_html( km_get_shipping_dates() ); ?>
 			</div>
@@ -268,8 +267,8 @@ function km_cart_shipping_delays_info() {
 	</tr>
 	<?php
 }
-
 add_action( 'woocommerce_cart_contents', 'km_cart_shipping_delays_info', 90 );
+
 
 /**
  * Ajoute le montant de l'éco-taxe au total de la commande
@@ -436,3 +435,28 @@ function km_add_ecotax_to_cart_item( $cart_item_data, $product_id, $variation_id
 	return $cart_item_data;
 }
 add_filter( 'woocommerce_add_cart_item_data', 'km_add_ecotax_to_cart_item', 10, 3 );
+
+/**
+ * Gère le cas ou un produit est gratuit
+ *
+ * @param WC_Cart $cart
+ * @return void
+ */
+function km_manage_cart_free_product_price( $cart ) {
+	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		return;
+	}
+
+	if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
+		return;
+	}
+
+	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		if ( 'Free' === $cart_item['wdr_free_product'] ) {
+			$cart_item['data']->set_price( 0 );
+			$cart_item['data']->update_meta_data( 'is_free_product', true );
+			$cart_item['data']->save();
+		}
+	}
+}
+add_action( 'woocommerce_before_calculate_totals', 'km_manage_cart_free_product_price', 20, 1 );
