@@ -227,16 +227,13 @@ class KM_Shipping_Methods {
 		if ( $product->is_type( 'variation' ) ) {
 			$variation_id               = $product->get_id();
 			$shipping_methods_variation = get_post_meta( $variation_id, '_product_shipping_methods', true );
-			error_log( var_export( $shipping_methods_variation, true ) );
 			if ( ! empty( $shipping_methods_variation ) && is_array( $shipping_methods_variation ) ) {
 				return $shipping_methods_variation;
 			}
 		}
 
-		// Fallback to the parent product's shipping methods
 		$product_id               = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 		$shipping_methods_product = get_post_meta( $product_id, '_product_shipping_methods', true );
-		error_log( var_export( $shipping_methods_product, true ) );
 		if ( ! empty( $shipping_methods_product ) && is_array( $shipping_methods_product ) ) {
 			return $shipping_methods_product;
 		}
