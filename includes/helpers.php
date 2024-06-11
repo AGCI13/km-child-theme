@@ -144,9 +144,9 @@ function km_get_ecotaxe_rate( $with_tax = false ) {
 	}
 
 	if ( $with_tax ) {
-		return KM_Dynamic_Pricing::get_instance()->ecotaxe_rate_incl_taxes;
+		return KM_Dynamic_Pricing::ECOTAXE_RATE_INCL_TAXES;
 	}
-	return KM_Dynamic_Pricing::get_instance()->ecotaxe_rate;
+	return KM_Dynamic_Pricing::ECOTAXE_RATE;
 }
 
 /**

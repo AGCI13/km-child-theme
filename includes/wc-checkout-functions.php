@@ -411,3 +411,13 @@ function display_drive_calendar() {
 	<?php
 }
 add_action( 'km_after_drive_method', 'display_drive_calendar' );
+
+
+function km_customize_checkout_fields( $fields ) {
+	// Rendre le champ Nom de l'entreprise obligatoire dans l'adresse de livraison
+	$fields['shipping']['shipping_company']['required'] = true;
+	$fields['billing']['billing_company']['required'] = true;
+
+	return $fields;
+}
+add_filter( 'woocommerce_checkout_fields', 'km_customize_checkout_fields' );

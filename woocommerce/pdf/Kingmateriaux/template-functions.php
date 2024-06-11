@@ -59,3 +59,12 @@ function km_get_invoice_subtotal_data( $order, $ecotaxe_qty ) {
 		'total_ttc'         => $total_ttc,
 	);
 }
+
+function km_get_company_meta( $order, $meta_key ) {
+	$user_id = $order->get_user_id();
+
+	if ( ! $user_id ) {
+		return '';
+	}
+	return get_user_meta( $user_id, $meta_key, true );
+}

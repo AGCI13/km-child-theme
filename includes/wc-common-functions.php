@@ -5,18 +5,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Affiche la page de connexion si l'utilisateur n'est pas connecté.
+ * Add taxo to pages
  */
-function km_redirect_to_login_if_not_logged_in() {
-	// Vérifie si l'utilisateur n'est pas connecté et tente d'accéder à "mon-compte" mais pas à "mot-passe-perdu".
-	if ( ! is_user_logged_in() && strpos( $_SERVER['REQUEST_URI'], 'mon-compte' ) !== false
-	&& strpos( $_SERVER['REQUEST_URI'], 'mon-compte/mot-passe-perdu' ) === false ) {
-		wp_safe_redirect( site_url( '/se-connecter/' ) );
-		exit;
-	}
+function km_pages_taxo() {
+	register_taxonomy(
+		'page-type',
+		'page',
+		array(
+			'label'             => __( 'Type de page' ),
+			'rewrite'           => array( 'slug' => 'page-type' ),
+			'hierarchical'      => true,
+			'show_admin_column' => true,
+		)
+	);
 }
-add_action( 'template_redirect', 'km_redirect_to_login_if_not_logged_in' );
+add_action( 'init', 'km_pages_taxo' );
 
+// Fonction personnalisée pour remplacer le tiret par "à"
+function custom_wc_format_price_range( $price, $from, $to ) {
+	$price = sprintf( _x( '%1$s <span class="price-range-sep">à</span> %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from ) : $from, is_numeric( $to ) ? wc_price( $to ) : $to );
+	return $price;
+}
+
+// Ajouter le hook pour remplacer le format de la plage de prix
+add_filter( 'woocommerce_format_price_range', 'custom_wc_format_price_range', 10, 3 );
 
 /**
  *  Disable WooCommerce Admin New Order Notification

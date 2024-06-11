@@ -7,7 +7,6 @@
   border: none;
 }
 
-
 /* Single Produit */
 .single-product:not(.has-tonnage-calculator) .lien-calcul-tonnage {
   display: none;
@@ -22,10 +21,12 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
   width: fit-content;
 }
 
-.single-product .verified-review>img {
+.single-product .verified-review > img {
   width: 40px;
 }
 
@@ -33,7 +34,7 @@
   margin-left: 5px;
 }
 
-.single-product .verified-review .headerStars>div {
+.single-product .verified-review .headerStars > div {
   display: flex;
   align-items: center;
 }
@@ -50,14 +51,14 @@
   font-size: 30px !important;
   font-weight: 900 !important;
   line-height: 40px;
-  color: #4D4D4D;
+  color: #4d4d4d;
 }
 
 .single-product .single_variation_wrap .woocommerce-Price-amount.amount {
   font-size: 30px !important;
   font-weight: 900 !important;
   line-height: 40px;
-  color: #4D4D4D;
+  color: #4d4d4d;
 }
 
 .single-product .elementor-widget-woocommerce-product-price .price {
@@ -66,7 +67,7 @@
 
 .single-product .km-product-ecotaxe {
   font-size: 13px;
-  color: #4D4D4D;
+  color: #4d4d4d;
   margin-bottom: 10px;
   font-style: italic;
   font-weight: 400;
@@ -79,7 +80,7 @@
 }
 
 .single-product .product .header_postcode p {
-  color: #4D4D4D;
+  color: #4d4d4d;
   font-family: Lato;
   font-weight: 400;
   font-size: 16px;
@@ -99,22 +100,27 @@
   border-right: inherit;
 }
 
-.single-product .informations-livraison .elementor-accordion-item .elementor-tab-content {
+.single-product
+  .informations-livraison
+  .elementor-accordion-item
+  .elementor-tab-content {
   border: inherit;
 }
 
 .single-product table.variations a.reset_variations {
-  color: #BE9D68;
+  color: #be9d68;
 }
 
 .single-product .woocommerce-variation-add-to-cart .quantity .qty,
 .woocommerce div.product.elementor .quantity .qty {
-  width: 70px;
-  padding: .5rem;
+  width: 62px;
+  padding: 0.5rem;
 }
 
-.single-product .woocommerce-variation-add-to-cart button[type="submit"].single_add_to_cart_button {
-  background-color: #BE9D68 !important;
+.single-product
+  .woocommerce-variation-add-to-cart
+  button[type="submit"].single_add_to_cart_button {
+  background-color: #be9d68 !important;
 }
 
 .single-product .produits-similaires form.woocommerce-ordering select {
@@ -136,7 +142,7 @@
 }
 
 .single-product .elementor-widget-theme-post-content a {
-  color: #BE9D68;
+  color: #be9d68;
 }
 
 .single-product .tonnage-calculator-wrapper {
@@ -149,8 +155,8 @@
   padding: 60px 0px 60px 0px;
 }
 
-.single-product  .woocommerce-variation-price .km-include-shipping{
-  margin-bottom:15px;
+.single-product .woocommerce-variation-price .km-include-shipping {
+  margin-bottom: 15px;
 }
 
 /*Badge Avis vérifiés */
@@ -158,4 +164,79 @@
   #c840c452-4bc7-434b-a8ae-65de371acd17 {
     display: none;
   }
+}
+/* Masquer les flèches des inputs de type number */
+.quantity input[type="number"]::-webkit-inner-spin-button,
+.quantity input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantity input[type="number"] {
+  -moz-appearance: textfield;
+  border-radius: 0;
+  margin-left: 0;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+}
+
+.qty-modifier {
+  width: 32px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  justify-content: stretch;
+  max-height: 100%;
+  align-items: center;
+  padding: 10px;
+  border-radius: 3px;
+  transition: all 0.2s ease-in-out;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.qty-modifier:hover {
+  background: #f7f7f7;
+}
+
+.qty-modifier,
+.quantity input[type="number"] {
+  border: 1px solid #939393;
+  margin: none !important;
+}
+
+.qty-modifier.minus {
+  border-radius: 3px 0 0 3px;
+  border-right: transparent;
+  font-size: 30px;
+  padding-bottom: 12px;
+}
+.qty-modifier.plus {
+  border-radius: 0 3px 3px 0;
+  border-left: transparent;
+  padding: 9px;
+  font-size: 22px;
+}
+
+.qty-modifier:hover {
+  background: #f1f1f1;
+}
+
+.qty-modifier img {
+  width: 100%;
+}
+
+.input-text.qty {
+  border: 1px solid #ddd;
+  margin: 0 5px;
+  text-align: center;
+  width: 50px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 3px;
 }

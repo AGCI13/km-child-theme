@@ -12,16 +12,37 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function km_change_cart_totals_text( $translated_text, $text, $domain ) {
-	if ( ! is_cart() ) {
+	if ( ! ( is_cart() || is_checkout() ) ) {
 		return $translated_text;
 	}
 
-	if ( km_is_shipping_zone_in_thirteen() && is_cart() && 'Total' === $text ) {
-		$translated_text = 'Total hors livraison';
+	if ( 'Total' === $text ) {
+		$translated_text = 'Total TTC hors livraison';
 	}
 	return $translated_text;
 }
 add_filter( 'gettext', 'km_change_cart_totals_text', 20, 3 );
+
+
+/**
+ * Change le label Sous Total dans le récapitulatif panier
+ *
+ * @param string $translated_text
+ * @param string $text
+ * @param string $domain
+ * @return string
+ */
+function km_change_cart_subtotals_text( $translated_text, $text, $domain ) {
+	if ( ! ( is_cart() || is_checkout() ) ) {
+		return $translated_text;
+	}
+
+	if ( in_array( $text, array( 'Sous-total', 'Subtotal' ) ) ) {
+		$translated_text = 'Sous-total HT';
+	}
+	return $translated_text;
+}
+add_filter( 'gettext', 'km_change_cart_subtotals_text', 25, 3 );
 
 /**
  * Supprime le calcul des frais de livraison du panier contient
@@ -136,7 +157,7 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 	$new_price_html .= $price_html;
 
 	if ( $cart_item['_has_ecotax'] ) {
-		$ecotax_amount = 'subtotal' === $context ? km_get_ecotaxe_rate( true ) * $cart_item['quantity'] : km_get_ecotaxe_rate( true );
+		$ecotax_amount = 'subtotal' === $context ? km_get_ecotaxe_rate() * $cart_item['quantity'] : km_get_ecotaxe_rate();
 
 		$new_price_html .= '<br><small class="ecotaxe-amount">'
 		. sprintf( __( 'Dont %s d\'Ecotaxe', 'kingmateriaux' ), wc_price( $ecotax_amount ) )

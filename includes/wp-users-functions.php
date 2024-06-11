@@ -41,3 +41,43 @@ function km_save_custom_user_profile_fields( $user_id ) {
 
 add_action( 'personal_options_update', 'km_save_custom_user_profile_fields' );
 add_action( 'edit_user_profile_update', 'km_save_custom_user_profile_fields' );
+
+
+// Afficher le champ TVA dans la page de profil des utilisateurs
+add_action( 'show_user_profile', 'show_tva_field' );
+add_action( 'edit_user_profile', 'show_tva_field' );
+
+function show_tva_field( $user ) {
+	?>
+	<h3><?php _e( 'Informations entreprise', 'uael' ); ?></h3>
+
+	<table class="form-table">
+		<tr>
+			<th><label for="tva"><?php _e( 'Numéro de TVA' ); ?></label></th>
+			<td>
+				<input type="text" name="_vat_number" id="tva" value="<?php echo esc_attr( get_the_author_meta( '_vat_number', $user->ID ) ); ?>" class="regular-text" /><br />
+			</td>
+		</tr>
+		<tr>
+			<th><label for="siret"><?php _e( 'Numéro de Siret' ); ?></label></th>
+			<td>
+				<input type="text" name="_siret" id="siret" value="<?php echo esc_attr( get_the_author_meta( '_siret', $user->ID ) ); ?>" class="regular-text" /><br />
+			</td>
+		</tr>
+	</table>
+	<?php
+}
+
+// Sauvegarder le champ TVA lorsqu'un profil utilisateur est mis à jour
+add_action( 'personal_options_update', 'save_tva_field_profile' );
+add_action( 'edit_user_profile_update', 'save_tva_field_profile' );
+
+function save_tva_field_profile( $user_id ) {
+	if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		return false;
+	}
+
+	// Sauvegarder le champ TVA
+	update_user_meta( $user_id, '_vat_number', sanitize_text_field( $_POST['_vat_number'] ) );
+	update_user_meta( $user_id, '_siret', sanitize_text_field( $_POST['_siret'] ) );
+}

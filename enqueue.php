@@ -70,6 +70,8 @@ function km_front_scripts_enqueue() {
 
 	if ( is_product() ) {
 		wp_enqueue_style( 'km-product-single-style', $css_uri . 'product-single.min.css', array(), filemtime( $css_path . 'product-single.min.css' ), 'all' );
+		wp_enqueue_script( 'km-product-single-script', $js_uri . 'product-single.min.js', array(), filemtime( $js_path . 'product-single.min.js' ), true );
+
 	}
 
 	wp_register_script(

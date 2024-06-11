@@ -51,6 +51,15 @@
 			<?php if ( isset( $this->settings['display_phone'] ) ) : ?>
 				<div class="billing-phone"><?php $this->billing_phone(); ?></div>
 			<?php endif; ?>
+			
+			<?php if ( ! empty( km_get_company_meta( $this->order, '_siret' ) ) ) : ?>
+				<div class="siret">N° SIRET : <?php echo km_get_company_meta( $this->order, '_siret' ); ?></div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( km_get_company_meta( $this->order, '_vat_number' ) ) ) : ?>
+				<div class="vat-number">N° TVA : <?php echo km_get_company_meta( $this->order, '_vat_number' ); ?></div>
+			<?php endif; ?>
+
 		</td>
 		<td class="address shipping-address">
 			<?php if ( $this->show_shipping_address() ) : ?>

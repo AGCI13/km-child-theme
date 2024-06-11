@@ -57,6 +57,7 @@ if ( ! function_exists( 'setup_kingmateriaux_theme' ) ) {
 		require_once 'enqueue.php';
 
 		require_once 'widgets/register-widgets.php';
+		require_once 'includes/routing-functions.php';
 
 		require_once 'includes/marketing-ops-functions.php';
 
@@ -79,9 +80,6 @@ add_action(
 
 		require_once 'includes/class-singleton-trait.php';
 		require_once 'includes/class-dynamic-pricing.php';
-		// error_log( __FILE__ . ' : ' . var_export( 'CALLED includes/class-dynamic-pricing.php', true ) );
-		// // Error log server request
-		// error_log( __FILE__ . ' : ' . var_export( $_SERVER['REQUEST_URI'], true ) );
 		require_once 'includes/class-shipping-zone.php';
 		require_once 'includes/class-shipping-delays.php';
 		require_once 'includes/class-order-processing.php';
@@ -117,3 +115,9 @@ add_action(
 	}
 );
 
+add_action(
+	'acf/init',
+	function () {
+		require_once 'elementor/elementor-functions.php';
+	}
+);

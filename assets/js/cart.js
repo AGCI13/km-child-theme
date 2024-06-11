@@ -27,7 +27,7 @@ const numberInputPlusMinus = () => {
         // Création du bouton "-"
         const minusButton = document.createElement('span');
         minusButton.classList.add('qty-modifier', 'minus');
-        minusButton.innerHTML = `<img src="${themeObject.themeUrl + '/assets/img/minus.svg'}" alt="Moins">`;
+        minusButton.innerHTML = `-`;
         minusButton.onclick = () => {
             input.value = Math.max(0, input.value - 1);
             triggerChangeEvent(input);
@@ -36,7 +36,7 @@ const numberInputPlusMinus = () => {
         // Création du bouton "+"
         const plusButton = document.createElement('span');
         plusButton.classList.add('qty-modifier', 'plus');
-        plusButton.innerHTML = `<img src="${themeObject.themeUrl + '/assets/img/plus.svg'}" alt="Plus">`;
+        plusButton.innerHTML = `+`;
         plusButton.onclick = () => {
             input.value = parseInt(input.value) + 1;
             triggerChangeEvent(input);

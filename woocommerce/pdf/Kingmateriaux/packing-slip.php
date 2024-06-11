@@ -61,6 +61,14 @@
 				<?php if ( isset( $this->settings['display_phone'] ) && ! empty( $this->get_billing_phone() ) ) : ?>
 					<div class="billing-phone"><?php $this->billing_phone(); ?></div>
 				<?php endif; ?>
+
+				<?php if ( ! empty( km_get_company_meta( $this->order, '_siret' ) ) ) : ?>
+				<div class="siret">N° SIRET : <?php echo km_get_company_meta( $this->order, '_siret' ); ?></div>
+				<?php endif; ?>
+
+				<?php if ( ! empty( km_get_company_meta( $this->order, '_vat_number' ) ) ) : ?>
+				<div class="vat-number">N° TVA : <?php echo km_get_company_meta( $this->order, '_vat_number' ); ?></div>
+			<?php endif; ?>
 			<?php endif; ?>
 		</td>
 		<td class="order-data">

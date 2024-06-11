@@ -36,6 +36,7 @@ class KM_Shipping_Methods {
 	public function register() {
 		add_filter( 'woocommerce_shipping_methods', array( $this, 'add_shipping_methods' ), 10, 1 );
 		add_filter( 'woocommerce_package_rates', array( $this, 'filter_shipping_methods' ), 99, 2 );
+		add_filter( 'woocommerce_cart_shipping_method_full_label', array( $this, 'add_ht_to_shipping_method_label' ), 10, 2 );
 	}
 
 	/**
@@ -275,5 +276,21 @@ class KM_Shipping_Methods {
 		}
 
 		return $rates;
+	}
+
+	/**
+	 * Ajoute "HT" après le prix d'une méthode de livraison si elle a un coût.
+	 *
+	 * @param string             $label Le label complet de la méthode de livraison.
+	 * @param WC_Shipping_Method $method L'objet méthode de livraison.
+	 * @return string Le label modifié.
+	 */
+	function add_ht_to_shipping_method_label( $label, $method ) {
+		// Vérifie si la méthode de livraison a un coût
+		if ( $method->cost > 0 ) {
+			// Ajoute " HT" après le prix
+			$label .= ' HT';
+		}
+		return $label;
 	}
 }

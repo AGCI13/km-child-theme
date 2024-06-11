@@ -67,7 +67,7 @@ class KM_Dynamic_Pricing {
 	 * Constructeur privé pour empêcher l'instantiation directe.
 	 */
 	private function __construct() {
-		$this->ecotaxe_info_html          = sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE_INCL_TAXES ) );
+		$this->ecotaxe_info_html          = sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) );
 		$this->include_shipping_html      = self::INCLUDE_SHIPPING_HTML;
 		$this->quantity_discount_msg_html = self::QUANTITY_DISCOUNT_MSG_HTML;
 		$this->is_in_thirteen             = km_is_shipping_zone_in_thirteen();
@@ -194,6 +194,12 @@ class KM_Dynamic_Pricing {
 			return $variation_data;
 		}
 
+		// Ajouter les prix HT et TTC.
+		$price_ht  = wc_get_price_excluding_tax( $variation );
+		$price_ttc = wc_get_price_including_tax( $variation );
+
+		$variation_data['price_html'] = sprintf( '<span class="price-ht">%s HT</span> / <span class="price-ttc">%s TTC</span>', wc_price( $price_ht ), wc_price( $price_ttc ) );
+
 		$this->maybe_add_ecotax_to_variation( $variation_data, $product, $variation );
 
 		return $variation_data;
@@ -216,8 +222,8 @@ class KM_Dynamic_Pricing {
 			$variation_price                 = wc_get_price_to_display( $variation );
 			$variation_data['display_price'] = $variation_price + self::ECOTAXE_RATE;
 
-			if ( strpos( $variation_data['price_html'], sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE_INCL_TAXES ) ) ) === false ) {
-				$variation_data['price_html'] .= sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE_INCL_TAXES ) );
+			if ( strpos( $variation_data['price_html'], sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) ) ) === false ) {
+				$variation_data['price_html'] .= sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) );
 			}
 		}
 	}
@@ -315,10 +321,19 @@ class KM_Dynamic_Pricing {
 	 * @param bool       $force_recalc Indique si le recalcul est forcé.
 	 * @return float Le prix calculé du produit.
 	 */
-	public function change_product_price_based_on_shipping_zone( $price, $product, $zone_id = null ) {
+	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null, $force_recalc = false ) {
+		if ( is_null( $zone_id ) ) {
+			$zone_id = $this->current_shipping_zone_id;
+		}
 
-		if ( $this->product_has_ecotax_meta( $product ) ) {
-				$price += $this->ecotaxe_rate;
+		$cache_key = $product->get_id() . '_' . $zone_id;
+
+		if ( isset( $_GET['force-recalc'] ) ) {
+			$force_recalc = true;
+		}
+
+		if ( ( true !== $force_recalc || true === empty( $product->get_meta( '_atoonext_sync', true ) ) ) && true === isset( $this->calculated_prices[ $cache_key ] ) ) {
+			return $this->calculated_prices[ $cache_key ];
 		}
 
 		if ( true === ! empty( $product->get_meta( 'is_free_product' ) ) ) {
@@ -350,7 +365,7 @@ class KM_Dynamic_Pricing {
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
-			if ( is_numeric( $shipping_price ) && $shipping_price >= 1 ) {
+			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
 			}
 		}
@@ -493,7 +508,7 @@ class KM_Dynamic_Pricing {
 			return $price;
 		}
 
-		if ( ! $product->get_meta( '_atoonext_sync', true ) && $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true ) ) {
+		if ( ! ( $product->get_meta( '_atoonext_sync', true ) || isset( $_GET['force-recalc'] ) ) && $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true ) ) {
 			return $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true );
 		}
 
@@ -503,7 +518,7 @@ class KM_Dynamic_Pricing {
 			$variation_obj = wc_get_product( $variation['variation_id'] );
 
 			if ( $variation_obj->is_purchasable() && ! $this->is_variation_disabled( $product, $variation_obj ) ) {
-				$prices[] = wc_get_price_including_tax( $variation_obj );
+				$prices[] = wc_get_price_excluding_tax( $variation_obj );
 
 				$variation_ecotaxe = $variation_obj->get_meta( '_has_ecotax' );
 				if ( 'yes' === $variation_ecotaxe || ( 'no' !== $variation_ecotaxe && $parent_ecotaxe ) ) {
@@ -516,7 +531,8 @@ class KM_Dynamic_Pricing {
 			$min_price = min( $prices );
 			$max_price = max( $prices );
 
-			$price = ( $min_price === $max_price ) ? wc_price( $min_price ) : wc_format_price_range( $min_price, $max_price );
+			$price  = ( $min_price === $max_price ) ? wc_price( $min_price ) : wc_format_price_range( $min_price, $max_price );
+			$price .= '<span class="tax-info"> HT</span>';
 
 			if ( $has_ecotaxe ) {
 				if ( strpos( $price, $this->ecotaxe_info_html ) === false ) {
@@ -552,7 +568,7 @@ class KM_Dynamic_Pricing {
 
 		foreach ( $items as $item ) {
 			if ( true === $item['_has_ecotax'] ) {
-				$total_ecotaxe += self::ECOTAXE_RATE_INCL_TAXES * $item['quantity'];
+				$total_ecotaxe += self::ECOTAXE_RATE * $item['quantity'];
 			}
 		}
 		return $total_ecotaxe;

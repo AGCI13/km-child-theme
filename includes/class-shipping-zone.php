@@ -91,6 +91,8 @@ class KM_Shipping_Zone {
 	}
 
 	private function get_shipping_zone_id() {
+		$shipping_zone_id = null;
+
 		if ( ! $this->shipping_zone_id ) {
 			$shipping_zone_id = $this->maybe_get_zone_url_id();
 		}
@@ -392,8 +394,8 @@ class KM_Shipping_Zone {
 						break 2; // Break out of both foreach loops.
 					}
 				} elseif ( $postcode === $location->code ) {
-						$found_zone = $zone_data['id'];
-						break 2;
+					$found_zone = $zone_data['id'];
+					break 2;
 				}
 			}
 		}
@@ -497,7 +499,24 @@ class KM_Shipping_Zone {
 	 */
 	public function modal_postcode_html() {
 
-		$active = '';
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		$terms      = array();
+		$term_array = get_the_terms( $page_id, 'page-type' );
+
+		if ( ! empty( $term_array ) && is_array( $term_array ) ) {
+			foreach ( $term_array as $term ) {
+				$terms[] = $term->slug;
+			}
+		}
+
+		if ( in_array( 'public', $terms, true ) || in_array( 'auth', $terms, true ) ) {
+			return;
+		}
+
+			$active = '';
 		if ( ! $this->shipping_zone_id && ( is_home() || is_front_page() || is_product() || is_product_category() ) ) {
 			$active = 'active';
 		}
