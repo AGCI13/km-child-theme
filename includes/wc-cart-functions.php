@@ -141,16 +141,15 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 
 	if ( $big_bag_quantity > 1 && km_is_big_bag_price_decreasing_zone() && ( km_is_big_bag( $product_id ) ||
 		km_is_big_bag_and_slab( $product_id ) ) ) {
-			$product                = wc_get_product( $product_id );
-			$initial_price          = $product->get_price();
-			$initial_price_incl_tax = wc_get_price_including_tax( $product, array( 'price' => $initial_price ) );
+			$product       = wc_get_product( $product_id );
+			$initial_price = $product->get_price();
 
-		if ( 'subtotal' === $context && is_float( $initial_price_incl_tax ) && $initial_price_incl_tax > 0 ) {
-			$initial_price_incl_tax *= $cart_item['quantity'];
+		if ( 'subtotal' === $context && is_float( $initial_price ) && $initial_price > 0 ) {
+			$initial_price *= $cart_item['quantity'];
 		}
 
 			$new_price_html .= '<del>'
-			. wc_price( $initial_price_incl_tax )
+			. wc_price( $initial_price )
 			. '</del> ';
 	}
 
@@ -236,7 +235,7 @@ add_action( 'woocommerce_cart_contents', 'km_shipping_delays_jo_message', 70 );
  */
 function km_cart_big_bag_discount_info_html() {
 
-	if ( ! km_has_item_with_decreasing_shipping_price_in_cart() ) {
+	if ( ! km_is_big_bag_price_decreasing_zone() ) {
 		return;
 	}
 	?>
@@ -250,53 +249,53 @@ function km_cart_big_bag_discount_info_html() {
 	</tr>
 	<?php
 }
-add_action( 'woocommerce_cart_contents', 'km_cart_big_bag_discount_info_html', 70 );
+	add_action( 'woocommerce_cart_contents', 'km_cart_big_bag_discount_info_html', 70 );
 
-/**
- * Affiche les informations relatives à l'éco-taxe sous le panier
- *
- * @return void
- */
+	/**
+	 * Affiche les informations relatives à l'éco-taxe sous le panier
+	 *
+	 * @return void
+	 */
 function km_cart_ecotaxe_info_html() {
 	?>
 	<tr class="km-cart-info-row">
 		<td colspan="100%">
 			<div class="km-cart-info-wrapper km-ecotaxe-message">	
 				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/ecotaxe.png' ); ?>" alt="icone ecotax">
-				<?php esc_html_e( "L'Écotaxe s'applique pour contribuer à limiter, atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
+			<?php esc_html_e( "L'Écotaxe s'applique pour contribuer à limiter, atténuer ou réparer certains effets d’actions générant des détériorations environnementales.", 'kingmateriaux' ); ?>
 			</div>
 		</td>
 	</tr>
-	<?php
+		<?php
 }
-add_action( 'woocommerce_cart_contents', 'km_cart_ecotaxe_info_html', 80 );
+	add_action( 'woocommerce_cart_contents', 'km_cart_ecotaxe_info_html', 80 );
 
-/**
- * Affiche les informations de livraison sous le panier
- *
- * @return void
- */
+	/**
+	 * Affiche les informations de livraison sous le panier
+	 *
+	 * @return void
+	 */
 function km_cart_shipping_delays_info() {
 	?>
 	<tr class="km-cart-info-row">
 		<td colspan="100%" class="km-cart-info-row">
 			<div class="km-cart-info-wrapper km-shipping-delay-message">    
 				<img src="<?php echo esc_html( get_stylesheet_directory_uri() . '/assets/img/icon-camion-livraison.png' ); ?>" alt="camion-livraison">
-				<?php echo esc_html( km_get_shipping_dates() ); ?>
+			<?php echo esc_html( km_get_shipping_dates() ); ?>
 			</div>
 		</td>
 	</tr>
-	<?php
+		<?php
 }
-add_action( 'woocommerce_cart_contents', 'km_cart_shipping_delays_info', 90 );
+	add_action( 'woocommerce_cart_contents', 'km_cart_shipping_delays_info', 90 );
 
 
-/**
- * Ajoute le montant de l'éco-taxe au total de la commande
- *
- * @param string $html Le HTML du total d'ecotaxe de la commande.
- * @return string
- */
+	/**
+	 * Ajoute le montant de l'éco-taxe au total de la commande
+	 *
+	 * @param string $html Le HTML du total d'ecotaxe de la commande.
+	 * @return string
+	 */
 function km_add_ecotax_to_order_total_html( $html ) {
 
 	$total_ecotaxe = km_get_total_ecotaxe();
@@ -308,16 +307,16 @@ function km_add_ecotax_to_order_total_html( $html ) {
 	$ecotax_text = sprintf( __( 'et %s d\'Écotaxe', 'kingmateriaux' ), wc_price( $total_ecotaxe ) );
 	return str_replace( 'tva)', 'TVA ' . $ecotax_text . ')', $html );
 }
-add_filter( 'woocommerce_cart_totals_order_total_html', 'km_add_ecotax_to_order_total_html', 10, 1 );
+	add_filter( 'woocommerce_cart_totals_order_total_html', 'km_add_ecotax_to_order_total_html', 10, 1 );
 
-/**
- *  --------------- END ECO-TAX ----------------------
- */
+	/**
+	 *  --------------- END ECO-TAX ----------------------
+	 */
 
 
-/**
- * --------------- START RECAP ----------------------
- */
+	/**
+	 * --------------- START RECAP ----------------------
+	 */
 function km_display_shipping_info_text() {
 	if ( is_admin() || ! is_a( WC()->cart, 'WC_Cart' ) ) {
 		return;
@@ -330,18 +329,18 @@ function km_display_shipping_info_text() {
 	<tr class="shipping-info">
 		<th><?php esc_html_e( 'Expédition', 'kingmateriaux' ); ?></th>
 		<td data-title="<?php esc_html_e( 'Expédition', 'kingmateriaux' ); ?>">
-			<?php echo km_get_shipping_info_text(); ?>
+		<?php echo km_get_shipping_info_text(); ?>
 		</td>
 	</tr>
-	<?php
-	do_action( 'km_after_checkout_shipping' );
+		<?php
+		do_action( 'km_after_checkout_shipping' );
 }
 
-/**
- * Retourne le texte à afficher pour les informations de livraison
- *
- * @return string
- */
+	/**
+	 * Retourne le texte à afficher pour les informations de livraison
+	 *
+	 * @return string
+	 */
 function km_get_shipping_info_text() {
 	if ( km_is_shipping_zone_in_thirteen() ) {
 		$shipping_text = __( 'Calcul à l\'étape suivante', 'kingmateriaux' );
@@ -357,19 +356,19 @@ function km_get_shipping_info_text() {
 	return $shipping_text;
 }
 
-add_filter( 'woocommerce_cart_totals_before_order_total', 'km_display_shipping_info_text', 80 );
+	add_filter( 'woocommerce_cart_totals_before_order_total', 'km_display_shipping_info_text', 80 );
 
 
-/**
- * Ajoute le champ de saisie du code promo après le total de la commande
- *
- * @return void
- */
-/**
- * Ajoute le champ de saisie du code promo après le total de la commande
- *
- * @return void
- */
+	/**
+	 * Ajoute le champ de saisie du code promo après le total de la commande
+	 *
+	 * @return void
+	 */
+	/**
+	 * Ajoute le champ de saisie du code promo après le total de la commande
+	 *
+	 * @return void
+	 */
 function km_add_redeem_coupon_in_cart_totals() {
 	if ( is_admin() || ! is_cart() ) {
 		return;
@@ -386,34 +385,34 @@ function km_add_redeem_coupon_in_cart_totals() {
 			</form>
 		</td>
 	</tr>
-	<?php
+		<?php
 }
-add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_in_cart_totals', 50 );
+	add_action( 'woocommerce_cart_totals_before_order_total', 'km_add_redeem_coupon_in_cart_totals', 50 );
 
-/**
- * Ajoute le champ de saisie du code promo après le total de la commande
- *
- * @param array  $cart_item The cart item data.
- * @param string $cart_item_key The cart item key.
- * @return void
- */
+	/**
+	 * Ajoute le champ de saisie du code promo après le total de la commande
+	 *
+	 * @param array  $cart_item The cart item data.
+	 * @param string $cart_item_key The cart item key.
+	 * @return void
+	 */
 function km_add_pallet_description_under_product_name( $cart_item, $cart_item_key ) {
 	$product_name = $cart_item['data']->get_name();
 	if ( strpos( $product_name, 'Palette' ) !== false ) {
 		echo '<small class="cart-item-meta">' . esc_html__( '⚠ Les palettes de parpaings sont consignées au prix de 28,80 € TTC la palette. Nous vous invitons à retourner la ou les palettes dans nos locaux, nous vous rembourserons 20,40 € TTC par palette. ⚠', 'kingmateriaux' ) . '</small>';
 	}
 }
-add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
+	add_action( 'woocommerce_after_cart_item_name', 'km_add_pallet_description_under_product_name', 10, 2 );
 
 
-/**
- * Vérifie le poids du panier avant d'ajouter un produit
- *
- * @param bool $passed
- * @param int  $product_id
- * @param int  $quantity
- * @return bool
- */
+	/**
+	 * Vérifie le poids du panier avant d'ajouter un produit
+	 *
+	 * @param bool $passed
+	 * @param int  $product_id
+	 * @param int  $quantity
+	 * @return bool
+	 */
 function km_check_cart_weight_before_adding( $passed, $product_id, $quantity ) {
 	$max_weight     = 59999; // Le poids maximum du panier en kg.
 	$product        = wc_get_product( $product_id );
@@ -431,16 +430,16 @@ function km_check_cart_weight_before_adding( $passed, $product_id, $quantity ) {
 
 	return $passed;
 }
-add_filter( 'woocommerce_add_to_cart_validation', 'km_check_cart_weight_before_adding', 10, 3 );
+	add_filter( 'woocommerce_add_to_cart_validation', 'km_check_cart_weight_before_adding', 10, 3 );
 
-/**
- * Ajoute ecotaxe au produit dans le panier
- *
- * @param array $cart_item_data
- * @param int   $product_id
- * @param int   $variation_id
- * @return array
- */
+	/**
+	 * Ajoute ecotaxe au produit dans le panier
+	 *
+	 * @param array $cart_item_data
+	 * @param int   $product_id
+	 * @param int   $variation_id
+	 * @return array
+	 */
 function km_add_ecotax_to_cart_item( $cart_item_data, $product_id, $variation_id ) {
 
 	$has_ecotax = get_post_meta( $product_id, '_has_ecotax', true );
@@ -455,14 +454,14 @@ function km_add_ecotax_to_cart_item( $cart_item_data, $product_id, $variation_id
 
 	return $cart_item_data;
 }
-add_filter( 'woocommerce_add_cart_item_data', 'km_add_ecotax_to_cart_item', 10, 3 );
+	add_filter( 'woocommerce_add_cart_item_data', 'km_add_ecotax_to_cart_item', 10, 3 );
 
-/**
- * Gère le cas ou un produit est gratuit
- *
- * @param WC_Cart $cart
- * @return void
- */
+	/**
+	 * Gère le cas ou un produit est gratuit
+	 *
+	 * @param WC_Cart $cart
+	 * @return void
+	 */
 function km_manage_cart_free_product_price( $cart ) {
 	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 		return;
@@ -473,11 +472,12 @@ function km_manage_cart_free_product_price( $cart ) {
 	}
 
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-		if ( 'Free' === $cart_item['wdr_free_product'] ) {
+
+		if ( ! empty( $cart_item['wdr_free_product'] ) && 'Free' === $cart_item['wdr_free_product'] ) {
 			$cart_item['data']->set_price( 0 );
 			$cart_item['data']->update_meta_data( 'is_free_product', true );
 			$cart_item['data']->save();
 		}
 	}
 }
-add_action( 'woocommerce_before_calculate_totals', 'km_manage_cart_free_product_price', 20, 1 );
+	add_action( 'woocommerce_before_calculate_totals', 'km_manage_cart_free_product_price', 20, 1 );

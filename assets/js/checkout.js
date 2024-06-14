@@ -244,7 +244,8 @@ jQuery(document).ready(function ($) {
             '#' + type + '_postcode_field',
             '#' + type + '_country_field',
             '#' + type + '_phone_field',
-            '#' + type + '_email_field'
+            '#' + type + '_email_field',
+            '#' + type + '_company_field'
         ];
 
         fields.forEach(field => {
@@ -284,7 +285,6 @@ jQuery(document).ready(function ($) {
     }
 
     const copyShippingAddressToBillingAdress = () => {
-
         const shippingFirstName = document.querySelector('#shipping_first_name');
         const billingFirstName = document.querySelector('#billing_first_name');
         const shippingLastName = document.querySelector('#shipping_last_name');
@@ -299,6 +299,8 @@ jQuery(document).ready(function ($) {
         const billingPostcode = document.querySelector('#billing_postcode');
         const shippingCountry = document.querySelector('#shipping_country');
         const billingCountry = document.querySelector('#billing_country');
+        const shippingCompany = document.querySelector('#shipping_company'); // Ajout des champs company
+        const billingCompany = document.querySelector('#billing_company'); // Ajout des champs company
 
         const selectedShippingMethod = document.querySelector('.woocommerce-shipping-methods.selected');
 
@@ -321,6 +323,9 @@ jQuery(document).ready(function ($) {
             }
             if (billingCity && shippingCity && shippingCity.value === '') {
                 shippingCity.value = billingCity.value;
+            }
+            if (billingCompany && shippingCompany && shippingCompany.value === '') { // Ajout des champs company
+                shippingCompany.value = billingCompany.value; // Ajout des champs company
             }
         }
         else {
@@ -346,6 +351,9 @@ jQuery(document).ready(function ($) {
             }
             if (shippingCountry && billingCountry && billingCountry.value === '') {
                 billingCountry.value = shippingCountry.value;
+            }
+            if (shippingCompany && billingCompany && billingCompany.value === '') { // Ajout des champs company
+                billingCompany.value = shippingCompany.value; // Ajout des champs company
             }
         }
     }
@@ -375,7 +383,7 @@ jQuery(document).ready(function ($) {
             const setDriveTotalsInfo = () => {
                 if (!selectedDate || !selectedTime) return;
                 displayDatetimeElem.innerHTML = 'le ' + selectedDate + ' à ' + selectedTime;
-            }    
+            }
 
             const handleDayClick = (day) => {
                 setActiveClass(dayInputs, day);

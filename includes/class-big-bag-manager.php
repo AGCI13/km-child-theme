@@ -20,14 +20,6 @@ class KM_Big_Bag_Manager {
 	private $big_bag_decreasing_price_zone = array( 5, 6, 7 );
 
 	/**
-	 * The big bag slabs product IDs.
-	 *
-	 * @var array
-	 */
-	private $big_bag_slabs_ids = array( 96800, 96815 );
-
-
-	/**
 	 * The count of big bags in the cart.
 	 *
 	 * @var int
@@ -186,23 +178,20 @@ class KM_Big_Bag_Manager {
 		if ( $product->is_type( 'variation' ) ) {
 			$product_id   = $product->get_parent_id();
 			$variation_id = $product->get_id();
+
+			$variation_type = get_field( '_product_type', $variation_id );
+			if ( ! empty( $variation_type ) && 'big_bag' === $variation_type ) {
+				return true;
+			}
 		} else {
 			$product_id = $product->get_id();
 		}
 
-		$variation_type = get_field( '_product_type', $variation_id );
-		if ( 'big_bag' === $variation_type ) {
-			return true;
-		}
-
 		$product_type = get_field( '_product_type', $product_id );
-		if ( 'big_bag' === $product_type ) {
+		if ( ! empty( $product_type ) && 'big_bag' === $product_type ) {
 			return true;
 		}
 
-		// if ( stripos( wc_get_product( $product_id )->get_name(), 'big bag' ) !== false && ! $this->is_big_bag_and_slab( $product ) ) {
-		// return true;
-		// }
 		return false;
 	}
 
@@ -219,22 +208,21 @@ class KM_Big_Bag_Manager {
 		if ( $product->is_type( 'variation' ) ) {
 			$product_id   = $product->get_parent_id();
 			$variation_id = $product->get_id();
+
+			$variation_type = get_field( '_product_type', $variation_id );
+			if ( ! empty( $variation_type ) && 'big_bag_and_slab' === $variation_type ) {
+				return true;
+			}
 		} else {
 			$product_id = $product->get_id();
 		}
 
-		$variation_type = get_field( '_product_type', $variation_id );
-		if ( 'big_bag_and_slab' === $variation_type ) {
-			return true;
-		}
-
 		$product_type = get_field( '_product_type', $product_id );
-		if ( 'big_bag_and_slab' === $product_type ) {
+		if ( ! empty( $product_type ) && 'big_bag_and_slab' === $product_type ) {
 			return true;
 		}
 
 		return false;
-		// return in_array( $product_id, $this->big_bag_slabs_ids, true );
 	}
 
 	/**

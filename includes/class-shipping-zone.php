@@ -504,7 +504,7 @@ class KM_Shipping_Zone {
 		}
 
 		$terms      = array();
-		$term_array = get_the_terms( $page_id, 'page-type' );
+		$term_array = get_the_terms( get_the_ID(), 'page-type' );
 
 		if ( ! empty( $term_array ) && is_array( $term_array ) ) {
 			foreach ( $term_array as $term ) {
