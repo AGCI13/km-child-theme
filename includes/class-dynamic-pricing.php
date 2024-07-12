@@ -321,32 +321,36 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix calculé du produit.
 	 */
 	public function get_product_price_based_on_shipping_zone( $price, $product, $zone_id = null, $force_recalc = false ) {
+
 		if ( is_null( $zone_id ) ) {
 			$zone_id = $this->current_shipping_zone_id;
 		}
 
-		$cache_key = $product->get_id() . '_' . $zone_id;
+		// $cache_key = $product->get_id() . '_' . $zone_id;
 
-		if ( isset( $_GET['force-recalc'] ) ) {
-			$force_recalc = true;
-		}
-		$force_recalc = true;
+		// if ( isset( $_GET['force-recalc'] ) ) {
+		// $force_recalc = true;
+		// }
+		// $force_recalc = true;
 
-		if ( ( true !== $force_recalc || true === empty( $product->get_meta( '_atoonext_sync', true ) ) ) && true === isset( $this->calculated_prices[ $cache_key ] ) ) {
-			return $this->calculated_prices[ $cache_key ];
-		}
-
-		if ( true === ! empty( $product->get_meta( 'is_free_product' ) ) ) {
+		if ( ! empty( $product->get_meta( 'is_free_product' ) ) ) {
 			return $price;
 		}
 
-		if ( true === did_action( 'woocommerce_before_calculate_totals' ) && true === km_is_big_bag_price_decreasing_zone( $zone_id ) && ( true === km_is_big_bag( $product ) || true === km_is_big_bag_and_slab( $product ) ) ) {
+		// // Si le recalcul n'est pas forcé et que le prix est déjà calculé
+		// if ( ! $force_recalc && isset( $this->calculated_prices[ $cache_key ] ) ) {
+		// return $this->calculated_prices[ $cache_key ];
+		// }
+
+		// Calcul du prix localisé.
+		if ( did_action( 'woocommerce_before_calculate_totals' ) && km_is_big_bag_price_decreasing_zone( $zone_id ) && ( km_is_big_bag( $product ) || km_is_big_bag_and_slab( $product ) ) ) {
 			$price = $this->calculate_localized_product_price( $price, $product, $zone_id, true );
-		} elseif ( ! empty( $product->get_meta( '_atoonext_sync', true ) ) || true === $force_recalc ) {
-			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
 		} else {
-			$price = $this->get_localized_product_price( $price, $product, $zone_id );
+			$price = $this->calculate_localized_product_price( $price, $product, $zone_id );
 		}
+
+		// $this->calculated_prices[ $cache_key ] = $price;
+
 		return $price;
 	}
 
@@ -360,14 +364,32 @@ class KM_Dynamic_Pricing {
 	 * @return float Le prix calculé du produit.
 	 */
 	private function calculate_localized_product_price( $price, $product, $zone_id, $is_big_bag = false ) {
+		if ( isset( $_GET['debug'] ) && $product->get_id() == $_GET['debug'] ) {
+			error_log( __FILE__ . ' : ' . 'Initial Price: ' . var_export( $price, true ) );
+		}
+
 		$shipping_product = $this->get_shipping_product( $product, $zone_id, $is_big_bag );
 		$price            = $this->add_ecotax_to_price( $price, $product );
+
+		if ( isset( $_GET['debug'] ) && $product->get_id() == $_GET['debug'] ) {
+			error_log( __FILE__ . ' : ' . 'Price after adding ecotax: ' . var_export( $price, true ) );
+		}
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
 
+			if ( isset( $_GET['debug'] ) && $product->get_id() == $_GET['debug'] ) {
+				error_log( __FILE__ . ' : ' . var_export( $shipping_product->get_id(), true ) );
+
+				error_log( __FILE__ . ' : ' . 'Shipping Product Price: ' . var_export( $shipping_price, true ) );
+			}
+
 			if ( is_numeric( $shipping_price ) ) {
 				$price += $shipping_price;
+			}
+
+			if ( isset( $_GET['debug'] ) && $product->get_id() == $_GET['debug'] ) {
+				error_log( __FILE__ . ' : ' . 'Price after adding shipping: ' . var_export( $price, true ) );
 			}
 		}
 
@@ -377,6 +399,7 @@ class KM_Dynamic_Pricing {
 
 		return $price;
 	}
+
 
 	/**
 	 * Ajoute éventuellement l'écotaxe au prix du produit.
@@ -462,13 +485,12 @@ class KM_Dynamic_Pricing {
 	 * @return string Le prix HTML avec le message d'inclusion de livraison.
 	 */
 	public function maybe_display_include_shipping_html( $price, $product ) {
-		if ( $product->is_type( 'simple' ) ) {
-			$meta_ecotax = $product->get_meta( '_has_ecotax' );
-			$has_ecotaxe = 'yes' === $meta_ecotax || '1' === $meta_ecotax;
 
-			if ( $has_ecotaxe && strpos( $price, sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) ) ) === false ) {
-				$price .= sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) );
-			}
+		$meta_ecotax = $product->get_meta( '_has_ecotax' );
+		$has_ecotaxe = 'yes' === $meta_ecotax || '1' === $meta_ecotax;
+
+		if ( $has_ecotaxe && strpos( $price, sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) ) ) === false ) {
+			$price .= sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE ) );
 		}
 
 		if ( ! km_is_shipping_zone_in_thirteen() && ! $product->is_type( 'variation' ) ) {
@@ -480,6 +502,7 @@ class KM_Dynamic_Pricing {
 		} elseif ( km_is_big_bag_price_decreasing_zone() && ( km_is_big_bag( $product ) || km_is_big_bag_and_slab( $product ) ) ) {
 			$price .= $this->quantity_discount_msg_html;
 		}
+
 		return $price;
 	}
 
@@ -518,11 +541,11 @@ class KM_Dynamic_Pricing {
 			return $price;
 		}
 
-		$_GET['force-recalc'] = true;
+		// $_GET['force-recalc'] = true;
 
-		if ( ! ( $product->get_meta( '_atoonext_sync', true ) || isset( $_GET['force-recalc'] ) ) && $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true ) ) {
-			return $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true );
-		}
+		// if ( ! ( $product->get_meta( '_atoonext_sync', true ) || isset( $_GET['force-recalc'] ) ) && $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true ) ) {
+		// return $product->get_meta( '_price_range_' . $this->current_shipping_zone_id, true );
+		// }
 
 		$parent_ecotaxe = $product->get_meta( '_has_ecotax' ) === 'yes' || $product->get_meta( '_has_ecotax' ) === '1';
 

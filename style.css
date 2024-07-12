@@ -5,3 +5,17 @@
  * Text Domain:	   kingmateriaux
  * Description:    Un thème conçu spécialement pour kingmateriaux.com
  */
+
+ button.wpforms-submit {
+    background-color: #be9d68 !important;
+     border-color: #be9d68 !important;
+     color: #ffffff !important;
+     box-shadow: unset !important;
+     border: 1px solid transparent !important;
+     background: unset !important;
+ }
+
+ button.wpforms-submit:hover {
+     background-color: #be9d68 !important;
+     color: #ffffff !important;
+ }
