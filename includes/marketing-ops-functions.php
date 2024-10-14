@@ -36,7 +36,7 @@ function km_handle_discount_newsletter_form( $record, $handler ) {
 		$name         = esc_html( $current_user->user_login );
 	}
 
-	km_send_data_to_cloudops( $name, $email, $opt, $source );
+	km_send_data_to_cloudops( $email, $opt, $source, $name );
 }
 add_action( 'elementor_pro/forms/new_record', 'km_handle_discount_newsletter_form', 10, 2 );
 
@@ -84,10 +84,10 @@ function km_handle_discount_cart_form() {
 	WC()->session->set( 'km_cart_discount_email', $email );
 
 	// Do the magic.
-	km_send_data_to_cloudops( $name, $email, $opt, $source );
+	km_send_data_to_cloudops( $email, $opt, $source, $name );
 
 	// Unset vars.
-	unset( $_POST['km_cart_discount_email'], $name, $email, $opt, $source );
+	unset( $_POST['km_cart_discount_email'], $email, $opt, $source, $name );
 
 	// Send success message.
 	wp_send_json_success( __( 'Votre email à bien été transmis. Vous allez recevoir votre code promo sur celui-ci.', 'kingmateriaux' ) );
@@ -108,11 +108,11 @@ function km_get_checkout_form_data() {
 	$opt    = $_POST['inscription_newsletter'] ? 'true' : 'false';
 	$source = 'order';
 
-	km_send_data_to_cloudops( $name, $email, $opt, $source );
+	km_send_data_to_cloudops( $email, $opt, $source, $name );
 }
 
 // REACH CLOUD OPS ENDPOINT WITH DATA AS URL PARAMS
-function km_send_data_to_cloudops( $name = '', $email, $opt, $source ) {
+function km_send_data_to_cloudops( $email, $opt, $source, $name = '' ) {
 
 	// Get current user id if user is connected, else leave empty
 	$user_id = get_current_user_id() ?: '';

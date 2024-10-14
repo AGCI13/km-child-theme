@@ -135,7 +135,7 @@ function km_change_cart_price_html( $price_html, $cart_item, $cart_item_key, $co
 
 	$new_price_html .= $price_html;
 
-	if ( $cart_item['_has_ecotax'] ) {
+	if ( ! empty( $cart_item['_has_ecotax'] ) ) {
 		$ecotax_amount = 'subtotal' === $context ? km_get_ecotaxe_rate( true ) * $cart_item['quantity'] : km_get_ecotaxe_rate( true );
 
 		$new_price_html .= '<br><small class="ecotaxe-amount">'
@@ -452,7 +452,7 @@ function km_manage_cart_free_product_price( $cart ) {
 	}
 
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-		if ( 'Free' === $cart_item['wdr_free_product'] ) {
+		if ( isset( $cart_item['wdr_free_product'] ) && 'Free' === $cart_item['wdr_free_product'] ) {
 			$cart_item['data']->set_price( 0 );
 			$cart_item['data']->update_meta_data( 'is_free_product', true );
 			$cart_item['data']->save();

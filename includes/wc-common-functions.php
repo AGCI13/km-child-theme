@@ -178,3 +178,29 @@ function km_maybe_show_email_banner_anniversary() {
 		<?php
 	}
 }
+
+function set_dynamic_home_banner( $post_id ) {
+	$zone_in_thirteen = km_is_shipping_zone_in_thirteen();
+
+	if ( $zone_in_thirteen ) {
+		$banner_id = get_field( 'banner_in_thirteen', 'option' );
+	} else {
+		$banner_id = get_field( 'banner_out_thirteen', 'option' );
+	}
+
+	if ( $banner_id ) {
+		set_post_thumbnail( $post_id, $banner_id );
+	}
+}
+
+add_action(
+	'template_redirect',
+	function () {
+		if ( ! is_page( 6 ) ) {
+			return;
+		}
+
+		$post_id = get_queried_object_id();
+		set_dynamic_home_banner( $post_id );
+	}
+);

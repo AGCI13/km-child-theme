@@ -5,47 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Handles dynamic pricing based on shipping zones and classes in WooCommerce.
- */
-function km_add_whishlist_endpoint() {
-	add_rewrite_endpoint( 'whishlist', EP_ROOT | EP_PAGES );
-}
-add_action( 'init', 'km_add_whishlist_endpoint' );
-
-/**
- * Adds the "Favoris" endpoint to the account menu.
- *
- * @param array $items The account menu items.
- * @return array The modified account menu items.
- */
-function km_add_whishlist_to_account_menu( $items ) {
-	$items['whishlist'] = __( 'Favoris', 'kingmateriaux' );
-	return $items;
-}
-add_filter( 'woocommerce_account_menu_items', 'km_add_whishlist_to_account_menu' );
-
-/**
- * Displays the content of the "Favoris" endpoint.
- */
-function km_whishlist_content() {
-	echo do_shortcode( '[yith_wcwl_wishlist]' );
-}
-add_action( 'woocommerce_account_whishlist_endpoint', 'km_whishlist_content' );
-
-
-/**
- * Adds the "whishlist" query variable.
- *
- * @param array $vars The query variables.
- * @return array The modified query variables.
- */
-function km_add_whishlist_query_var( $vars ) {
-	$vars[] = 'whishlist';
-	return $vars;
-}
-add_filter( 'query_vars', 'km_add_whishlist_query_var', 0 );
-
-/**
  * Ajoute l'endpoint "moyen_paiement".
  */
 function km_add_payment_methods_endpoint() {
@@ -80,7 +39,6 @@ function km_reorder_my_account_menu( $items ) {
 		// 'edit-address'    => __( 'Addresses', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		// 'payment-methods'  => __( 'Moyen de paiement', 'woocommerce' ),
-		'whishlist'       => __( 'Mes favoris', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
 	);
 
@@ -105,3 +63,31 @@ function custom_woocommerce_account_orders_columns( $columns ) {
 	return $new_order;
 }
 add_filter( 'woocommerce_account_orders_columns', 'custom_woocommerce_account_orders_columns', 100 );
+
+/**
+ * Ajoute le champ de date d'anniversaire au formulaire de modification du compte WooCommerce.
+ */
+function km_add_birthday_to_edit_account_form() {
+	$user_id  = get_current_user_id();
+	$birthday = get_user_meta( $user_id, 'birthday', true );
+	?>
+<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+    <label for="account_birthday"><?php esc_html_e( 'Date d\'anniversaire', 'woocommerce' ); ?></label>
+    <input type="date" class="woocommerce-Input woocommerce-Input--date input-text" name="account_birthday"
+        id="account_birthday" value="<?php echo esc_attr( $birthday ); ?>" />
+</p>
+<?php
+}
+add_action( 'woocommerce_edit_account_form_fields', 'km_add_birthday_to_edit_account_form' );
+
+// Save the birthday field.
+function km_save_birthday_field( $user_id ) {
+	if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		return false;
+	}
+	if ( isset( $_POST['account_birthday'] ) ) {
+		update_user_meta( $user_id, 'birthday', sanitize_text_field( $_POST['account_birthday'] ) );
+	}
+	return true;
+}	
+add_action( 'woocommerce_save_account_details', 'km_save_birthday_field' );
