@@ -7,6 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Classe KM_Dynamic_Pricing pour gérer la tarification dynamique des produits.
  */
+/**
+ * Classe KM_Dynamic_Pricing pour gérer la tarification dynamique des produits.
+ */
 class KM_Dynamic_Pricing {
 
 	use SingletonTrait;
@@ -32,6 +35,9 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Constructeur privé pour empêcher l'instantiation directe.
 	 */
+	/**
+	 * Constructeur privé pour empêcher l'instantiation directe.
+	 */
 	private function __construct() {
 		$this->ecotaxe_info_html          = sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE_INCL_TAXES ) );
 		$this->include_shipping_html      = self::INCLUDE_SHIPPING_HTML;
@@ -46,7 +52,11 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Enregistre les filtres et actions WordPress nécessaires.
 	 */
+	/**
+	 * Enregistre les filtres et actions WordPress nécessaires.
+	 */
 	private function register() {
+		if ( true === is_admin() ) {
 		if ( true === is_admin() ) {
 			return;
 		}
@@ -65,7 +75,14 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Définit les prix lorsque le code postal ou la zone de livraison est manquant.
 	 */
+	/**
+	 * Définit les prix lorsque le code postal ou la zone de livraison est manquant.
+	 */
 	public function set_prices_on_zip_or_zone_missing() {
+		if ( ! $this->current_shipping_zone_id ) {
+			add_filter( 'woocommerce_is_purchasable', '__return_false' );
+			add_filter( 'woocommerce_get_price_html', array( $this, 'display_required_postcode_message' ), 99, 2 );
+		}
 		if ( ! $this->current_shipping_zone_id ) {
 			add_filter( 'woocommerce_is_purchasable', '__return_false' );
 			add_filter( 'woocommerce_get_price_html', array( $this, 'display_required_postcode_message' ), 99, 2 );
@@ -84,6 +101,7 @@ class KM_Dynamic_Pricing {
 			return false;
 		}
 
+		if ( true === $product->is_type( 'variable' ) ) {
 		if ( true === $product->is_type( 'variable' ) ) {
 			return $this->handle_variable_product( $product );
 		}
@@ -109,6 +127,7 @@ class KM_Dynamic_Pricing {
 			$is_variation_disabled = $this->is_variation_disabled( $product, $variation );
 
 			if ( true === $variation->is_in_stock() ) {
+			if ( true === $variation->is_in_stock() ) {
 				$all_variations_out_of_stock = false;
 			}
 
@@ -130,12 +149,17 @@ class KM_Dynamic_Pricing {
 
 		if ( true === $all_variations_out_of_stock ) {
 			$this->modify_product_status( $product, 'out_of_stock' );
+		if ( true === $all_variations_out_of_stock ) {
+			$this->modify_product_status( $product, 'out_of_stock' );
 		}
 
 		if ( true === $all_variations_unpurchasable ) {
 			$this->modify_product_status( $product, 'unpurchasable' );
+		if ( true === $all_variations_unpurchasable ) {
+			$this->modify_product_status( $product, 'unpurchasable' );
 		}
 
+		return ! ( true === $all_variations_out_of_stock || true === $all_variations_unpurchasable );
 		return ! ( true === $all_variations_out_of_stock || true === $all_variations_unpurchasable );
 	}
 
@@ -144,11 +168,17 @@ class KM_Dynamic_Pricing {
 	 */
 	public function filter_available_variations( $variation_data, $product, $variation ) {
 		if ( true === $this->is_variation_disabled( $product, $variation ) ) {
+		if ( true === $this->is_variation_disabled( $product, $variation ) ) {
 			$variation_data['is_purchasable']      = false;
 			$variation_data['variation_is_active'] = false;
 			$variation_data['availability_html']   = '<p class="stock out-of-stock">Indisponible dans votre zone de livraison</p>';
 			return $variation_data;
+			$variation_data['availability_html']   = '<p class="stock out-of-stock">Indisponible dans votre zone de livraison</p>';
+			return $variation_data;
 		}
+
+		$this->maybe_add_ecotax_to_variation( $variation_data, $product, $variation );
+
 
 		$this->maybe_add_ecotax_to_variation( $variation_data, $product, $variation );
 
@@ -196,7 +226,9 @@ class KM_Dynamic_Pricing {
 				return true;
 			case 'in_thirteen_only':
 				return true === $this->is_in_thirteen;
+				return true === $this->is_in_thirteen;
 			case 'out_thirteen_only':
+				return true !== $this->is_in_thirteen;
 				return true !== $this->is_in_thirteen;
 			case 'custom_zones':
 				$metadata     = $this->get_product_metadata( $product );
@@ -215,6 +247,7 @@ class KM_Dynamic_Pricing {
 		if ( 'unpurchasable' === $status && true !== in_array( $product_id, $this->unpurchasable_products ) ) {
 			$this->unpurchasable_products[] = $product_id;
 		} elseif ( 'out_of_stock' === $status && true !== in_array( $product_id, $this->out_of_stock_products ) ) {
+		} elseif ( 'out_of_stock' === $status && true !== in_array( $product_id, $this->out_of_stock_products ) ) {
 			$this->out_of_stock_products[] = $product_id;
 		}
 		add_filter( 'woocommerce_get_price_html', array( $this, 'display_product_status_message' ), 99, 2 );
@@ -229,8 +262,12 @@ class KM_Dynamic_Pricing {
 
 		if ( true === in_array( $product_id, $this->unpurchasable_products ) ) {
 			$messages[] = '<p class="km-price-info">Indisponible dans votre zone de livraison</p>';
+		if ( true === in_array( $product_id, $this->unpurchasable_products ) ) {
+			$messages[] = '<p class="km-price-info">Indisponible dans votre zone de livraison</p>';
 		}
 
+		if ( true === in_array( $product_id, $this->out_of_stock_products ) ) {
+			$messages[] = '<p class="km-price-info">En rupture de stock</p>';
 		if ( true === in_array( $product_id, $this->out_of_stock_products ) ) {
 			$messages[] = '<p class="km-price-info">En rupture de stock</p>';
 		}
@@ -292,6 +329,7 @@ class KM_Dynamic_Pricing {
 	private function calculate_localized_product_price( $price, $product, $zone_id, $is_big_bag = false ) {
 		$shipping_product = $this->get_shipping_product( $product, $zone_id, $is_big_bag );
 		$price            = $this->add_ecotax_to_price( $price, $product );
+		$price            = $this->add_ecotax_to_price( $price, $product );
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
@@ -347,6 +385,8 @@ class KM_Dynamic_Pricing {
 	 */
 	private function update_localized_product_price( $product, $zone_id, $price ) {
 		$product_id = $product->get_id();
+		$updated    = update_post_meta( $product_id, '_price_zone_' . (string) $zone_id, $price );
+		if ( false !== $updated ) {
 		$updated    = update_post_meta( $product_id, '_price_zone_' . (string) $zone_id, $price );
 		if ( false !== $updated ) {
 			delete_post_meta( $product_id, '_atoonext_sync' );
@@ -433,8 +473,12 @@ class KM_Dynamic_Pricing {
 			$max_price = max( $prices );
 
 			$price = ( $min_price === $max_price ) ? wc_price( $min_price ) : wc_format_price_range( $min_price, $max_price );
+			$price = ( $min_price === $max_price ) ? wc_price( $min_price ) : wc_format_price_range( $min_price, $max_price );
 
 			if ( $has_ecotaxe ) {
+				if ( strpos( $price, $this->ecotaxe_info_html ) === false ) {
+					$price .= $this->ecotaxe_info_html;
+				}
 				if ( strpos( $price, $this->ecotaxe_info_html ) === false ) {
 					$price .= $this->ecotaxe_info_html;
 				}
@@ -450,6 +494,7 @@ class KM_Dynamic_Pricing {
 	 */
 	public function display_required_postcode_message( $price, $product ) {
 		return ! $this->current_shipping_zone_id ? __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' ) : $price;
+		return ! $this->current_shipping_zone_id ? __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' ) : $price;
 	}
 
 	/**
@@ -457,6 +502,7 @@ class KM_Dynamic_Pricing {
 	 */
 	public function get_total_ecotaxe( $context = 'cart' ) {
 		$total_ecotaxe = 0;
+		$items         = ( 'cart' === $context ) ? WC()->cart->get_cart() : WC()->order->get_items();
 		$items         = ( 'cart' === $context ) ? WC()->cart->get_cart() : WC()->order->get_items();
 
 		foreach ( $items as $item ) {
