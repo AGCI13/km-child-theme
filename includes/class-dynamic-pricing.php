@@ -7,9 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Classe KM_Dynamic_Pricing pour gérer la tarification dynamique des produits.
  */
-/**
- * Classe KM_Dynamic_Pricing pour gérer la tarification dynamique des produits.
- */
 class KM_Dynamic_Pricing {
 
 	use SingletonTrait;
@@ -35,9 +32,6 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Constructeur privé pour empêcher l'instantiation directe.
 	 */
-	/**
-	 * Constructeur privé pour empêcher l'instantiation directe.
-	 */
 	private function __construct() {
 		$this->ecotaxe_info_html          = sprintf( self::ECOTAXE_HTML, wc_price( self::ECOTAXE_RATE_INCL_TAXES ) );
 		$this->include_shipping_html      = self::INCLUDE_SHIPPING_HTML;
@@ -52,12 +46,11 @@ class KM_Dynamic_Pricing {
 	/**
 	 * Enregistre les filtres et actions WordPress nécessaires.
 	 */
-	/**
-	 * Enregistre les filtres et actions WordPress nécessaires.
-	 */
 	private function register() {
 		if ( true === is_admin() ) {
-		if ( true === is_admin() ) {
+			add_action( 'woocommerce_process_product_meta', array( $this, 'handle_product_price_update' ), 10, 1 );
+			add_action( 'woocommerce_save_product_variation', array( $this, 'handle_variation_price_update' ), 10, 2 );
+			add_action( 'woocommerce_before_product_object_save', array( $this, 'store_old_prices' ), 10, 2 );
 			return;
 		}
 
@@ -68,21 +61,66 @@ class KM_Dynamic_Pricing {
 		add_filter( 'woocommerce_variable_price_html', array( $this, 'adjust_variable_product_price_html' ), 99, 2 );
 		add_filter( 'woocommerce_available_variation', array( $this, 'filter_available_variations' ), 10, 3 );
 		add_action( 'wp', array( $this, 'set_prices_on_zip_or_zone_missing' ) );
-		add_action( 'save_post_product', array( $this, 'recalculate_localized_prices_on_save' ) );
-		add_action( 'woocommerce_save_product_variation', array( $this, 'recalculate_localized_prices_on_save' ), 10, 2 );
+	}
+
+	/**
+	 * Stocke temporairement les anciens prix avant la mise à jour
+	 */
+	public function store_old_prices( $product ) {
+		$product_id     = $product->get_id();
+		$old_price      = $product->get_regular_price();
+		$old_sale_price = $product->get_sale_price();
+
+		wp_cache_set( 'old_price_' . $product_id, $old_price, 'km_prices' );
+		wp_cache_set( 'old_sale_price_' . $product_id, $old_sale_price, 'km_prices' );
+	}
+
+	/**
+	 * Gère la mise à jour des prix pour un produit simple
+	 */
+	public function handle_product_price_update( $product_id ) {
+		$product = wc_get_product( $product_id );
+		if ( ! $product || $product->is_type( 'variable' ) ) {
+			return;
+		}
+
+		$old_price      = wp_cache_get( 'old_price_' . $product_id, 'km_prices' );
+		$old_sale_price = wp_cache_get( 'old_sale_price_' . $product_id, 'km_prices' );
+
+		$new_price      = $product->get_regular_price();
+		$new_sale_price = $product->get_sale_price();
+
+		// Vérifie si les prix ont changé
+		if ( $old_price !== $new_price || $old_sale_price !== $new_sale_price ) {
+			$this->recalculate_localized_prices( $product_id );
+		}
+	}
+
+	/**
+	 * Gère la mise à jour des prix pour une variation
+	 */
+	public function handle_variation_price_update( $variation_id, $i ) {
+		$variation = wc_get_product( $variation_id );
+		if ( ! $variation ) {
+			return;
+		}
+
+		$old_price      = wp_cache_get( 'old_price_' . $variation_id, 'km_prices' );
+		$old_sale_price = wp_cache_get( 'old_sale_price_' . $variation_id, 'km_prices' );
+
+		$new_price      = $variation->get_regular_price();
+		$new_sale_price = $variation->get_sale_price();
+
+		// Vérifie si les prix ont changé
+		if ( $old_price !== $new_price || $old_sale_price !== $new_sale_price ) {
+			$this->recalculate_localized_prices( $variation_id );
+		}
 	}
 
 	/**
 	 * Définit les prix lorsque le code postal ou la zone de livraison est manquant.
 	 */
-	/**
-	 * Définit les prix lorsque le code postal ou la zone de livraison est manquant.
-	 */
 	public function set_prices_on_zip_or_zone_missing() {
-		if ( ! $this->current_shipping_zone_id ) {
-			add_filter( 'woocommerce_is_purchasable', '__return_false' );
-			add_filter( 'woocommerce_get_price_html', array( $this, 'display_required_postcode_message' ), 99, 2 );
-		}
 		if ( ! $this->current_shipping_zone_id ) {
 			add_filter( 'woocommerce_is_purchasable', '__return_false' );
 			add_filter( 'woocommerce_get_price_html', array( $this, 'display_required_postcode_message' ), 99, 2 );
@@ -101,7 +139,6 @@ class KM_Dynamic_Pricing {
 			return false;
 		}
 
-		if ( true === $product->is_type( 'variable' ) ) {
 		if ( true === $product->is_type( 'variable' ) ) {
 			return $this->handle_variable_product( $product );
 		}
@@ -127,7 +164,6 @@ class KM_Dynamic_Pricing {
 			$is_variation_disabled = $this->is_variation_disabled( $product, $variation );
 
 			if ( true === $variation->is_in_stock() ) {
-			if ( true === $variation->is_in_stock() ) {
 				$all_variations_out_of_stock = false;
 			}
 
@@ -149,17 +185,12 @@ class KM_Dynamic_Pricing {
 
 		if ( true === $all_variations_out_of_stock ) {
 			$this->modify_product_status( $product, 'out_of_stock' );
-		if ( true === $all_variations_out_of_stock ) {
-			$this->modify_product_status( $product, 'out_of_stock' );
 		}
 
 		if ( true === $all_variations_unpurchasable ) {
 			$this->modify_product_status( $product, 'unpurchasable' );
-		if ( true === $all_variations_unpurchasable ) {
-			$this->modify_product_status( $product, 'unpurchasable' );
 		}
 
-		return ! ( true === $all_variations_out_of_stock || true === $all_variations_unpurchasable );
 		return ! ( true === $all_variations_out_of_stock || true === $all_variations_unpurchasable );
 	}
 
@@ -168,17 +199,11 @@ class KM_Dynamic_Pricing {
 	 */
 	public function filter_available_variations( $variation_data, $product, $variation ) {
 		if ( true === $this->is_variation_disabled( $product, $variation ) ) {
-		if ( true === $this->is_variation_disabled( $product, $variation ) ) {
 			$variation_data['is_purchasable']      = false;
 			$variation_data['variation_is_active'] = false;
 			$variation_data['availability_html']   = '<p class="stock out-of-stock">Indisponible dans votre zone de livraison</p>';
 			return $variation_data;
-			$variation_data['availability_html']   = '<p class="stock out-of-stock">Indisponible dans votre zone de livraison</p>';
-			return $variation_data;
 		}
-
-		$this->maybe_add_ecotax_to_variation( $variation_data, $product, $variation );
-
 
 		$this->maybe_add_ecotax_to_variation( $variation_data, $product, $variation );
 
@@ -226,9 +251,7 @@ class KM_Dynamic_Pricing {
 				return true;
 			case 'in_thirteen_only':
 				return true === $this->is_in_thirteen;
-				return true === $this->is_in_thirteen;
 			case 'out_thirteen_only':
-				return true !== $this->is_in_thirteen;
 				return true !== $this->is_in_thirteen;
 			case 'custom_zones':
 				$metadata     = $this->get_product_metadata( $product );
@@ -247,7 +270,6 @@ class KM_Dynamic_Pricing {
 		if ( 'unpurchasable' === $status && true !== in_array( $product_id, $this->unpurchasable_products ) ) {
 			$this->unpurchasable_products[] = $product_id;
 		} elseif ( 'out_of_stock' === $status && true !== in_array( $product_id, $this->out_of_stock_products ) ) {
-		} elseif ( 'out_of_stock' === $status && true !== in_array( $product_id, $this->out_of_stock_products ) ) {
 			$this->out_of_stock_products[] = $product_id;
 		}
 		add_filter( 'woocommerce_get_price_html', array( $this, 'display_product_status_message' ), 99, 2 );
@@ -262,12 +284,8 @@ class KM_Dynamic_Pricing {
 
 		if ( true === in_array( $product_id, $this->unpurchasable_products ) ) {
 			$messages[] = '<p class="km-price-info">Indisponible dans votre zone de livraison</p>';
-		if ( true === in_array( $product_id, $this->unpurchasable_products ) ) {
-			$messages[] = '<p class="km-price-info">Indisponible dans votre zone de livraison</p>';
 		}
 
-		if ( true === in_array( $product_id, $this->out_of_stock_products ) ) {
-			$messages[] = '<p class="km-price-info">En rupture de stock</p>';
 		if ( true === in_array( $product_id, $this->out_of_stock_products ) ) {
 			$messages[] = '<p class="km-price-info">En rupture de stock</p>';
 		}
@@ -329,7 +347,6 @@ class KM_Dynamic_Pricing {
 	private function calculate_localized_product_price( $price, $product, $zone_id, $is_big_bag = false ) {
 		$shipping_product = $this->get_shipping_product( $product, $zone_id, $is_big_bag );
 		$price            = $this->add_ecotax_to_price( $price, $product );
-		$price            = $this->add_ecotax_to_price( $price, $product );
 
 		if ( $shipping_product instanceof WC_Product ) {
 			$shipping_price = $shipping_product->get_price( 'edit' );
@@ -385,8 +402,6 @@ class KM_Dynamic_Pricing {
 	 */
 	private function update_localized_product_price( $product, $zone_id, $price ) {
 		$product_id = $product->get_id();
-		$updated    = update_post_meta( $product_id, '_price_zone_' . (string) $zone_id, $price );
-		if ( false !== $updated ) {
 		$updated    = update_post_meta( $product_id, '_price_zone_' . (string) $zone_id, $price );
 		if ( false !== $updated ) {
 			delete_post_meta( $product_id, '_atoonext_sync' );
@@ -473,12 +488,8 @@ class KM_Dynamic_Pricing {
 			$max_price = max( $prices );
 
 			$price = ( $min_price === $max_price ) ? wc_price( $min_price ) : wc_format_price_range( $min_price, $max_price );
-			$price = ( $min_price === $max_price ) ? wc_price( $min_price ) : wc_format_price_range( $min_price, $max_price );
 
 			if ( $has_ecotaxe ) {
-				if ( strpos( $price, $this->ecotaxe_info_html ) === false ) {
-					$price .= $this->ecotaxe_info_html;
-				}
 				if ( strpos( $price, $this->ecotaxe_info_html ) === false ) {
 					$price .= $this->ecotaxe_info_html;
 				}
@@ -494,7 +505,6 @@ class KM_Dynamic_Pricing {
 	 */
 	public function display_required_postcode_message( $price, $product ) {
 		return ! $this->current_shipping_zone_id ? __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' ) : $price;
-		return ! $this->current_shipping_zone_id ? __( 'L\'affichage du prix requiert un code postal', 'kingmateriaux' ) : $price;
 	}
 
 	/**
@@ -502,7 +512,6 @@ class KM_Dynamic_Pricing {
 	 */
 	public function get_total_ecotaxe( $context = 'cart' ) {
 		$total_ecotaxe = 0;
-		$items         = ( 'cart' === $context ) ? WC()->cart->get_cart() : WC()->order->get_items();
 		$items         = ( 'cart' === $context ) ? WC()->cart->get_cart() : WC()->order->get_items();
 
 		foreach ( $items as $item ) {
@@ -546,40 +555,86 @@ class KM_Dynamic_Pricing {
 	}
 
 	/**
-	 * Recalcule les prix localisés pour toutes les zones d'expédition lors de la sauvegarde d'un produit.
+	 * Recalcule les prix localisés lors de la sauvegarde d'un produit.
 	 */
-	public function recalculate_localized_prices_on_save( $product_id ) {
+	public function recalculate_localized_prices( $product_id ) {
 		$product = wc_get_product( $product_id );
 
 		if ( ! $product ) {
 			return;
 		}
 
-		// Recalculate for the main product.
+		// Vérifie si le produit a été mis à jour par AtoonextSync ou manuellement.
+		$atoonext_sync = get_post_meta( $product_id, '_atoonext_sync', true );
+		$price_changed = wp_cache_get( 'old_price_' . $product_id, 'km_prices' ) !== $product->get_regular_price() ||
+					wp_cache_get( 'old_sale_price_' . $product_id, 'km_prices' ) !== $product->get_sale_price();
+
+		if ( empty( $atoonext_sync ) && ! $price_changed ) {
+			return;
+		}
+
+		// Recalcule pour le produit principal.
 		if ( ! $product->is_type( 'variation' ) ) {
 			$this->recalculate_prices_for_product_and_zones( $product );
 		}
 
-		// Recalculate for each variation.
+		// Recalcule pour chaque variation si c'est un produit variable.
 		if ( $product->is_type( 'variable' ) ) {
 			foreach ( $product->get_children() as $variation_id ) {
 				$variation = wc_get_product( $variation_id );
 				if ( $variation ) {
-					$this->recalculate_prices_for_product_and_zones( $variation );
+					$variation_sync          = get_post_meta( $variation_id, '_atoonext_sync', true );
+					$variation_price_changed = wp_cache_get( 'old_price_' . $variation_id, 'km_prices' ) !== $variation->get_regular_price() ||
+										wp_cache_get( 'old_sale_price_' . $variation_id, 'km_prices' ) !== $variation->get_sale_price();
+
+					if ( ! empty( $variation_sync ) || $variation_price_changed ) {
+						$this->recalculate_prices_for_product_and_zones( $variation );
+					}
 				}
 			}
 		}
+
+		// Nettoie le cache et les meta.
+		if ( ! empty( $atoonext_sync ) ) {
+			delete_post_meta( $product_id, '_atoonext_sync' );
+		}
+		wp_cache_delete( 'old_price_' . $product_id, 'km_prices' );
+		wp_cache_delete( 'old_sale_price_' . $product_id, 'km_prices' );
 	}
 
 	/**
-	 * Recalcule les prix pour un produit donné pour toutes les zones d'expédition.
+	 * Recalcule les prix pour un produit donné pour toutes les zones d'expédition
 	 */
 	private function recalculate_prices_for_product_and_zones( $product ) {
+		global $wpdb;
+
 		$zones = WC_Shipping_Zones::get_zones();
 
-		foreach ( $zones as $zone ) {
-			$zone_id = $zone['id'];
-			$this->calculate_localized_product_price( $product->get_price(), $product, $zone_id, true );
+		// Démarre une transaction pour les mises à jour multiples.
+		$wpdb->query( 'START TRANSACTION' );
+
+		try {
+			foreach ( $zones as $zone ) {
+				$zone_id = $zone['id'];
+
+				// Calcule le prix pour cette zone.
+				$base_price      = $product->get_price();
+				$is_big_bag      = $this->cached_call( 'km_is_big_bag', array( $product ) );
+				$localized_price = $this->calculate_localized_product_price( $base_price, $product, $zone_id, $is_big_bag );
+
+				// Met à jour la meta du prix pour cette zone.
+				update_post_meta( $product->get_id(), '_price_zone_' . $zone_id, $localized_price );
+			}
+
+			// Si tout s'est bien passé, commit la transaction.
+			$wpdb->query( 'COMMIT' );
+			return true;
+
+		} catch ( Exception $e ) {
+			// En cas d'erreur, rollback la transaction.
+			$wpdb->query( 'ROLLBACK' );
+			error_log( 'Erreur lors du recalcul des prix par zone : ' . $e->getMessage() );
+			return false;
 		}
 	}
 }
